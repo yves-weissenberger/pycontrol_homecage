@@ -45,7 +45,7 @@ class Visualizator(QtGui.QMainWindow):
 
         self.connected_boards = []
         self.connected_access_controls = []
-        self.controllers = []
+        self.controllers = {}
         self.GUI_filepath = os.path.dirname(os.path.abspath(__file__))
         self.app = None # Overwritten with QtGui.QApplication instance in main.
         self.active_user = None
@@ -108,7 +108,7 @@ class Visualizator(QtGui.QMainWindow):
 
     def refresh(self):
         #print(self.setup_window_tab.callibrate_dialog)
-        for SC in self.controllers:
+        for k,SC in self.controllers.items():
             SC.check_for_data()
 
             if self.system_tab.plot_isactive:

@@ -1,7 +1,7 @@
 from pyqtgraph.Qt import QtGui, QtCore
 from utils import get_users
 from loc_def import user_path
-
+from config.paths import *
 
 
 class calibrate_dialog(QtGui.QDialog):
@@ -95,19 +95,37 @@ class box_conn_dialog(QtGui.QDialog):
         self.textbox.setText("You must be connected to the setup to update it")
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(self.textbox)
+
+
 class configure_box_dialog(QtGui.QDialog):
     """ Dialog window that allows you to upload harware definitions etc """ 
     def __init__(self,parent=None):
         super(configure_box_dialog,self).__init__(parent)
         self.setGeometry(10, 30, 300, 200) # Left, top, width, height.
         self.load_framework_button = QtGui.QPushButton('Load framework', self)
+        self.load_framework_button.clicked.connect(self.load_framework)
         self.load_hardware_definition_button = QtGui.QPushButton('Load hardware definition',self)
-        self.disable_USB = QtGui.QPushButton('Disable USB connection')
+        self.load_hardware_definition_button.clicked.connect(self.load_hardware_definition)
+
+        self.disable_USB_button = QtGui.QPushButton('Disable USB connection')
+        self.disable_USB_button.clicked.connect(self.disable_USB)
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(self.load_framework_button)
         layout.addWidget(self.load_hardware_definition_button)
-        layout.addWidget(self.disable_USB)
+        layout.addWidget(self.disable_USB_button)
 
+    def load_framework(self):
+        pass
+
+
+    def disable_USB(self):
+        pass
+
+    def load_hardware_definition(self):
+        hwd_path = QtGui.QFileDialog.getOpenFileName(self, 'Select hardware definition:',
+                os.path.join(config_dir, 'hardware_definition.py'), filter='*.py')[0]
+        
+        #setup.load_hardware_definition(hwd_path)
 
 
 class login_dialog(QtGui.QDialog):

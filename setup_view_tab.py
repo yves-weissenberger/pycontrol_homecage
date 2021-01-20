@@ -1,4 +1,3 @@
-import numpy as np
 from pyqtgraph.Qt import QtGui, QtCore
 from pyqtgraph import Qt
 from pyqtgraph import mkPen
@@ -127,9 +126,8 @@ class setups_tab(QtGui.QWidget):
             checked_row = isChecked.index(1)
             setup_col = self.list_of_setups.header_names.index("Setup_ID")
             checked_setup_id = self.list_of_setups.item(checked_row,setup_col).text()
-            for G in self.GUI.controllers:
-                print(checked_setup_id,G.setup_id)
-                if G.setup_id==checked_setup_id:
+            for k,G in self.GUI.controllers.items():
+                if k==checked_setup_id:
                     print("YA")
                     configure_box_dialog().exec_()
 

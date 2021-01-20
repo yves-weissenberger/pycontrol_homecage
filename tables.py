@@ -345,7 +345,7 @@ class mouse_list_table(QtGui.QTableWidget):
         for row_index, row in df.iterrows():    
 
             for col_index in range(self.columnCount()-1):
-                print(row_index,col_index)
+                #print(row_index,col_index)
                 self.setItem(row_index,col_index+1,Qt.QtWidgets.QTableWidgetItem(str(row[col_index])))
 
             chkBoxItem = QtGui.QTableWidgetItem()
@@ -435,7 +435,6 @@ class cageTable(QtGui.QTableWidget):
             SC.add_PYC(board)
             SC.add_AC(ac)
 
-            print(comAC_,ac.serial_port)
             ac.load_framework()
             self.GUI.connected_access_controls.append(ac)
             #self.GUI.data_loggers.append(self.data_logger)
@@ -443,7 +442,7 @@ class cageTable(QtGui.QTableWidget):
 
             send_name = self.sender().name
             self._fill_setup_df_row(send_name)
-            self.GUI.controllers.append(SC)
+            self.GUI.controllers[setup_id] = SC
             time.sleep(0.05)
             self.tab.callibrate_dialog = calibrate_dialog(ac=ac)
             self.tab.callibrate_dialog.exec_()
@@ -467,7 +466,6 @@ class cageTable(QtGui.QTableWidget):
 
     def _refresh(self):
         ports = find_setups(self.GUI)
-        print(ports)
 
         ac_nr = self.header_names.index("COM")
         setup_nr = self.header_names.index("COM_AC")

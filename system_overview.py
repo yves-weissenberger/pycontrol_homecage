@@ -174,7 +174,7 @@ class system_tab(QtGui.QWidget):
                 if row['Mouse_training']!='none':
                     #k = str(len(experiment['subjects']))
                     experiment['subjects'][row['Setup_ID']] = row['Mouse_training']
-                    handler_ = [i for i in self.GUI.controllers if i.setup_id==row['Setup_ID']][0]
+                    handler_ = [setup for k,setup in self.GUI.controllers.items() if k==row['Setup_ID']][0]
                     experiment['sm_infos'][row['Setup_ID']] = handler_.PYC.sm_info
                     experiment['handlers'][row['Setup_ID']] = handler_
 
@@ -211,7 +211,7 @@ class system_tab(QtGui.QWidget):
                 print(self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName])
                 for setup in self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Setups'].values:
                     print('HERE4',setup)
-                    handler_ = [i for i in self.GUI.controllers if i.setup_id==setup][0]
+                    handler_ = [setup for k,setup in self.GUI.controllers.items() if k==setup][0]
 
                     handler_.PYC.stop_framework()
                     time.sleep(.05)

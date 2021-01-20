@@ -153,5 +153,4 @@ class Access_control(Pyboard):
     def rfid_read_tag(self):
         return eval(self.eval('access_control.rfid.read_tag()').decode())
 
-    def close(self):
-        self.serial.close()
+
