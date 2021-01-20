@@ -128,8 +128,8 @@ class setups_tab(QtGui.QWidget):
             checked_setup_id = self.list_of_setups.item(checked_row,setup_col).text()
             for k,G in self.GUI.controllers.items():
                 if k==checked_setup_id:
-                    print("YA")
-                    configure_box_dialog().exec_()
+                    #print("YA")
+                    configure_box_dialog(k,self.GUI).exec_()
 
 
             #self.GUI.controllers.append(SC)
@@ -162,6 +162,8 @@ class setups_tab(QtGui.QWidget):
 
 
         self.list_of_setups.fill_table()
+        self.GUI.system_tab.list_of_setups.fill_table()
+
         self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
         #print(self.GUI.setup_df)
 
@@ -208,6 +210,7 @@ class setups_tab(QtGui.QWidget):
                 #print(self.GUI.setup_df)
 
                 self.list_of_setups.fill_table()
+                self.GUI.system_tab.list_of_setups.fill_table()
         else:
             pass
 

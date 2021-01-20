@@ -244,6 +244,8 @@ class system_tab(QtGui.QWidget):
         else:
             pass
 
+    def _refresh(self):
+        pass
 
 #A class implementing experiments tables
 class ExperimentsTable(QtGui.QTableWidget):

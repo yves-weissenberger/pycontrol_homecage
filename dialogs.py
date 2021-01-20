@@ -99,9 +99,11 @@ class box_conn_dialog(QtGui.QDialog):
 
 class configure_box_dialog(QtGui.QDialog):
     """ Dialog window that allows you to upload harware definitions etc """ 
-    def __init__(self,parent=None):
+    def __init__(self,setup_id,GUI,parent=None):
         super(configure_box_dialog,self).__init__(parent)
         self.setGeometry(10, 30, 300, 200) # Left, top, width, height.
+        self.setup_id = setup_id
+        self.GUI = GUI
         self.load_framework_button = QtGui.QPushButton('Load framework', self)
         self.load_framework_button.clicked.connect(self.load_framework)
         self.load_hardware_definition_button = QtGui.QPushButton('Load hardware definition',self)
@@ -124,7 +126,8 @@ class configure_box_dialog(QtGui.QDialog):
     def load_hardware_definition(self):
         hwd_path = QtGui.QFileDialog.getOpenFileName(self, 'Select hardware definition:',
                 os.path.join(config_dir, 'hardware_definition.py'), filter='*.py')[0]
-        
+        self.GUI.controllers[self.setup_id].PYC.load_hardware_definition(hwd_path)
+
         #setup.load_hardware_definition(hwd_path)
 
 

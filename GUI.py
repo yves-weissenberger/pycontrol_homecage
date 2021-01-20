@@ -23,6 +23,8 @@ from loc_def import all_paths, create_paths
 from new_experiment_dialog import new_experiment_dialog
 from utils import load_data_csv
 import com
+from tables import cageTable, experiment_overview_table
+from dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog
 
 
 ## Here want to implement a GUI for managing the homecage datasets. Thoughts on how to structure it. I think natural way is to ]
@@ -51,6 +53,7 @@ class Visualizator(QtGui.QMainWindow):
         self.active_user = None
         self.task_df,self.exp_df,self.setup_df,self.mouse_df = load_data_csv()
 
+
         ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
 
         self.paths = {'ROOT': ROOT,
@@ -63,7 +66,6 @@ class Visualizator(QtGui.QMainWindow):
                       'protocol_dir': protocol_dir}
 
         self.setup_df['connected'] = False
-
 
 
         self.tab_widget = QtGui.QTabWidget(self)
@@ -115,6 +117,7 @@ class Visualizator(QtGui.QMainWindow):
                 self.system_tab.experiment_plot.update()
 
         self.setup_window_tab._refresh()
+        self.system_tab._refresh()
 
     def change_user(self):
         self.login.exec_()

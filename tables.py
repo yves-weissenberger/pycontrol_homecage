@@ -399,8 +399,12 @@ class cageTable(QtGui.QTableWidget):
                 except KeyError:
                     pass
 
-           
-            button = QtGui.QPushButton('Connect')
+            if row['connected']:
+                buttonText = 'Connected'
+            else:
+                buttonText = 'Connect'
+
+            button = QtGui.QPushButton(buttonText)
             button.name = [row['Setup_ID'],row['COM'],row['COM_AC']]
             button.clicked.connect(self.connect)
             self.buttons.append(button)
@@ -438,7 +442,7 @@ class cageTable(QtGui.QTableWidget):
             ac.load_framework()
             self.GUI.connected_access_controls.append(ac)
             #self.GUI.data_loggers.append(self.data_logger)
-            self.sender().setText("Connected")
+            #self.sender().setText("Connected")
 
             send_name = self.sender().name
             self._fill_setup_df_row(send_name)
@@ -448,6 +452,8 @@ class cageTable(QtGui.QTableWidget):
             self.tab.callibrate_dialog.exec_()
             self.sender().setEnabled(False)
             self.fill_table()
+            self.GUI.system_tab.list_of_setups.fill_table()
+
 
         except (PyboardError,SerialException) as e:   
 

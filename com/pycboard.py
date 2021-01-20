@@ -58,7 +58,7 @@ class Pycboard(Pyboard):
         '''Copy the pyControl framework folder to the board.'''
         self.print('\nTransfering pyControl framework to pyboard.', end='')
         self.transfer_folder(framework_dir, file_type='py', show_progress=True)
-        self.transfer_folder(devices_dir  , file_type='py', show_progress=True)
+        self.transfer_folder(devices_dir, file_type='py', show_progress=True)
         error_message = self.reset()
         if not self.status['framework']:
             self.print('\nError importing framework:')
