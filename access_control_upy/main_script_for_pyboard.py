@@ -37,7 +37,7 @@ class handler():
         com = pyb.USB_VCP()
 
         ONE_MOUSE = 13
-        TWO_MICE = 70
+        TWO_MICE = 80
         NEWSTATE = True
         state = 'allow_entry'
         build_msg = lambda x: 'start_' + x + '_end'
@@ -49,7 +49,7 @@ class handler():
         myled.off()
         self.baseline_read = 0. 
         self.baseline_alpha = .3
-        self.forced_delay = 150
+        self.forced_delay = 500
         last_check = micros.counter()
         last_weight = 0 
 
@@ -108,7 +108,8 @@ class handler():
                     pyb.delay(10)
                     weights.append(weight)
 
-                weight = sum(weights)/float(len(weights)) - self.baseline_read
+                weight = sum(weights)/float(len(weights)) #- self.baseline_read
+                #weight = 25
                 com.write(build_msg('weight:' + str(weight)))
 
                 #if more than one mouse got in
@@ -128,7 +129,7 @@ class handler():
                     while getRFID:
                         rfid = AC_handler.rfid.read_tag()
                         pyb.delay(50)
-                        rfid = '116000039959'
+                        #rfid = '116000039959'
                         #if read an RFID TAG
                         if rfid is not None:
                             com.write(build_msg('RFID:' + str(rfid)))
@@ -141,7 +142,20 @@ class handler():
                         if (time.time() - st_check)>30:
                             getRFID = False
                             state = 'allow_exit'
-                            NEWSTATE = True; pyb.delay(self.forced_delay)
+
+            else:
+                rfid = AC_handler.rfid.read_tag()
+                rfid = None
+            #weights = []
+            #for _ in range(10):
+            #    weight = AC_handler.loadcell.weigh()
+            #    pyb.delay(10)
+            #    weights.append(weight)#
+
+            #weight = sum(weights)/float(len(weights))
+            #weight = 25
+            #com.write(build_msg('weight:' + str(weight)))
+            #pyb.delay(500)
 
 
             #in this state allow a mouse to leave the access control system and
@@ -173,7 +187,7 @@ class handler():
                 #if door entry to chamber is closed again
                 if P_read_en2.value()==0:
 
-                    weight = AC_handler.loadcell.weigh() - self.baseline_read
+                    weight = AC_handler.loadcell.weigh()# - self.baseline_read
                     pyb.delay(10)
 
                     if weight<ONE_MOUSE:
@@ -209,7 +223,7 @@ class handler():
 
                 if P_read_ex1.value()==0:
 
-                    weight = AC_handler.loadcell.weigh() - self.baseline_read
+                    weight = AC_handler.loadcell.weigh()# - self.baseline_read
                     pyb.delay(10)
                     
                     if weight<ONE_MOUSE: #in this case the mouse opened and closed the door without going back into the training room
@@ -230,6 +244,7 @@ class handler():
                     #if abs(CW-self.baseline_read)<1:
                     Wbase = float(AC_handler.loadcell.weigh(times=1))
                     self.baseline_read = self.baseline_alpha*Wbase + (1-self.baseline_alpha)*self.baseline_read
+                    com.write(build_msg('Wbase:'+str(Wbase)))
                     #com.write(build_msg('Wbase:' + str(Wbase)))
 
             if state=='allow_exit':
@@ -256,7 +271,7 @@ class handler():
 
                 if P_read_ex2.value()==0:  #if exit door is closed
 
-                    weight = AC_handler.loadcell.weigh() #- self.baseline_read
+                    weight = AC_handler.loadcell.weigh() - self.baseline_read
                     pyb.delay(10)
                     
                     if weight<ONE_MOUSE: #in this case the mouse has left and we restart
@@ -275,7 +290,7 @@ class handler():
 
                     AC_handler.loadcell.tare()
 
-                    weight = AC_handler.loadcell.weigh() #- self.baseline_read
+                    weight = AC_handler.loadcell.weigh() - self.baseline_read
                     pyb.delay(10)
                     com.write(build_msg('calT:'+str(weight)))
                 elif 'calibrate' in sent_data:
@@ -283,13 +298,13 @@ class handler():
                     AC_handler.loadcell.calibrate(weight=w_)
                     #com.write(build_message(str(sent_data)))
 
-                    weight = AC_handler.loadcell.weigh() #- self.baseline_read
+                    weight = AC_handler.loadcell.weigh() - self.baseline_read
                     pyb.delay(10)
                     com.write(build_msg('calC:'+str(weight)))
 
                 elif sent_data=='weigh':
 
-                    weight = AC_handler.loadcell.weigh() #- self.baseline_read
+                    weight = AC_handler.loadcell.weigh() - self.baseline_read
                     pyb.delay(10)
                     com.write(build_msg('calW:'+str(weight)))
 

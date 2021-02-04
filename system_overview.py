@@ -231,16 +231,18 @@ class system_tab(QtGui.QWidget):
 
         if self.log_active.isChecked():
             if type(msg)==str:
-                self.log_textbox.moveCursor(QtGui.QTextCursor.End)
-                self.log_textbox.insertPlainText(msg +'\n')
-                self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+                if 'Wbase' not in msg:
+                    self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+                    self.log_textbox.insertPlainText(msg +'\n')
+                    self.log_textbox.moveCursor(QtGui.QTextCursor.End)
             elif type(msg)==list:
                 for msg_ in msg:
                     #print(msg_)
                     #print(msg_)
-                    self.log_textbox.moveCursor(QtGui.QTextCursor.End)
-                    self.log_textbox.insertPlainText(str(msg_) +'\n')
-                    self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+                    if 'Wbase' not in msg:
+                        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+                        self.log_textbox.insertPlainText(str(msg_) +'\n')
+                        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
         else:
             pass
 

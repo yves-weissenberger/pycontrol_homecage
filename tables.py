@@ -526,13 +526,17 @@ class MouseTable(QtGui.QTableWidget):
 
     def fill_table(self):
         #print(self.GUI.mouse_df)
+        self.setRowCount(0)
         self.setRowCount(len(self.GUI.mouse_df))
-
+        df_cols = self.GUI.mouse_df.columns
+        #print(df_cols)
         for row_index, row in self.GUI.mouse_df.iterrows():    
 
-            for col_index in range(self.columnCount()-1):
-                #print(index,col,row[col])
-                self.setItem(row_index,col_index+1,Qt.QtWidgets.QTableWidgetItem(str(row[col_index])))
+            for col_index in range(self.columnCount()-1):  
+
+                if df_cols[col_index] in self.header_names:
+                    table_col_ix = self.header_names.index(df_cols[col_index])
+                    self.setItem(row_index,table_col_ix,Qt.QtWidgets.QTableWidgetItem(str(row[col_index])))
             #items = [QtGui.QStandardItem(field)for field in row]
             #print(items)
             #self.model.appendRow(items)

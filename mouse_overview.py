@@ -90,18 +90,29 @@ class mouse_window(QtGui.QWidget):
     def remove_mouse(self):
         """ Remove mouse from df and CSV file"""
         isChecked = []
+        RFID_index = self.list_of_mice.header_names.index("RFID")
+        #print("RFID_index",RFID_index)
         for row in range(self.list_of_mice.rowCount()):
-            isChecked.append(self.list_of_mice.item(row,0).checkState()==2)
-
-        if np.any(isChecked):
+            if self.list_of_mice.item(row,0).checkState()==2:
+                isChecked.append(float(self.list_of_mice.item(row,RFID_index).text()))   #because its a float in the mouse_df
+            #isChecked.append(self.list_of_mice.item(row,0).checkState()==2)
+        #print(isChecked)
+        #print(type(self.GUI.mouse_df['RFID'].values[0]))
+        if isChecked:
             sure = are_you_sure_dialog()
             sure.exec_()
             if sure.GO:
-                fl = self.GUI.mouse_df.file_location
-                self.GUI.mouse_df = self.GUI.mouse_df.drop(self.GUI.mouse_df.index[isChecked])
-                self.GUI.mouse_df.file_location = fl
-                #print(self.GUI.mouse_df)
-                self.list_of_mice.fill_table()
+                for ch_ in isChecked:
+                    print("GO",ch_)
+                    fl = self.GUI.mouse_df.file_location
+                    ix_ = self.GUI.mouse_df.index[self.GUI.mouse_df['RFID']==ch_]
+                    print("INDEX",ix_)
+                    self.GUI.mouse_df = self.GUI.mouse_df.drop(ix_)
+                    self.GUI.mouse_df.file_location = fl  #because the file location is not part of the class so when using drop this is removed
+                    self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+
+                    print(self.GUI.mouse_df)
+                    self.list_of_mice.fill_table()
         else:
             pass
 

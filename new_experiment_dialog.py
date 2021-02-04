@@ -357,8 +357,13 @@ class new_experiment_dialog(QtGui.QDialog):
         df_.to_csv(pth_)
 
     def run_experiment(self):
+        
+        """ ADD WARNING IF YOU ARE DUPLICATING MOUSE NAMES OR RFIDS!!!!
 
+
+        """
         ## Create all the paths for data
+        print("RUN EXPERIMENT")
         exp_path = os.path.join(data_dir,self.set_experiment_name)
         if not os.path.isdir(exp_path):
             os.mkdir(exp_path)
@@ -375,7 +380,7 @@ class new_experiment_dialog(QtGui.QDialog):
                 entry_nr = len(self.GUI.mouse_df)
 
                 self.GUI.mouse_df.loc[entry_nr] = ['NA']*len(self.GUI.mouse_df.columns)
-                self.GUI.mouse_df.loc[entry_nr]
+                #self.GUI.mouse_df.loc[entry_nr]
                 for col in self.GUI.mouse_df.columns:
                     self.GUI.mouse_df.loc[entry_nr][col] = row[col]
 
