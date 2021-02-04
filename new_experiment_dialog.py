@@ -357,7 +357,7 @@ class new_experiment_dialog(QtGui.QDialog):
         df_.to_csv(pth_)
 
     def run_experiment(self):
-        
+
         """ ADD WARNING IF YOU ARE DUPLICATING MOUSE NAMES OR RFIDS!!!!
 
 
@@ -371,13 +371,16 @@ class new_experiment_dialog(QtGui.QDialog):
             #update mouse information
             for ix,row in self.df_mouse_tmp.iterrows():
                 mouse_exp_path = os.path.join(exp_path,row['Mouse_ID'])
-                os.mkdir(mouse_exp_path)
+                if not os.path.isdir(mouse_exp_path):
+                    os.mkdir(mouse_exp_path)
 
 
                 mouse_exp_task_path = os.path.join(mouse_exp_path,row['Protocol'])
-                os.mkdir(mouse_exp_task_path)
+                if not os.path.isdir(mouse_exp_task_path):
+                    os.mkdir(mouse_exp_task_path)
 
                 entry_nr = len(self.GUI.mouse_df)
+                print("HERE55")
 
                 self.GUI.mouse_df.loc[entry_nr] = ['NA']*len(self.GUI.mouse_df.columns)
                 #self.GUI.mouse_df.loc[entry_nr]
@@ -425,6 +428,8 @@ class new_experiment_dialog(QtGui.QDialog):
             self.accept()
 
         else:
-            #PRINT WARNING MESSAGE, CHECKSUM OR OTHER INDICATION THAT SOMETHING HAS GONE WRONG
-            pass
+            msg = QtGui.QMessageBox()
+            msg.setIcon(QtGui.QMessageBox.Warning)
+            msg.setText("This experiment already exists you need a unique experiment")
+            msg.exec_()
 
