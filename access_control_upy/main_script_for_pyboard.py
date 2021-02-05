@@ -52,6 +52,7 @@ class handler():
         self.forced_delay = 500
         last_check = micros.counter()
         last_weight = 0 
+        mean = lambda x: float(sum(x))/float(len(x))
 
 
         ## This is the infinite loop
@@ -83,15 +84,24 @@ class handler():
                     com.write(build_msg('state:' + state))
                     NEWSTATE = False
 
-                
-                for mag in range(4):
-                    MAGs[mag].value(1)
+
 
 
                 if P_read_en1.value()==0:  #if entry door is closed again
-                    state = 'check_mouse'
-                    NEWSTATE = True; pyb.delay(self.forced_delay)
-                    last_check = micros.counter()
+
+                    ## This is an extra check step to try to help prevent the door from being unnecessarily closed
+                    weight = AC_handler.loadcell.weigh()
+                    if weight<ONE_MOUSE:
+                        state = 'allow_entry'
+                        NEWSTATE = True; pyb.delay(self.forced_delay)
+                        last_check = micros.counter()
+                    else:
+                        for mag in range(4):
+                            MAGs[mag].value(1)
+
+                        state = 'check_mouse'
+                        NEWSTATE = True; pyb.delay(self.forced_delay)
+                        last_check = micros.counter()
                     
 
             #in this state check that a mouse has entered the access control system and
@@ -108,10 +118,12 @@ class handler():
                     com.write(build_msg('temp_weight:' + str(weight)))
                     pyb.delay(10)
                     weights.append(weight)
-                    if ((weight-self.baseline_read)<10 and len(weights)>1):
+
+                    #This is a second check so that the entry door does not stay unnecessarily closed
+                    if ((mean(weights)-self.baseline_read)<ONE_MOUSE and len(weights)>1):
                         break
 
-                weight = sum(weights)/float(len(weights)) #- self.baseline_read
+                weight = mean(weights) #- self.baseline_read
                 #weight = 25
                 com.write(build_msg('weight:' + str(weight)))
 
@@ -149,16 +161,7 @@ class handler():
             else:
                 rfid = AC_handler.rfid.read_tag()
                 rfid = None
-            #weights = []
-            #for _ in range(10):
-            #    weight = AC_handler.loadcell.weigh()
-            #    pyb.delay(10)
-            #    weights.append(weight)#
 
-            #weight = sum(weights)/float(len(weights))
-            #weight = 25
-            #com.write(build_msg('weight:' + str(weight)))
-            #pyb.delay(500)
 
 
             #in this state allow a mouse to leave the access control system and
