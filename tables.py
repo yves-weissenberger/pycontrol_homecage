@@ -15,7 +15,7 @@ from serial import SerialException
 
 from dialogs import calibrate_dialog
 from utils import find_setups
-from utils import get_tasks
+from utils import get_tasks, null_resize
 
 
 
@@ -34,8 +34,19 @@ class variables_table(QtGui.QTableWidget):
     " Table that tracks what variables a mouse currently running in a task has"
 
     def __init__(self,GUI,parent=None):
-        super(QtGui.QTableWidget, self).__init__(1,7, parent=parent)
+        super(QtGui.QTableWidget, self).__init__(1,6, parent=parent)
         self.setHorizontalHeaderLabels(['Subject', 'Variable', 'Value', 'Persistent','Summary',''])
+        self.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+        self.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.Stretch)
+        self.horizontalHeader().setResizeMode(5, QtGui.QHeaderView.ResizeToContents)
+        self.verticalHeader().setVisible(False)
+        add_button = QtGui.QPushButton('   add   ')
+        self.setCellWidget(0,5, add_button)
+        self.n_variables = 0
+        self.variable_names = []
+        self.available_variables = []
+        self.assigned = {v_name:[] for v_name in self.variable_names} # Which subjects have values assigned for each variable.
+
 
 
 class experiment_overview_table(QtGui.QTableWidget):

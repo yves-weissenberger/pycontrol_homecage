@@ -115,7 +115,7 @@ class handler():
                 weights = []
                 for _ in range(50):
                     weight = AC_handler.loadcell.weigh()
-                    com.write(build_msg('temp_weight:' + str(weight)))
+                    com.write(build_msg('temp_w:' + str(weight)))
                     pyb.delay(10)
                     weights.append(weight)
 

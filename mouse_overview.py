@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 from dialogs import are_you_sure_dialog, mouse_summary_dialog
-from tables import mouse_adder_table, MouseTable
+from tables import mouse_adder_table, MouseTable, variables_table
 
 class mouse_window(QtGui.QWidget):
 
@@ -26,7 +26,6 @@ class mouse_window(QtGui.QWidget):
         self.mouse_summary_button = QtGui.QPushButton('Get Mouse Summary')
         self.mouse_summary_button.clicked.connect(self.get_summary)
 
-
         self.mouse_manager_layout = QtGui.QHBoxLayout()
         self.mouse_manager_layout.addWidget(self.remove_mouse_button)
         self.mouse_manager_layout.addWidget(self.update_mouse_button)
@@ -42,7 +41,6 @@ class mouse_window(QtGui.QWidget):
         self.scrollable_mouse.horizontalScrollBar().setEnabled(False)
 
 
-        self.add_mouse_table = mouse_adder_table(self.GUI )
 
 
         self.list_of_mice = MouseTable(self.GUI,self)
@@ -56,7 +54,25 @@ class mouse_window(QtGui.QWidget):
         self.Vlayout.addWidget(self.scrollable_mouse)
 
 
-        self.Vlayout.addWidget(self.add_mouse_table)  #THIS NEEDS TO GO. THIS WILL NEVER HAPPEN. CHANGE TO VARIABLES TABLE
+
+        #### Deal with variables of the tasks
+        self.variables_table = variables_table(GUI=self.GUI)
+        self.filter_categories = ['Experiment','User','Mouse']
+        self.variables_box = QtGui.QGroupBox('Variables')
+        self.vars_hlayout1 = QtGui.QHBoxLayout(self)
+        self.vars_vlayout1 = QtGui.QVBoxLayout(self)
+
+        self.vars_combo  = QtGui.QComboBox()
+        self.vars_combo.addItems(['Filter by'] + self.filter_categories)
+        #self.task_combo.currentIndexChanged.connect(self.picked_task)
+        self.vars_hlayout1.addWidget(self.vars_combo)
+        self.vars_vlayout1.addLayout(self.vars_hlayout1)
+        self.vars_vlayout1.addWidget(self.variables_table)
+
+        self.variables_box.setLayout(self.vars_vlayout1)
+
+
+        self.Vlayout.addWidget(self.variables_box)  #THIS NEEDS TO GO. THIS WILL NEVER HAPPEN. CHANGE TO VARIABLES TABLE
 
 
 

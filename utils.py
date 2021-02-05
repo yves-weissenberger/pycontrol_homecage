@@ -2,8 +2,22 @@ import pandas as pd
 import os
 import re
 from loc_def import user_path, all_paths
+from pyqtgraph.Qt import QtGui, QtCore
 
 from serial.tools import list_ports
+
+
+
+# --------------------------------------------------------------------------------
+
+def null_resize(widget):
+    '''Call a widgets resize event with its current size.  Used when rows are added
+    by user to tables to prevent mangling of the table layout.'''
+    size = QtCore.QSize(widget.frameGeometry().width(), widget.frameGeometry().height())
+    resize = QtGui.QResizeEvent(size, size)
+    widget.resizeEvent(resize)
+
+# ----------------------------------------------------------------------------------
 
 
 def find_setups(GUI):
