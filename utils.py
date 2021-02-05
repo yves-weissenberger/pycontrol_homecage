@@ -47,6 +47,10 @@ def load_data_csv():
     mouse_df = pd.read_csv(fp)
     mouse_df.file_location = fp
 
+    for col in mouse_df.columns:
+        if 'Unnamed' in col:
+            mouse_df.drop(col, inplace=True, axis=1)
+
     return task_df,exp_df,setup_df,mouse_df
 
 def get_tasks(GUI_fp):

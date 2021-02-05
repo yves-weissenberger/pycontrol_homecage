@@ -144,6 +144,7 @@ class system_controller(Data_logger):
 
 
                 if 'task' in prot:
+                    # if the current protocol is simply to run a task do so
                     task = mouse_row['Task'].values[0]
                     self.PYC.setup_state_machine(sm_name=task)
 

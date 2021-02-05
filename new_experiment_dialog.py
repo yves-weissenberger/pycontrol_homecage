@@ -14,7 +14,7 @@ from dialogs import are_you_sure_dialog
 from tables import mouse_adder_table, MouseTable
 from utils import get_tasks
 from com.data_logger import Data_logger
-from tables import mouse_list_table, cage_list_table
+from tables import mouse_list_table, cage_list_table, variables_table
 from loc_def import data_dir, mice_dir, protocol_dir
 #TA code
 from com.pycboard import Pycboard, PyboardError, _djb2_file
@@ -179,7 +179,18 @@ class new_experiment_dialog(QtGui.QDialog):
         self.mouse_prot = QtGui.QComboBox()
         self.mouse_prot.addItems(['Select Task'] + self.available_tasks)
         
+        ###############################################################
+        ###############################################################
 
+
+        ####################################################
+        ###########      Set Variables Table      ##########
+        ####################################################
+
+        self.mouse_var_table =variables_table
+
+        ###############################################################
+        ###############################################################
 
 
         self.matL1.addWidget(self.mouse_name_label)
@@ -363,7 +374,6 @@ class new_experiment_dialog(QtGui.QDialog):
 
         """
         ## Create all the paths for data
-        print("RUN EXPERIMENT")
         exp_path = os.path.join(data_dir,self.set_experiment_name)
         if not os.path.isdir(exp_path):
             os.mkdir(exp_path)
@@ -380,18 +390,19 @@ class new_experiment_dialog(QtGui.QDialog):
                     os.mkdir(mouse_exp_task_path)
 
                 entry_nr = len(self.GUI.mouse_df)
-                print("HERE55")
 
                 self.GUI.mouse_df.loc[entry_nr] = ['NA']*len(self.GUI.mouse_df.columns)
                 #self.GUI.mouse_df.loc[entry_nr]
                 for col in self.GUI.mouse_df.columns:
-                    self.GUI.mouse_df.loc[entry_nr][col] = row[col]
+                    #conv_col_ix = self.mouse_df_tmp.col     #convereted column index 
+                    if col in self.df_mouse_tmp.columns:
+                        self.GUI.mouse_df.loc[entry_nr,col] = row[col]
 
                 self._create_mouse_exp_log(row['Mouse_ID'])
 
             print("HERE")
             print(self.GUI.mouse_df)
-            #self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
             self.GUI.mouse_window_tab.list_of_mice.fill_table()
 
 
@@ -420,7 +431,7 @@ class new_experiment_dialog(QtGui.QDialog):
                 mices_ = self.df_mouse_tmp['Mouse_ID'].loc[self.df_mouse_tmp['Setup_ID']==stup].values
                 self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'mice_in_setup'] = str(mices_)[1:-1]
 
-            print(self.GUI.setup_df)
+            self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
             self.GUI.setup_window_tab.list_of_setups.fill_table()
             self.GUI.system_tab.list_of_setups.fill_table()
             self.GUI.system_tab.list_of_experiments.fill_table()

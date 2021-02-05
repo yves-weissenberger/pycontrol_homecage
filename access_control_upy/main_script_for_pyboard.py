@@ -83,7 +83,7 @@ class handler():
                     com.write(build_msg('state:' + state))
                     NEWSTATE = False
 
-
+                
                 for mag in range(4):
                     MAGs[mag].value(1)
 
@@ -103,10 +103,13 @@ class handler():
                     NEWSTATE = False
 
                 weights = []
-                for _ in range(10):
+                for _ in range(50):
                     weight = AC_handler.loadcell.weigh()
+                    com.write(build_msg('temp_weight:' + str(weight)))
                     pyb.delay(10)
                     weights.append(weight)
+                    if ((weight-self.baseline_read)<10 and len(weights)>1):
+                        break
 
                 weight = sum(weights)/float(len(weights)) #- self.baseline_read
                 #weight = 25

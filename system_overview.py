@@ -128,7 +128,7 @@ class system_tab(QtGui.QWidget):
         self.log_hlayout.addWidget(self.filter_setup)
 
         self.log_textbox = QtGui.QPlainTextEdit()
-        self.log_textbox.setMaximumBlockCount(50) 
+        self.log_textbox.setMaximumBlockCount(500) 
         self.log_textbox.setFont(QtGui.QFont('Courier', 12))
         self.log_textbox.setReadOnly(True)
 

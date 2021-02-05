@@ -19,8 +19,6 @@ class mouse_window(QtGui.QWidget):
 
         self.GUI = self.parent()
 
-        self.add_mouse_button = QtGui.QPushButton('Add Mouse')
-        self.add_mouse_button.clicked.connect(self.add_mouse)
         self.remove_mouse_button = QtGui.QPushButton('Remove Mouse')
         self.remove_mouse_button.clicked.connect(self.remove_mouse)
         self.update_mouse_button = QtGui.QPushButton('Update Mouse')
@@ -52,39 +50,15 @@ class mouse_window(QtGui.QWidget):
 
         # Buttons to control stuff
         self.Vlayout = QtGui.QVBoxLayout(self)
-        self.Vlayout.addWidget(self.add_mouse_button)
-        self.Vlayout.addWidget(self.add_mouse_table)
-
         self.Vlayout.addWidget(self.mouse_table_label)
         self.Vlayout.addLayout(self.mouse_manager_layout)
 
         self.Vlayout.addWidget(self.scrollable_mouse)
 
 
-    def add_mouse(self):
-        #print(self.GUI.mouse_df)
-        mouse_dat = []
-        entry_nr = len(self.GUI.mouse_df)
+        self.Vlayout.addWidget(self.add_mouse_table)  #THIS NEEDS TO GO. THIS WILL NEVER HAPPEN. CHANGE TO VARIABLES TABLE
 
-        #add a check to see that something about the mouse has been filled in
-        if not all([self.add_mouse_table.item(0,kk) is None for kk in range(self.add_mouse_table.columnCount())]):
 
-            #first fill row with NA
-            self.GUI.mouse_df.loc[entry_nr] = ['NA']*len(self.GUI.mouse_df.columns)
-
-            #Then fill in provided information
-            for kk,hdr_ in enumerate(self.add_mouse_table.header_names):
-                if self.add_mouse_table.item(0,kk) is not None:
-                    self.GUI.mouse_df.loc[entry_nr][hdr_] = self.add_mouse_table.item(0,kk).text()
-
-            self.GUI.mouse_df.loc[entry_nr]['Start_date'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S").replace(' ','_')
-            self.GUI.mouse_df.loc[entry_nr]['User'] = self.GUI.active_user
-
-        self.add_mouse_table.clearContents()
-
-        self.list_of_mice.fill_table()
-        self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
-        #print(self.GUI.mouse_df)
 
 
     def remove_mouse(self):
@@ -103,10 +77,11 @@ class mouse_window(QtGui.QWidget):
             sure.exec_()
             if sure.GO:
                 for ch_ in isChecked:
+                    #if 
                     print("GO",ch_)
                     fl = self.GUI.mouse_df.file_location
                     ix_ = self.GUI.mouse_df.index[self.GUI.mouse_df['RFID']==ch_]
-                    print("INDEX",ix_)
+                    #print("INDEX",ix_)
                     self.GUI.mouse_df = self.GUI.mouse_df.drop(ix_)
                     self.GUI.mouse_df.file_location = fl  #because the file location is not part of the class so when using drop this is removed
                     self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)

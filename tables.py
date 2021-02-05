@@ -29,6 +29,15 @@ from com.access_control import Access_control
 ####################      Experiment Table      #######################
 #######################################################################
 
+
+class variables_table(QtGui.QTableWidget):
+    " Table that tracks what variables a mouse currently running in a task has"
+
+    def __init__(self,GUI,parent=None):
+        super(QtGui.QTableWidget, self).__init__(1,7, parent=parent)
+        self.setHorizontalHeaderLabels(['Subject', 'Variable', 'Value', 'Persistent','Summary',''])
+
+
 class experiment_overview_table(QtGui.QTableWidget):
     " Table for system tab that shows all experiments currently running"
 
@@ -526,7 +535,7 @@ class MouseTable(QtGui.QTableWidget):
 
     def fill_table(self):
         #print(self.GUI.mouse_df)
-        self.setRowCount(0)
+        #self.setRowCount(0)
         self.setRowCount(len(self.GUI.mouse_df))
         df_cols = self.GUI.mouse_df.columns
         #print(df_cols)
