@@ -186,8 +186,24 @@ class new_experiment_dialog(QtGui.QDialog):
         ####################################################
         ###########      Set Variables Table      ##########
         ####################################################
+        self.filter_categories = ['Setup','Mouse']
+        self.vars_filter_checkbox = QtGui.QCheckBox("Filter mice")
 
-        self.mouse_var_table =variables_table
+        self.vars_combo_type  = QtGui.QComboBox()
+        self.vars_combo_type.addItems(['Filter by'] + self.filter_categories)
+
+
+        self.vars_combo_ID  = QtGui.QComboBox()
+        self.vars_combo_ID.addItems(['Filter by'] + self.filter_categories)
+
+        #self.vars_hlayout1 = QtGui.QHBoxLayout(self)
+        #self.vars_hlayout1.addWidget(self.vars_filter_checkbox)
+        #self.vars_hlayout1.addWidget(self.vars_combo_type)
+        #self.vars_hlayout1.addWidget(self.vars_combo_ID)
+        #self.task_combo.currentIndexChanged.connect(self.picked_task)
+
+
+        self.mouse_var_table = variables_table(GUI=self.GUI)
 
         ###############################################################
         ###############################################################
@@ -222,6 +238,8 @@ class new_experiment_dialog(QtGui.QDialog):
 
         self.mice_column.addWidget(self.MAT)
         self.mice_column.addWidget(self.MLT)
+        #self.mice_column.addLayout(self.vars_hlayout1)
+        self.mice_column.addWidget(self.mouse_var_table)
         self.MICE.setLayout(self.mice_column)
 
 

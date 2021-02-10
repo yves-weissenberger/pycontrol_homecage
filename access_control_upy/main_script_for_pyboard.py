@@ -113,7 +113,7 @@ class handler():
                     NEWSTATE = False
 
                 weights = []
-                for _ in range(50):
+                for _ in range(10):
                     weight = AC_handler.loadcell.weigh()
                     com.write(build_msg('temp_w:' + str(weight)))
                     pyb.delay(10)

@@ -210,16 +210,22 @@ class system_tab(QtGui.QWidget):
                 print(self.GUI.exp_df)
                 print(self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName])
                 for setup in self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Setups'].values:
+                    setup = eval(setup)[0]
                     print('HERE4',setup)
-                    handler_ = [setup for k,setup in self.GUI.controllers.items() if k==setup][0]
+                    #for k,setup_ in self.GUI.controllers.items():
+                    #    print(k,setup_)
+                    
+                    if self.GUI.controllers.items():  #if there are any controllers
 
-                    handler_.PYC.stop_framework()
-                    time.sleep(.05)
-                    handler_.PYC.process_data()
-                    handler_.close_files()
-                    handler_.PYC.reset()
-                    handler_.PYC.close()
-                    handler_.AC.close()
+                        handler_ = [setup_ for k,setup_ in self.GUI.controllers.items() if k==setup][0]
+
+                        handler_.PYC.stop_framework()
+                        time.sleep(.05)
+                        handler_.PYC.process_data()
+                        handler_.close_files()
+                        handler_.PYC.reset()
+                        handler_.PYC.close()
+                        handler_.AC.close()
 
 
                 #self.GUI.exp_df

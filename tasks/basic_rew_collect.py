@@ -48,6 +48,7 @@ v.light_pokes = 0
 v.dark_pokes = 0
 v.first_entry = True
 v.rew_dur = 30
+v.get_free_rew = True
 #-------------------------------------------------------------------------
 
 
@@ -69,11 +70,12 @@ def handle_poke(event):
 
         v.choice_poke = random.choice(range(9))
 
-        if v.first_entry:
-          v.first_entry = False
-          for pk_ in hw.poke_list:
-            pk_.SOL.on()
-          set_timer('rew_timer', 200*ms)
+        if v.get_free_rew:
+          if v.first_entry:
+            v.first_entry = False
+            for pk_ in hw.poke_list:
+              pk_.SOL.on()
+            set_timer('rew_timer', 200*ms)
 
         print(v.choice_poke)
         for pk in range(9):

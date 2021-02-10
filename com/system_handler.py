@@ -284,14 +284,14 @@ class system_controller(Data_logger):
         df_mouseLog = pd.read_csv(logPth)
         
         entry_nr = len(df_mouseLog)
-        df_mouseLog.loc[entry_nr] = ['NA']*len(df_mouseLog.columns)
+        df_mouseLog.append(pd.Series(), ignore_index = True)
 
         for k in self.mouse_data.keys():
             if k in df_mouseLog.columns:
                 #print(k,self.mouse_data[k])
-                df_mouseLog.loc[entry_nr][k] = self.mouse_data[k]
+                df_mouseLog.loc[entry_nr,k] = self.mouse_data[k]
 
-        df_mouseLog.loc[entry_nr]['Variables'] = repr(v_)
+        df_mouseLog.loc[entry_nr,'Variables'] = repr(v_)
         #print(df_mouseLog,entry_nr)
 
         df_mouseLog.to_csv(logPth)
