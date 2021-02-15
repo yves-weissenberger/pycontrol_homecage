@@ -113,8 +113,8 @@ class handler():
                     NEWSTATE = False
 
                 weights = []
-                for _ in range(10):
-                    weight = AC_handler.loadcell.weigh()
+                for _ in range(30):
+                    weight = AC_handler.loadcell.weigh(times=1)
                     com.write(build_msg('temp_w:' + str(weight)))
                     pyb.delay(10)
                     weights.append(weight)
@@ -145,6 +145,7 @@ class handler():
                         rfid = AC_handler.rfid.read_tag()
                         pyb.delay(50)
                         #rfid = '116000039959'
+                        #rfid = '116000039953'
                         #if read an RFID TAG
                         if rfid is not None:
                             com.write(build_msg('RFID:' + str(rfid)))
@@ -193,7 +194,7 @@ class handler():
                 #if door entry to chamber is closed again
                 if P_read_en2.value()==0:
 
-                    weight = AC_handler.loadcell.weigh()# - self.baseline_read
+                    weight = AC_handler.loadcell.weigh()# - self.baseline_read   #RETURN
                     pyb.delay(10)
 
                     if weight<ONE_MOUSE:

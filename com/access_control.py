@@ -88,7 +88,7 @@ class Access_control(Pyboard):
 
         #df_ = self.data_logger.GUI.setup_df
         if self.data_logger.GUI is not None:
-
+                #print('!!!!!!!!!')
 
                 if self.serial.inWaiting()>0:
                     #read the input if something is coming

@@ -368,7 +368,7 @@ class new_experiment_dialog(QtGui.QDialog):
 
             for col_name in self.GUI.setup_df.columns:
                 if col_name not in ['Setup_ID','Experiment','Protocol']:
-                    val_ = self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==COM][col_name]
+                    val_ = self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==COM,col_name]
 
                     self.df_setup_tmp.loc[entry_nr][col_name] =  val_.values[0]
 
@@ -450,6 +450,7 @@ class new_experiment_dialog(QtGui.QDialog):
                 self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'mice_in_setup'] = str(mices_)[1:-1]
 
             self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
+            self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
             self.GUI.setup_window_tab.list_of_setups.fill_table()
             self.GUI.system_tab.list_of_setups.fill_table()
             self.GUI.system_tab.list_of_experiments.fill_table()

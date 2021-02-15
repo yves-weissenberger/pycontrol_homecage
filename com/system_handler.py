@@ -95,7 +95,7 @@ class system_controller(Data_logger):
         """
         now = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
         #print(self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port])
-        if self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port]['Experiment'].values!='none': #if an experiment is running
+        if self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port]['Experiment'].values!='none': #YW 11/02/21 NOT SURE WHY THIS CHECK IS HERE
             for msg in new_data:
                 self.GUI.print_msg(msg)
 
@@ -134,6 +134,7 @@ class system_controller(Data_logger):
 
 
         elif state=='mouse_training':
+            #print("HERE")
 
             if self.data_file is None:
                 mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
@@ -141,11 +142,13 @@ class system_controller(Data_logger):
                 prot = mouse_row['Protocol'].values[0]
 
                 
-
-
+                #print("HERE")
+                print(mouse_row)
                 if 'task' in prot:
                     # if the current protocol is simply to run a task do so
                     task = mouse_row['Task'].values[0]
+                    self.GUI.print_msg("Uploading: " + str(task) ,ac_pyc='pyc')
+
                     self.PYC.setup_state_machine(sm_name=task)
 
                 else:

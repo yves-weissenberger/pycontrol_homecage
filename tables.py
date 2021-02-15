@@ -11,7 +11,7 @@ from datetime import datetime
 import time
 import re
 from serial import SerialException
-
+from functools import partial
 
 from dialogs import calibrate_dialog
 from utils import find_setups
@@ -531,7 +531,7 @@ class MouseTable(QtGui.QTableWidget):
         system """
     def __init__(self, GUI,parent=None):
         super(QtGui.QTableWidget, self).__init__(1,15, parent=parent)
-        self.header_names = ['','Mouse_ID', 'RFID', 'Sex', 'Age', 'Experiment', 'Protocol', 'User', 
+        self.header_names = ['','Mouse_ID', 'RFID', 'Sex', 'Age', 'Experiment', 'Task','Protocol', 'User', 
                             'Start_date', 'Current_weight', 'Start_weight', 'is_training',
                             'is_assigned', 'training_log', 'Setup_ID']
 
@@ -541,22 +541,33 @@ class MouseTable(QtGui.QTableWidget):
         #    self.horizontalHeader().setResizeMode(i, QtGui.QHeaderView.Stretch)
         self.verticalHeader().setVisible(False)
         self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
+        self.loaded = False
 
         self.fill_table()
-
+        self.loaded = True
     def fill_table(self):
         #print(self.GUI.mouse_df)
         #self.setRowCount(0)
         self.setRowCount(len(self.GUI.mouse_df))
         df_cols = self.GUI.mouse_df.columns
+
         #print(df_cols)
         for row_index, row in self.GUI.mouse_df.iterrows():    
 
             for col_index in range(self.columnCount()-1):  
-
-                if df_cols[col_index] in self.header_names:
+                col_name = df_cols[col_index]
+                if col_name in self.header_names:
                     table_col_ix = self.header_names.index(df_cols[col_index])
-                    self.setItem(row_index,table_col_ix,Qt.QtWidgets.QTableWidgetItem(str(row[col_index])))
+                    if col_name=='Task':
+                        task_combo = QtGui.QComboBox()
+                        task_combo.RFID = row['RFID']
+                        task_combo.addItems([str(row[col_index])] + get_tasks(self.GUI.GUI_filepath))
+                        self.setCellWidget(row_index,table_col_ix,task_combo)
+                        task_combo.currentTextChanged.connect(partial(self.change_mouse_task,task_combo))
+
+
+                    else:
+                        self.setItem(row_index,table_col_ix,Qt.QtWidgets.QTableWidgetItem(str(row[col_index])))
             #items = [QtGui.QStandardItem(field)for field in row]
             #print(items)
             #self.model.appendRow(items)
@@ -564,5 +575,16 @@ class MouseTable(QtGui.QTableWidget):
             chkBoxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
             chkBoxItem.setCheckState(QtCore.Qt.Unchecked)   
             self.setItem(row_index,0,chkBoxItem)
+
+
+
+
+    def change_mouse_task(self,combo):
+        """ Change task mouse is doing """
+        rfid = combo.RFID
+
+        if self.loaded:  #workaround (sorry)
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID'],'Task'] = combo.currentText()
+
 
 
