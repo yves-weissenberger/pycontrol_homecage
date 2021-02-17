@@ -225,8 +225,9 @@ class handler():
                     com.write(build_msg('state:' + state))
                     NEWSTATE = False
 
-                for mag in range(4):
-                    MAGs[mag].value(1)
+                #YVES UPDATE 160221 think this is unncessary
+                #for mag in range(4):
+                #    MAGs[mag].value(1)
 
                 if P_read_ex1.value()==0:
 
@@ -259,7 +260,10 @@ class handler():
                 if NEWSTATE:
                     com.write(build_msg('state:' + state))
                     NEWSTATE = False
-                    
+                
+                weight = AC_handler.loadcell.weigh(times=1)
+                com.write(build_msg('temp_w_out:' + str(weight)))
+
                 for mag in range(4):
                     if mag in [0,1,2]:
                         MAGs[mag].value(1)
@@ -297,7 +301,7 @@ class handler():
 
                     AC_handler.loadcell.tare()
 
-                    weight = AC_handler.loadcell.weigh() - self.baseline_read
+                    weight = AC_handler.loadcell.weigh()
                     pyb.delay(10)
                     com.write(build_msg('calT:'+str(weight)))
                 elif 'calibrate' in sent_data:
@@ -305,13 +309,13 @@ class handler():
                     AC_handler.loadcell.calibrate(weight=w_)
                     #com.write(build_message(str(sent_data)))
 
-                    weight = AC_handler.loadcell.weigh() - self.baseline_read
+                    weight = AC_handler.loadcell.weigh() 
                     pyb.delay(10)
                     com.write(build_msg('calC:'+str(weight)))
 
                 elif sent_data=='weigh':
 
-                    weight = AC_handler.loadcell.weigh() - self.baseline_read
+                    weight = AC_handler.loadcell.weigh()
                     pyb.delay(10)
                     com.write(build_msg('calW:'+str(weight)))
 

@@ -46,7 +46,7 @@ def create_empty_csv(index,pth):
 
     #set variables for experiments what to store about them
     elif index==1:
-        df = pd.DataFrame(columns=['Name','Setups','Subjects','n_subjects','User','Protocol','Active'])
+        df = pd.DataFrame(columns=['Name','Setups','Subjects','n_subjects','User','Protocol','Active','Persistent_variables'])
         fp = os.path.join(pth,'experiments.csv')
 
     #set variables for setups what to store about them

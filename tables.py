@@ -560,9 +560,14 @@ class MouseTable(QtGui.QTableWidget):
                     table_col_ix = self.header_names.index(df_cols[col_index])
                     if col_name=='Task':
                         task_combo = QtGui.QComboBox()
+                        task_combo.activated.connect(partial(self.update_task_combo,task_combo))
+                        task_combo.installEventFilter(self)
                         task_combo.RFID = row['RFID']
-                        task_combo.addItems([str(row[col_index])] + get_tasks(self.GUI.GUI_filepath))
+                        cTask = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==row['RFID'],'Task'].values[0]
+                        task_combo.addItems([cTask] + get_tasks(self.GUI.GUI_filepath))
+
                         self.setCellWidget(row_index,table_col_ix,task_combo)
+
                         task_combo.currentTextChanged.connect(partial(self.change_mouse_task,task_combo))
 
 
@@ -578,13 +583,21 @@ class MouseTable(QtGui.QTableWidget):
 
 
 
+    def update_task_combo(self,combo):
+            cTask = combo.currentText()
+            combo.clear()
+            combo.addItems([cTask] + get_tasks(self.GUI.GUI_filepath))
+
 
     def change_mouse_task(self,combo):
         """ Change task mouse is doing """
         rfid = combo.RFID
 
-        if self.loaded:  #workaround (sorry)
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID'],'Task'] = combo.currentText()
+        #if self.loaded:  #workaround (sorry)
+
+        #print('UPDATED TASK VIA TABLE')
+        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==rfid,'Task'] = combo.currentText()  #need to update the table of the individual mouses training record as well??
+        self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
 
 
 

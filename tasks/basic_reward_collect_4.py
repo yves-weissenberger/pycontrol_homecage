@@ -116,11 +116,9 @@ def handle_poke(event):
                   v.inactive = True
 
                   hw.speaker.noise()
-                  set_timer('noise_timer', v.noise_dur*ms,output_event=True)
+                  set_timer('noise_timer', v.timeout_dur*ms,output_event=True)
                   set_timer('timeout_timer', v.timeout_dur*ms,output_event=True)
                   v.n_timeouts += 1
-                  for pk in range(9):
-                    hw.poke_list[pk].LED.off()
 
                 
 

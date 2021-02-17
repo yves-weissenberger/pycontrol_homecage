@@ -51,9 +51,12 @@ v.first_entry = True
 v.rew_dur = 20
 v.get_free_rew = False
 
-v.seq = [5,3,6,4,8,4,6,3]
+#a = 
+# a.tolist()[:-1] + list(reversed(a[:]))  
+v.seq = [1, 3, 6, 7, 2, 0, 2, 7, 6, 3]#[5,3,6,4,8,4,6,3]
+print(v.seq)
 v.seq_ix = 0
-v.probe_probability = 0 
+v.probe_probability = 0.33 
 v.probe_dur = 2000
 v.lseq  = len(v.seq)
 #-------------------------------------------------------------------------
@@ -80,7 +83,7 @@ def handle_poke(event):
                 v.first_entry = False
                 for pk_ in hw.poke_list:
                     pk_.SOL.on()
-                set_timer('rew_timer', 200*ms)
+                set_timer('rew_timer', 200*ms,output_event=True)
 
         print(v.choice_poke)
         if withprob(v.probe_probability):
@@ -95,7 +98,9 @@ def handle_poke(event):
                 else:
                     hw.poke_list[pk].LED.off()
         else:
-            set_timer('probe_timer', v.probe_dur*ms)
+            for pk in range(9):
+                hw.poke_list[pk].LED.off()
+            set_timer('probe_timer', v.probe_dur*ms,output_event=True)
 
     if event=='probe_timer':
         for pk in range(9):
@@ -124,7 +129,7 @@ def deliver_reward(event):
     if event == 'entry':
             print('nREWS:' + str(v.n_rewards) +
                         'fracL:' + str(float(v.light_pokes)/float(v.light_pokes+1+v.dark_pokes)))
-            set_timer('rew_timer', v.rew_dur*ms)
+            set_timer('rew_timer', v.rew_dur*ms,output_event=True)
             hw.poke_list[v.choice_poke].SOL.on()
             v.n_rewards += 1
     if event=='rew_timer':

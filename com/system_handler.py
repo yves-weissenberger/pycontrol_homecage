@@ -95,7 +95,9 @@ class system_controller(Data_logger):
         """
         now = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
         #print(self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port])
-        if self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port]['Experiment'].values!='none': #YW 11/02/21 NOT SURE WHY THIS CHECK IS HERE
+        exp_running_now = self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port]['Experiment'].values
+
+        if exp_running_now!='none': #YW 11/02/21 NOT SURE WHY THIS CHECK IS HERE
             for msg in new_data:
                 self.GUI.print_msg(msg)
 
@@ -107,7 +109,7 @@ class system_controller(Data_logger):
                     if 'weight' in msg:
                         self.mouse_data['weight'] = float(msg.strip('weight:'))
                     if 'RFID' in msg:
-                        self.mouse_data['RFID'] = msg.strip('RFID:')
+                        self.mouse_data['RFID'] = int(msg.strip('RFID:'))
 
         else:
             for msg in new_data:
@@ -119,6 +121,7 @@ class system_controller(Data_logger):
 
         #print("HEREIAM",state)
         #
+        print(state,now)
         self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'AC_state'] = state
 
         if state=='allow_entry':
@@ -137,13 +140,17 @@ class system_controller(Data_logger):
             #print("HERE")
 
             if self.data_file is None:
+
+                #print("DATA FILE IS NONE", self.mouse_data['RFID'],type(self.mouse_data['RFID']))
+                #print(self.GUI.mouse_df['RFID'])
                 mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
+                #print(mouse_row)
+                #print(mouse_row['Protocol'])
                 mouse_ID = mouse_row['Mouse_ID'].values[0]
                 prot = mouse_row['Protocol'].values[0]
 
                 
                 #print("HERE")
-                print(mouse_row)
                 if 'task' in prot:
                     # if the current protocol is simply to run a task do so
                     task = mouse_row['Task'].values[0]

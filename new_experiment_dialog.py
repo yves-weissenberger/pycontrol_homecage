@@ -292,7 +292,7 @@ class new_experiment_dialog(QtGui.QDialog):
         self.df_mouse_tmp.loc[entry_nr] = ['NA']*len(self.df_mouse_tmp.columns)
 
         self.df_mouse_tmp.loc[entry_nr]['Mouse_ID'] = self.mouse_name.text()
-        self.df_mouse_tmp.loc[entry_nr]['RFID'] = self.RFID.text()
+        self.df_mouse_tmp.loc[entry_nr]['RFID'] = int(self.RFID.text())
         self.df_mouse_tmp.loc[entry_nr]['Sex'] = self.sex.currentText()
         self.df_mouse_tmp.loc[entry_nr]['Age'] = self.age.text()
         self.df_mouse_tmp.loc[entry_nr]['Experiment'] = self.set_experiment_name
@@ -409,7 +409,7 @@ class new_experiment_dialog(QtGui.QDialog):
 
                 entry_nr = len(self.GUI.mouse_df)
 
-                self.GUI.mouse_df.loc[entry_nr] = ['NA']*len(self.GUI.mouse_df.columns)
+                self.GUI.mouse_df.append(pd.Series(), ignore_index=True)
                 #self.GUI.mouse_df.loc[entry_nr]
                 for col in self.GUI.mouse_df.columns:
                     #conv_col_ix = self.mouse_df_tmp.col     #convereted column index 
@@ -426,16 +426,16 @@ class new_experiment_dialog(QtGui.QDialog):
 
             #update experiment information
             entry_nr = len(self.GUI.exp_df)
-            self.GUI.exp_df.loc[entry_nr] = ['NA']*len(self.GUI.exp_df.columns)
-            self.GUI.exp_df.loc[entry_nr]['Name'] = self.set_experiment_name
-            self.GUI.exp_df.loc[entry_nr]['Setups'] = self.df_setup_tmp['Setup_ID'].values
-            self.GUI.exp_df.loc[entry_nr]['User'] = self.GUI.active_user
-            self.GUI.exp_df.loc[entry_nr]['Protocol'] = self.set_protocol
-            self.GUI.exp_df.loc[entry_nr]['Subjects'] = self.df_mouse_tmp['Mouse_ID'].values
+            self.GUI.exp_df.append(pd.Series(), ignore_index=True)
+            self.GUI.exp_df.loc[entry_nr,'Name'] = self.set_experiment_name
+            self.GUI.exp_df.loc[entry_nr,'Setups'] = self.df_setup_tmp['Setup_ID'].values
+            self.GUI.exp_df.loc[entry_nr,'User'] = self.GUI.active_user
+            self.GUI.exp_df.loc[entry_nr,'Protocol'] = self.set_protocol
+            self.GUI.exp_df.loc[entry_nr,'Subjects'] = self.df_mouse_tmp['Mouse_ID'].values
 
             for stup in self.df_setup_tmp['Setup_ID'].values:
 
-                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup]['User'] = self.GUI.active_user
+                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'User'] = self.GUI.active_user
 
                 self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'in_use'] = 'Y'
 
