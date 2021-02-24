@@ -53,7 +53,8 @@ v.get_free_rew = False
 
 #a = 
 # a.tolist()[:-1] + list(reversed(a[:]))  
-v.seq = [1, 3, 6, 7, 2, 0, 2, 7, 6, 3]#[5,3,6,4,8,4,6,3]
+#v.seq = [1, 3, 6, 7, 2, 0, 2, 7, 6, 3]#[5,3,6,4,8,4,6,3]
+v.seq =  [5, 4, 6, 8, 2, 0, 2, 8, 6, 4]    
 print(v.seq)
 v.seq_ix = 0
 v.probe_probability = 0.25

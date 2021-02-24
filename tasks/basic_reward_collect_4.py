@@ -44,14 +44,14 @@ hw.poke_list = [hw.poke_1,hw.poke_2,hw.poke_3,
 
 v.state_str = [str(i) for i in range(1,10)] 
 v.choice_poke = random.choice(range(9))
-v.click_volume = 20
+v.click_volume = 10
 v.n_rewards = 0
 v.light_pokes = 0
 v.dark_pokes = 0
 v.first_entry = True
 v.rew_dur = 20
 v.noise_dur = 100
-v.timeout_dur = 2000
+v.timeout_dur = 3000
 v.get_free_rew = False
 v.prev_rew = None
 v.inactive = False

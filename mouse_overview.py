@@ -10,6 +10,7 @@ from datetime import datetime
 
 from dialogs import are_you_sure_dialog, mouse_summary_dialog
 from tables import mouse_adder_table, MouseTable, variables_table
+from utils import get_variables_from_taskfile
 
 class mouse_window(QtGui.QWidget):
 
@@ -57,15 +58,20 @@ class mouse_window(QtGui.QWidget):
 
         #### Deal with variables of the tasks
         self.variables_table = variables_table(GUI=self.GUI)
-        self.filter_categories = ['Experiment','User','Mouse']
+        self.filter_categories = ['Experiment','User','Mouse_ID','RFID']
         self.variables_box = QtGui.QGroupBox('Variables')
         self.vars_hlayout1 = QtGui.QHBoxLayout(self)
         self.vars_vlayout1 = QtGui.QVBoxLayout(self)
 
         self.vars_combo  = QtGui.QComboBox()
         self.vars_combo.addItems(['Filter by'] + self.filter_categories)
+        self.vars_combo.activated.connect(self.update_available_vfilt)
+
+        self.vars_combo_sel  = QtGui.QComboBox()
+        self.vars_combo_sel.addItems([''])
         #self.task_combo.currentIndexChanged.connect(self.picked_task)
         self.vars_hlayout1.addWidget(self.vars_combo)
+        self.vars_hlayout1.addWidget(self.vars_combo_sel)
         self.vars_vlayout1.addLayout(self.vars_hlayout1)
         self.vars_vlayout1.addWidget(self.variables_table)
 
@@ -75,7 +81,17 @@ class mouse_window(QtGui.QWidget):
         self.Vlayout.addWidget(self.variables_box)  #THIS NEEDS TO GO. THIS WILL NEVER HAPPEN. CHANGE TO VARIABLES TABLE
 
 
+    def update_variables_filt(self):
+        
 
+    def update_available_vfilt(self):
+        filtby = str(self.vars_combo.currentText())
+
+        if filtby in ('Mouse_ID','RFID'):
+            self.vars_combo_sel.clear()
+            dat = self.GUI.mouse_df[filtby]
+            self.vars_combo_sel.addItems(['Select'] + [str(i) for i in dat.values])
+            
 
     def remove_mouse(self):
         """ Remove mouse from df and CSV file"""

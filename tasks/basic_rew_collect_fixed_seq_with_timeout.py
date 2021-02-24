@@ -30,7 +30,9 @@ events = ['poke_1', 'poke_1_out',
                     'wrong_timer',
                     'repeat_timer',
                     'change_task_timer',
-                    'probe_timer'
+                    'probe_timer',
+                    'noise_timer',
+                    'timeout_timer'
                     ]
 
 
@@ -43,21 +45,27 @@ hw.poke_list = [hw.poke_1,hw.poke_2,hw.poke_3,
 
 v.state_str = [str(i) for i in range(1,10)] 
 v.choice_poke = random.choice(range(9))
-v.click_volume = 60
+v.click_volume = 10
 v.n_rewards = 0
 v.light_pokes = 0
 v.dark_pokes = 0
 v.first_entry = True
 v.rew_dur = 20
 v.get_free_rew = False
-
+v.noise_dur = 100
+v.timeout_dur = 3000
+v.max_timeout = 4
+v.n_timeouts = 0
+v.prev_rew = None
 #a = 
 # a.tolist()[:-1] + list(reversed(a[:]))  
 v.seq = [1, 3, 6, 7, 2, 0, 2, 7, 6, 3]#[5,3,6,4,8,4,6,3]
 print(v.seq)
 v.seq_ix = 0
 v.probe_probability = 0.25
-v.probe_dur = 5000
+v.probe_dur = 100000
+v.isprobe = False
+v.inactive = False
 v.lseq  = len(v.seq)
 #-------------------------------------------------------------------------
 
@@ -87,11 +95,11 @@ def handle_poke(event):
 
         print(v.choice_poke)
         if withprob(v.probe_probability):
-            isprobe = True
+            v.isprobe = True
         else:
-            isprobe = False
+            v.isprobe = False
 
-        if not isprobe:
+        if not v.isprobe:
             for pk in range(9):
                 if pk == v.choice_poke:
                     hw.poke_list[pk].LED.on()
@@ -100,8 +108,10 @@ def handle_poke(event):
         else:
             for pk in range(9):
                 hw.poke_list[pk].LED.off()
+
             print("probe_start")
             set_timer('probe_timer', v.probe_dur*ms,output_event=True)
+
 
     if event=='probe_timer':
         for pk in range(9):
@@ -116,13 +126,40 @@ def handle_poke(event):
 
     if event[-1] in v.state_str:  #check that event is an in-poke
         chosen_poke = int(event[-1]) - 1
-        if v.choice_poke==chosen_poke:
-                goto_state('deliver_reward')
-                v.light_pokes += 1
-        else:
-                v.dark_pokes += 1
+        if not v.inactive:
+
+            if v.choice_poke==chosen_poke:
+                    v.prev_rew = v.choice_poke
+                    v.light_pokes += 1
+                    goto_state('deliver_reward')
+            else:
+                if (chosen_poke==v.prev_rew) or v.isprobe:
+                    pass
+                else:
+                    v.dark_pokes += 1
+                    if (v.n_timeouts<v.max_timeout):#not v.has_been_wrong:
+                        v.has_been_wrong = True
+                        v.inactive = True
+
+                        hw.speaker.noise()
+                        set_timer('noise_timer', v.timeout_dur*ms,output_event=True)
+                        set_timer('timeout_timer', v.timeout_dur*ms,output_event=True)
+                        v.n_timeouts += 1
+
     if event=='rew_timer':
-            hw.poke_list[v.choice_poke].SOL.off()
+        hw.poke_list[v.choice_poke].SOL.off()
+
+    if event=='noise_timer':
+      hw.speaker.off()
+
+    if event=='timeout_timer':
+      v.inactive = False
+
+      for pk in range(9):
+          if pk == v.choice_poke:
+              hw.poke_list[pk].LED.on()
+          else:
+              hw.poke_list[pk].LED.off()
 
 
 def deliver_reward(event):
@@ -133,6 +170,8 @@ def deliver_reward(event):
             set_timer('rew_timer', v.rew_dur*ms,output_event=True)
             hw.poke_list[v.choice_poke].SOL.on()
             v.n_rewards += 1
+            v.n_timeouts = 0
+
     if event=='rew_timer':
             goto_state('handle_poke')
     elif event == 'exit':
