@@ -17,8 +17,6 @@ protocol_dir = os.path.join(ROOT,'prot')
 
 user_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)),'users.txt')
 
-#code_path = '/Users/Yves/Documents/Code/structural_knowledge/homecage_system/homecage_gui/'
-#user_path = '/Users/Yves/Documents/Code/structural_knowledge/homecage_system/homecage_gui/users.txt'
 
 all_paths = [ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir]
 

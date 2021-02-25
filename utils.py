@@ -37,9 +37,12 @@ def get_variables_from_taskfile(pth):
     return variables
 
 def get_users():
-    users = open(user_path,'r')
+    dat = open(user_path,'r').readlines()
     #users = [i.readline() for i in users]
-    users = [str(usr.strip()) for usr in users]
+    user_dat =  [re.findall(r'({.*})',l_)[0] for l_ in dat if 'user_data' in l_]
+    user_dict_list = [eval(i) for i in user_dat]   
+    user_dict = {k: v for d in user_dict_list for k, v in d.items()}   
+    users = list(user_dict.keys())
     return users
 
 def load_data_csv():

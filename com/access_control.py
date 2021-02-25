@@ -27,6 +27,7 @@ class Access_control(Pyboard):
         now = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
         self.logger_dir = GUI.paths['AC_logger_dir']
         self.logger_path = os.path.join(self.logger_dir,name_ + '_' + now + '.txt')
+        #self.GUI.setup_df
 
         with open(self.logger_path,'w') as f:
             f.write("Start"+'\n')

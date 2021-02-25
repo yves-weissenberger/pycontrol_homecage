@@ -121,7 +121,7 @@ class system_controller(Data_logger):
 
         #print("HEREIAM",state)
         #
-        print(state,now)
+        #print(state,now)
         self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'AC_state'] = state
 
         if state=='allow_entry':

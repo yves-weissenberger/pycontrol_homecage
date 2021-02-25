@@ -249,8 +249,9 @@ class add_user_dialog(QtGui.QDialog):
         self.setGeometry(10, 30, 300, 200) # Left, top, width, height.
 
         self.textName = QtGui.QLineEdit(self)
+        self.textEmail = QtGui.QLineEdit(self)
         self.addUserButton = QtGui.QPushButton('Add User', self)
-        self.addUserButton .clicked.connect(self.handleLogin)
+        self.addUserButton.clicked.connect(self.handleLogin)
         self.users = get_users()
 
 
