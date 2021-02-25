@@ -82,7 +82,7 @@ class mouse_window(QtGui.QWidget):
 
 
     def update_variables_filt(self):
-        
+        pass
 
     def update_available_vfilt(self):
         filtby = str(self.vars_combo.currentText())

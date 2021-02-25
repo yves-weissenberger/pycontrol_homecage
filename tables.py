@@ -47,6 +47,8 @@ class variables_table(QtGui.QTableWidget):
         self.available_variables = []
         self.assigned = {v_name:[] for v_name in self.variable_names} # Which subjects have values assigned for each variable.
 
+    
+
 
 
 class experiment_overview_table(QtGui.QTableWidget):
