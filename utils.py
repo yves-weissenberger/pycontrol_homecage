@@ -19,7 +19,13 @@ def null_resize(widget):
 
 # ----------------------------------------------------------------------------------
 
+def get_pyhomecage_email():
+    lines_ = open(user_path,'r').readlines()
+    sender_email =  re.findall('"(.*)"',[l_ for l_ in lines_ if 'system_email' in l_][0])[0]
+    #print([l_ for l_ in lines_ if 'password' in l_])
+    password = re.findall('"(.*)"',[l_ for l_ in lines_ if 'password' in l_][0])[0]
 
+    return sender_email, password
 def find_setups(GUI):
 
     #print(list_ports.comports())

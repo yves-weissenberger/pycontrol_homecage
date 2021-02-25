@@ -13,9 +13,6 @@ from email.mime.multipart import MIMEMultipart
 lines_ = open(user_path,'r').readlines()
 users = get_users()
 
-sender_email =  re.findall('"(.*)"',[l_ for l_ in lines_ if 'system_email' in l_][0])[0]
-#print([l_ for l_ in lines_ if 'password' in l_])
-password = re.findall('"(.*)"',[l_ for l_ in lines_ if 'password' in l_][0])[0]
 
 port = 587  # For starttls
 smtp_server = "smtp.gmail.com"
