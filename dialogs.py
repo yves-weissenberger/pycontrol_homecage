@@ -314,7 +314,7 @@ class add_user_dialog(QtGui.QDialog):
         ###FIX TO IGNORE CASE         #####!!!!!!!!!!!!!!!!!
         if self.user.lower() not in [i.lower() for i in self.users]:
             with open(user_path, 'a') as file:
-                user_details = "user_data:{'"+str(self.user) + "':" + str(self.receiver_email) + '}'
+                user_details = "user_data:{'"+str(self.user) + "':' " + str(self.receiver_email) + "'}"
                 file.writelines('\n'+user_details)
         self.accept()
 
