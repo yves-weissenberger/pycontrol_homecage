@@ -53,6 +53,7 @@ class Visualizator(QtGui.QMainWindow):
         self.active_user = None
         self.task_df,self.exp_df,self.setup_df,self.mouse_df = load_data_csv()
 
+        
 
         ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
 

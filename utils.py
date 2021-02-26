@@ -17,6 +17,52 @@ def null_resize(widget):
     resize = QtGui.QResizeEvent(size, size)
     widget.resizeEvent(resize)
 
+
+# --------------------------------------------------------------------------------
+
+class TableCheckbox(QtGui.QWidget):
+    '''Checkbox that is centered in cell when placed in table.'''
+
+    def __init__(self, parent=None):
+        super(QtGui.QWidget, self).__init__(parent)
+        self.checkbox = QtGui.QCheckBox(parent=parent)
+        self.layout = QtGui.QHBoxLayout(self)
+        self.layout.addWidget(self.checkbox)
+        self.layout.setAlignment(QtCore.Qt.AlignCenter)
+        self.layout.setContentsMargins(0,0,0,0)
+
+    def isChecked(self):
+        return self.checkbox.isChecked()
+
+    def setChecked(self, state):
+        self.checkbox.setChecked(state)
+
+# --------------------------------------------------------------------------------
+
+def cbox_update_options(cbox, options):
+    '''Update the options available in a qcombobox without changing the selection.'''
+    selected = str(cbox.currentText())
+    available = sorted(list(set([selected]+options)))
+    i = available.index(selected)
+    cbox.clear()
+    cbox.addItems(available)
+    cbox.setCurrentIndex(i)
+
+def cbox_set_item(cbox, item_name, insert=False):
+    '''Set the selected item in a combobox to the name provided.  If name is
+    not in item list returns False if insert is False or inserts item if insert 
+    is True.'''
+    index = cbox.findText(item_name, QtCore.Qt.MatchFixedString)
+    if index >= 0:
+         cbox.setCurrentIndex(index)
+         return True
+    else:
+        if insert:
+            cbox.insertItem(0, item_name)
+            cbox.setCurrentIndex(0)
+            return True
+        else:
+            return False
 # ----------------------------------------------------------------------------------
 
 def get_pyhomecage_email():
@@ -41,6 +87,22 @@ def get_variables_from_taskfile(pth):
     variables = re.findall(r'(v\.[^ ]*) {0,2}=',txt)
     variables = list(set(variables))
     return variables
+
+
+def get_variables_and_values_from_taskfile(pth):
+    "Helper function to scan python script and return variables in that script"
+    with open(pth,'r') as f:
+        txt = f.readlines()
+    var_dict = {}
+    for l in txt:
+        if ('v.' in l) and ('=' in l):
+            var_ = re.findall(r'v\.(.*)=',l)[0]
+            val_ = re.findall(r'v\..*=(.*)\n',l)[0]
+            var_dict[var_] = val_
+        if 'run_start' in l:
+            break
+        
+    return var_dict
 
 def get_users():
     dat = open(user_path,'r').readlines()

@@ -6,11 +6,13 @@ import pyqtgraph as pg
 import sys, os, pickle, time
 import copy as cp
 from datetime import datetime
-
+import json
 
 from dialogs import are_you_sure_dialog, mouse_summary_dialog
 from tables import mouse_adder_table, MouseTable, variables_table
-from utils import get_variables_from_taskfile
+from utils import get_variables_from_taskfile, get_variables_and_values_from_taskfile
+from loc_def import main_path
+
 
 class mouse_window(QtGui.QWidget):
 
@@ -69,9 +71,18 @@ class mouse_window(QtGui.QWidget):
 
         self.vars_combo_sel  = QtGui.QComboBox()
         self.vars_combo_sel.addItems([''])
+
+        self.vars_update_button = QtGui.QPushButton('Update Variables')
+        self.show_all_vars_checkbox = QtGui.QCheckBox("Show all variables")
+        self.show_all_vars_checkbox.setChecked(True)
+        #self.show_all_vars_checkboxself.stateChanged.connect(lambda: self.show_all_vars_checkboxself:
+
+        self.vars_combo_sel.activated.connect(self.update_variables_filt)
         #self.task_combo.currentIndexChanged.connect(self.picked_task)
         self.vars_hlayout1.addWidget(self.vars_combo)
         self.vars_hlayout1.addWidget(self.vars_combo_sel)
+        self.vars_hlayout1.addWidget(self.show_all_vars_checkbox)
+        self.vars_hlayout1.addWidget(self.vars_update_button)
         self.vars_vlayout1.addLayout(self.vars_hlayout1)
         self.vars_vlayout1.addWidget(self.variables_table)
 
@@ -82,9 +93,31 @@ class mouse_window(QtGui.QWidget):
 
 
     def update_variables_filt(self):
-        pass
+
+        filtby = str(self.vars_combo.currentText())
+        self.variables_table.clearContents()
+        if filtby=='RFID':
+            sel_RFID = str(self.vars_combo_sel.currentText())
+            mouseTask = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(sel_RFID),'Task'].values[0] + '.py'
+            task_dir = os.path.join(main_path,'tasks')
+            task_path = os.path.join(task_dir,mouseTask)
+            variables =  get_variables_and_values_from_taskfile(task_path)
+            if self.show_all_vars_checkbox.isChecked():
+                #print(variables)
+                for k,v in variables.items():
+                    var_dict = {'name':k,
+                                'subject': sel_RFID,
+                                'value': v,
+                                'persistent': False,
+                                'summary': False}
+                    self.variables_table.add_variable(var_dict)
+            #else:
+
+
+
 
     def update_available_vfilt(self):
+        "Change what you are filtering variables you show by"
         filtby = str(self.vars_combo.currentText())
 
         if filtby in ('Mouse_ID','RFID'):

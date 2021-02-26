@@ -16,6 +16,7 @@ protocol_dir = os.path.join(ROOT,'prot')
 
 
 user_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)),'users.txt')
+main_path = os.path.dirname(os.path.abspath(__file__))
 
 
 all_paths = [ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir]
@@ -51,7 +52,7 @@ def create_empty_csv(index,pth):
     elif index==2:
         df = pd.DataFrame(columns=['Setup_ID','COM','COM_AC','in_use','connected','User',
                                    'Experiment','Protocol','Mouse_training','AC_state','Door_Mag','Door_Sensor','n_mice',
-                                   'mice_in_setup'])
+                                   'mice_in_setup','logger_path'])
         fp = os.path.join(pth,'setups.csv')
 
     #set variables for mice what to store about them
@@ -59,7 +60,7 @@ def create_empty_csv(index,pth):
         df = pd.DataFrame(columns=['Mouse_ID','RFID','Sex','Age','Experiment',
                                    'Protocol','Stage','Task','User','Start_date','Current_weight',
                                    'Start_weight','is_training','is_assigned',
-                                   'training_log','Setup_ID','in_system'])
+                                   'training_log','Setup_ID','in_system','summary_variables','persistent_variables'])
         fp = os.path.join(pth,'mice.csv')
 
     if (fp is not None) and (not os.path.isfile(fp)):

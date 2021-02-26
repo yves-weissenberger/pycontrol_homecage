@@ -25,6 +25,9 @@ from com.pycboard import Pycboard, PyboardError, _djb2_file
 from com.system_handler import system_controller
 from com.access_control import Access_control
 
+
+from utils import TableCheckbox, cbox_update_options, cbox_set_item, null_resize
+
 #######################################################################
 ####################      Experiment Table      #######################
 #######################################################################
@@ -46,6 +49,59 @@ class variables_table(QtGui.QTableWidget):
         self.variable_names = []
         self.available_variables = []
         self.assigned = {v_name:[] for v_name in self.variable_names} # Which subjects have values assigned for each variable.
+
+    def remove_variable(self, variable_n):
+        self.removeRow(variable_n)
+        self.n_variables -= 1
+        #self.update_available()
+        null_resize(self)
+
+    def reset(self):
+        '''Clear all rows of table.'''
+        for i in reversed(range(self.n_variables)):
+            self.removeRow(i)
+        self.n_variables = 0
+        self.assigned = {v_name:[] for v_name in self.variable_names} 
+
+    def add_variable(self, var_dict=None):
+        #self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent','Summary',''])
+        '''Add a row to the variables table.'''
+        variable_cbox = QtGui.QComboBox()
+        #variable_cbox.activated.connect(self.update_available)
+        subject_cbox = QtGui.QComboBox()
+        #subject_cbox.activated.connect(self.update_available)
+        persistent = TableCheckbox()
+        summary    = TableCheckbox()
+        remove_button = QtGui.QPushButton('remove')
+        ind = QtCore.QPersistentModelIndex(self.model().index(self.n_variables, 2))
+        remove_button.clicked.connect(lambda :self.remove_variable(ind.row()))
+        add_button = QtGui.QPushButton('   add   ')
+        add_button.clicked.connect(self.add_variable)
+        self.insertRow(self.n_variables+1)
+        self.setCellWidget(self.n_variables  ,0, variable_cbox)
+        self.setCellWidget(self.n_variables  ,1, subject_cbox)
+        self.setCellWidget(self.n_variables  ,3, persistent)
+        self.setCellWidget(self.n_variables  ,4, summary)
+        self.setCellWidget(self.n_variables  ,5, remove_button)
+        self.setCellWidget(self.n_variables+1,5, add_button)
+        if var_dict: # Set cell values from provided dictionary.
+            variable_cbox.addItems([var_dict['name']])
+            subject_cbox.addItems([var_dict['subject']])
+            value_item = QtGui.QTableWidgetItem()
+            value_item.setText(var_dict['value'])
+            self.setItem(self.n_variables, 2, value_item)
+            persistent.setChecked(var_dict['persistent'])
+            summary.setChecked(var_dict['summary'])
+        else:
+            variable_cbox.addItems(['select variable']+self.available_variables)
+            if self.n_variables > 0: # Set variable to previous variable if available.
+                v_name = str(self.cellWidget(self.n_variables-1, 0).currentText())
+                if v_name in self.available_variables:
+                    cbox_set_item(variable_cbox, v_name)
+                    subject_cbox.addItems(self.available_subjects(v_name))
+        self.n_variables += 1
+        #self.update_available()
+        null_resize(self)
 
     
 

@@ -310,12 +310,12 @@ class add_user_dialog(QtGui.QDialog):
 
     def handleLogin(self):
         self.users = get_users()
-
-        ###FIX TO IGNORE CASE         #####!!!!!!!!!!!!!!!!!
-        if self.user.lower() not in [i.lower() for i in self.users]:
-            with open(user_path, 'a') as file:
-                user_details = "user_data:{'"+str(self.user) + "':' " + str(self.receiver_email) + "'}"
-                file.writelines('\n'+user_details)
+        if str(self.confirm_email.text())==str(self.code):
+            ###FIX TO IGNORE CASE         #####!!!!!!!!!!!!!!!!!
+            if self.user.lower() not in [i.lower() for i in self.users]:
+                with open(user_path, 'a') as file:
+                    user_details = "user_data:{'"+str(self.user) + "':' " + str(self.receiver_email) + "'}"
+                    file.writelines('\n'+user_details)
         self.accept()
 
 
