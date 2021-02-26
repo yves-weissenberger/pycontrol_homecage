@@ -103,8 +103,14 @@ class variables_table(QtGui.QTableWidget):
         #self.update_available()
         null_resize(self)
 
-    
-
+    def variables_list(self):
+        '''Return the variables table contents as a list of dictionaries.'''
+        return [{'name'  : str(self.cellWidget(v,0).currentText()),
+                 'subject'   : str(self.cellWidget(v,1).currentText()),
+                 'value'     : str(self.item(v, 2).text()) if self.item(v,2) else '',
+                 'persistent': self.cellWidget(v,3).isChecked(),
+                 'summary'   : self.cellWidget(v,4).isChecked()}
+                 for v in range(self.n_variables)]
 
 
 class experiment_overview_table(QtGui.QTableWidget):

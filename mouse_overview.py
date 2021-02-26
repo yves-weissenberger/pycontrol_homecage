@@ -73,6 +73,7 @@ class mouse_window(QtGui.QWidget):
         self.vars_combo_sel.addItems([''])
 
         self.vars_update_button = QtGui.QPushButton('Update Variables')
+        self.vars_update_button.clicked.connect(self.update_variables_table)
         self.show_all_vars_checkbox = QtGui.QCheckBox("Show all variables")
         self.show_all_vars_checkbox.setChecked(True)
         #self.show_all_vars_checkboxself.stateChanged.connect(lambda: self.show_all_vars_checkboxself:
@@ -92,26 +93,61 @@ class mouse_window(QtGui.QWidget):
         self.Vlayout.addWidget(self.variables_box)  #THIS NEEDS TO GO. THIS WILL NEVER HAPPEN. CHANGE TO VARIABLES TABLE
 
 
-    def update_variables_filt(self):
 
+    def update_variables_table(self):
+
+        """ This function updates variables in the mousetable for future use 
+            REMEMBER TO CHECK TYPES OF DICT ELEMENTS ONCE THIS IS RUNNING!!!!
+        """
+        self.variables_table.setEnabled(False)
+
+        all_variables = self.variables_table.variables_list()
+        unique_mice = list(set([i['subject'] for i in all_variables]))
+
+        for ms_rfid in unique_mice:
+            #persistent variables persist over sessions
+            persistent_variables_dict = dict([(str(i['name']),i['value']) for i in all_variables if ((i['subject']==ms_rfid) and (i['persistent']))])
+            #summary variables are send with the data 
+            summary_variables_dict = dict([(str(i['name']),i['value']) for i in all_variables if ((i['subject']==ms_rfid) and (i['summary']))])
+            #set variables are different to default values in the task file but not persistent across sessions
+            set_variables_dict = dict([(str(i['name']),i['value']) for i in all_variables if ((i['subject']==ms_rfid) and 
+                                                                                             not (i['persistent'])
+                                                                                             and i['value']!=self.default_variables[i['name']]
+                                                                                             )])
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'summary_variables'] = summary_variables_dict
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'persistent_variables'] = persistent_variables_dict
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'set_variables'] = set_variables_dict
+    def update_variables_filt(self):
+        self.variables_table.setEnabled(True)
         filtby = str(self.vars_combo.currentText())
         self.variables_table.clearContents()
         if filtby=='RFID':
             sel_RFID = str(self.vars_combo_sel.currentText())
-            mouseTask = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(sel_RFID),'Task'].values[0] + '.py'
+            mouseRow = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(sel_RFID)]
+            mouseTask = mouseRow['Task'].values[0] + '.py'
+            if mouseRow['summary_variables']: summary_variables = eval(mouseRow['summary_variables'])
+            if mouseRow['persistent_variables']: persistent_variables = eval(mouseRow['persistent_variables'])
+            if mouseRow['set_variables']: set_variables = eval(mouseRow['set_variables'])  #set variables are persistent variables that are not updated. Is this necessary??
             task_dir = os.path.join(main_path,'tasks')
             task_path = os.path.join(task_dir,mouseTask)
-            variables =  get_variables_and_values_from_taskfile(task_path)
+            self.default_variables =  get_variables_and_values_from_taskfile(task_path)
             if self.show_all_vars_checkbox.isChecked():
-                #print(variables)
-                for k,v in variables.items():
+                for k,v in self.default_variables.items():
+                    persistent = False; summary = False
+
+                    if k in persistent_variables.keys():
+                        v = persistent_variables[k]; persistent = True
+                    if k in set_variables.keys():
+                        v = set_variables[k]
+                    if k in summary_variables.keys():
+                        summary = True
+
                     var_dict = {'name':k,
                                 'subject': sel_RFID,
                                 'value': v,
-                                'persistent': False,
-                                'summary': False}
+                                'persistent': persistent,
+                                'summary': summary}
                     self.variables_table.add_variable(var_dict)
-            #else:
 
 
 
