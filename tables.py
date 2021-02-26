@@ -38,7 +38,7 @@ class variables_table(QtGui.QTableWidget):
 
     def __init__(self,GUI,parent=None):
         super(QtGui.QTableWidget, self).__init__(1,6, parent=parent)
-        self.setHorizontalHeaderLabels(['Subject', 'Variable', 'Value', 'Persistent','Summary',''])
+        self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent','Summary',''])
         self.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
         self.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.Stretch)
         self.horizontalHeader().setResizeMode(5, QtGui.QHeaderView.ResizeToContents)
@@ -64,12 +64,11 @@ class variables_table(QtGui.QTableWidget):
         self.assigned = {v_name:[] for v_name in self.variable_names} 
 
     def add_variable(self, var_dict=None):
-        #self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent','Summary',''])
         '''Add a row to the variables table.'''
         variable_cbox = QtGui.QComboBox()
-        #variable_cbox.activated.connect(self.update_available)
+        variable_cbox.activated.connect(self.update_available)
         subject_cbox = QtGui.QComboBox()
-        #subject_cbox.activated.connect(self.update_available)
+        subject_cbox.activated.connect(self.update_available)
         persistent = TableCheckbox()
         summary    = TableCheckbox()
         remove_button = QtGui.QPushButton('remove')
@@ -100,8 +99,59 @@ class variables_table(QtGui.QTableWidget):
                     cbox_set_item(variable_cbox, v_name)
                     subject_cbox.addItems(self.available_subjects(v_name))
         self.n_variables += 1
-        #self.update_available()
+        self.update_available()
         null_resize(self)
+    
+    def update_available(self, i=None):
+            # Find out what variable-subject combinations already assigned.
+            self.assigned = {v_name:[] for v_name in self.variable_names}
+            #print(self.assigned)
+            for v in range(self.n_variables):
+                v_name = self.cellWidget(v,0).currentText()
+                s_name = self.cellWidget(v,1).currentText()
+                if s_name and s_name not in self.subjects_in_group + ['all']:
+                    cbox_set_item(self.cellWidget(v,1),'', insert=True)
+                    continue
+                if v_name != 'select variable' and s_name:
+                    self.assigned[v_name].append(s_name)
+            # Update the variables available:
+            fully_asigned_variables = [v_n for v_n in self.assigned.keys()
+                                       if 'all' in self.assigned[v_n]]
+            if self.subjects_in_group:
+                fully_asigned_variables += [v_n for v_n in self.assigned.keys()
+                    if set(self.assigned[v_n]) == set(self.subjects_in_group)]
+            self.available_variables = sorted(list(
+                set(self.variable_names) - set(fully_asigned_variables)), key=str.lower)
+            # Update the available options in the variable and subject comboboxes.
+            for v in range(self.n_variables):  
+                v_name = self.cellWidget(v,0).currentText()
+                s_name = self.cellWidget(v,1).currentText()
+                cbox_update_options(self.cellWidget(v,0), self.available_variables)
+                if v_name != 'select variable':
+                    # If variable has no subjects assigned, set subjects to 'all'.
+                    if not self.assigned[v_name]:
+                        self.cellWidget(v,1).addItems(['all'])
+                        self.assigned[v_name] = ['all']
+                        self.available_variables.remove(v_name)
+                    cbox_update_options(self.cellWidget(v,1), self.available_subjects(v_name, s_name))
+    
+    def set_available_subjects(self,subjects):
+        self.subjects_in_group = subjects
+
+    def set_variable_names(self,variable_names):
+        self.variable_names = variable_names
+
+
+    def available_subjects(self, v_name, s_name=None):
+        '''Return sorted list of the subjects that are available for selection 
+        for the specified variable v_name given that subject s_name is already
+        selected.'''
+        if (not self.assigned[v_name]) or self.assigned[v_name] == [s_name]:
+            available_subjects = ['all']+ sorted(self.subjects_in_group)
+        else:
+            available_subjects = sorted(list(set(self.subjects_in_group)-
+                                             set(self.assigned[v_name])))
+        return available_subjects
 
     def variables_list(self):
         '''Return the variables table contents as a list of dictionaries.'''

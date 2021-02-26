@@ -6,6 +6,7 @@ import pyqtgraph as pg
 import sys, os, pickle, time
 import copy as cp
 from datetime import datetime
+import pandas as pd
 import json
 
 from dialogs import are_you_sure_dialog, mouse_summary_dialog
@@ -114,23 +115,36 @@ class mouse_window(QtGui.QWidget):
                                                                                              not (i['persistent'])
                                                                                              and i['value']!=self.default_variables[i['name']]
                                                                                              )])
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'summary_variables'] = summary_variables_dict
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'persistent_variables'] = persistent_variables_dict
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'set_variables'] = set_variables_dict
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'summary_variables'] = json.dumps(summary_variables_dict)
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'persistent_variables'] = json.dumps(persistent_variables_dict)
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'set_variables'] =json.dumps(set_variables_dict)
+
+            print('P',persistent_variables_dict)
+            print('S',summary_variables_dict)
+            print('Set',set_variables_dict)
+
+
     def update_variables_filt(self):
         self.variables_table.setEnabled(True)
         filtby = str(self.vars_combo.currentText())
         self.variables_table.clearContents()
         if filtby=='RFID':
+
             sel_RFID = str(self.vars_combo_sel.currentText())
+            self.variables_table.set_available_subjects([sel_RFID])
+
             mouseRow = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(sel_RFID)]
             mouseTask = mouseRow['Task'].values[0] + '.py'
-            if mouseRow['summary_variables']: summary_variables = eval(mouseRow['summary_variables'])
-            if mouseRow['persistent_variables']: persistent_variables = eval(mouseRow['persistent_variables'])
-            if mouseRow['set_variables']: set_variables = eval(mouseRow['set_variables'])  #set variables are persistent variables that are not updated. Is this necessary??
+            #print(mouseRow['summary_variables'].values)
+            summary_variables = {}; persistent_variables = {}; set_variables = {}
+            if not pd.isnull(mouseRow['summary_variables'].values): summary_variables = eval(mouseRow['summary_variables'])
+            if not pd.isnull(mouseRow['persistent_variables'].values): persistent_variables = eval(mouseRow['persistent_variables'])
+            if not pd.isnull(mouseRow['set_variables'].values): set_variables = eval(mouseRow['set_variables'])  #set variables are persistent variables that are not updated. Is this necessary??
             task_dir = os.path.join(main_path,'tasks')
             task_path = os.path.join(task_dir,mouseTask)
             self.default_variables =  get_variables_and_values_from_taskfile(task_path)
+            self.variable_names =  list(set(self.default_variables.keys()))#get_variables_from_taskfile(task_path)
+            self.variables_table.set_variable_names(self.variable_names)
             if self.show_all_vars_checkbox.isChecked():
                 for k,v in self.default_variables.items():
                     persistent = False; summary = False

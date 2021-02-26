@@ -84,7 +84,7 @@ def get_variables_from_taskfile(pth):
     with open(pth,'r') as f:
         txt = f.read()
     #print(txt)
-    variables = re.findall(r'(v\.[^ ]*) {0,2}=',txt)
+    variables = re.findall(r'(v\.[^\s ]*) {0,2}=',txt)
     variables = list(set(variables))
     return variables
 
@@ -96,7 +96,7 @@ def get_variables_and_values_from_taskfile(pth):
     var_dict = {}
     for l in txt:
         if ('v.' in l) and ('=' in l):
-            var_ = re.findall(r'v\.(.*)=',l)[0]
+            var_ = re.findall(r'(v\.[^\s]*)',l)[0].strip()
             val_ = re.findall(r'v\..*=(.*)\n',l)[0]
             var_dict[var_] = val_
         if 'run_start' in l:
