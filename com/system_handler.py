@@ -78,8 +78,8 @@ class system_controller(Data_logger):
         human readable data strings are passed to it.'''
         if self.data_file:
             self.write_to_file(new_data)
-        if self.print_func:
-            self.print_func(self.data_to_string(new_data, verbose=True), end='\n')
+        #if self.print_func:
+        #    self.print_func(self.data_to_string(new_data, verbose=True), end='\n')
         if self.data_consumers:
             for data_consumer in self.data_consumers:
                 data_consumer.process_data(new_data)
@@ -163,10 +163,10 @@ class system_controller(Data_logger):
                     #summary_variables = eval(mouseRow['summary_variables'])
                     if not pd.isnull(mouse_row['set_variables'].values):
                         set_variables = eval(mouse_row['set_variables'].values[0])
-                        for k,v in set_variables.items(): self.PYC.set_variable(k,v)
+                        for k,v in set_variables.items(): self.PYC.set_variable(k[2:],v)
                     if not pd.isnull(mouse_row['persistent_variables'].values):
-                        persistent_variables = eval(mouseRow['persistent_variables'].values[0])
-                        for k,v in persistent_variables.items(): self.PYC.set_variable(k,v)
+                        persistent_variables = eval(mouse_row['persistent_variables'].values[0])
+                        for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],v)
 
 
 

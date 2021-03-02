@@ -200,11 +200,11 @@ class system_tab(QtGui.QWidget):
 
     def end_experiment(self):
         #if False:
-        print("HERE")
+
         for rowN in range(self.list_of_experiments.rowCount()):
-            print("HERE2",rowN)
+
             if self.list_of_experiments.item(rowN,0).checkState()==2:
-                print("HERE3")
+
                 expName = self.list_of_experiments.item(rowN,self.list_of_experiments.header_names.index('Name')).text()
                 print(expName)
                 print(self.GUI.exp_df)
