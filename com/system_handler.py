@@ -163,10 +163,10 @@ class system_controller(Data_logger):
                     #summary_variables = eval(mouseRow['summary_variables'])
                     if not pd.isnull(mouse_row['set_variables'].values):
                         set_variables = eval(mouse_row['set_variables'].values[0])
-                        for k,v in set_variables.item(): self.PYC.set_variable(k,v)
+                        for k,v in set_variables.items(): self.PYC.set_variable(k,v)
                     if not pd.isnull(mouse_row['persistent_variables'].values):
                         persistent_variables = eval(mouseRow['persistent_variables'].values[0])
-                        for k,v in persistent_variables.item(): self.PYC.set_variable(k,v)
+                        for k,v in persistent_variables.items(): self.PYC.set_variable(k,v)
 
 
 
