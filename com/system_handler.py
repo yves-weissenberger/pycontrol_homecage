@@ -289,6 +289,9 @@ class system_controller(Data_logger):
 
             self.data_file.writelines("Variables")
             v_ = self.PYC.get_variables()
+            self.data_file.writelines(repr(v_))
+            self.data_file.close()
+            mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
             if not pd.isnull(mouse_row['persistent_variables'].values):
                 persistent_variables = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
                 for k,v__ in v_.items():
@@ -297,8 +300,6 @@ class system_controller(Data_logger):
 
                 self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'] = json.dumps(persistent_variables)
 
-            self.data_file.writelines(repr(v_))
-            self.data_file.close()
 
             self.update_mouseLog(v_)
 
