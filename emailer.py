@@ -12,11 +12,12 @@ from email.mime.multipart import MIMEMultipart
 
 lines_ = open(user_path,'r').readlines()
 users = get_users()
-
+sender_email = [re.findall('"(.*)"',l)[0] for l in lines_ if "system_email" in l][0]
+password = [re.findall('"(.*)"',l)[0] for l in lines_ if "password" in l][0]
 
 port = 587  # For starttls
 smtp_server = "smtp.gmail.com"
-receiver_email = 'example_email'
+receiver_email = 'yvesweissenberger@gmail.com'
 
 message = MIMEMultipart("alternative")
 message["Subject"] = "Pyhomecage 24h summary"
@@ -63,7 +64,7 @@ def get_behaviour_dat(root_path):
             time_dt = datetime.strptime(time,'%Y-%m-%d-%H%M%S')
             if (now-time_dt).total_seconds()<(24*60*60):
                 tmp = [0]
-                print(f)
+                #print(f)
                 for l in open(os.path.join(root_path,f),'r').readlines():
                     if 'nREWS' in l:
                         tmp.append(float(re.findall('nREWS:([0-9]{1,4})',l)[0]))

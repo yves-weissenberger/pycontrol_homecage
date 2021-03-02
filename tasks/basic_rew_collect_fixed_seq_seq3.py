@@ -35,6 +35,7 @@ events = ['poke_1', 'poke_1_out',
 
 
 
+v.test_variable = None
 
 #list of pokes to do stuff with
 hw.poke_list = [hw.poke_1,hw.poke_2,hw.poke_3,
@@ -58,7 +59,7 @@ v.seq =  [5, 4, 6, 8, 2, 0, 2, 8, 6, 4]
 print(v.seq)
 v.seq_ix = 0
 v.probe_probability = 0.25
-v.probe_dur = 5000
+v.probe_dur = 2000
 v.lseq  = len(v.seq)
 #-------------------------------------------------------------------------
 

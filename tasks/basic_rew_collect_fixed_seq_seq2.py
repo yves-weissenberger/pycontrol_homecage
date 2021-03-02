@@ -58,7 +58,7 @@ v.seq =  [1, 2, 4, 3, 7, 5, 7, 3, 4, 2]
 print(v.seq)
 v.seq_ix = 0
 v.probe_probability = 0.25
-v.probe_dur = 5000
+v.probe_dur = 2000
 v.lseq  = len(v.seq)
 #-------------------------------------------------------------------------
 

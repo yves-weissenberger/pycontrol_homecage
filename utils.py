@@ -97,7 +97,7 @@ def get_variables_and_values_from_taskfile(pth):
     for l in txt:
         if ('v.' in l) and ('=' in l):
             var_ = re.findall(r'(v\.[^\s]*)',l)[0].strip()
-            val_ = re.findall(r'v\..*=(.*)\n',l)[0]
+            val_ = re.findall(r'v\..*=(.*)[#|\n]',l)[0]
             var_dict[var_] = val_
         if 'run_start' in l:
             break

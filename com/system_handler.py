@@ -158,6 +158,20 @@ class system_controller(Data_logger):
 
                     self.PYC.setup_state_machine(sm_name=task)
 
+
+
+                    #summary_variables = eval(mouseRow['summary_variables'])
+                    if not pd.isnull(mouse_row['set_variables'].values):
+                        set_variables = eval(mouse_row['set_variables'].values[0])
+                        for k,v in set_variables.item(): self.PYC.set_variable(k,v)
+                    if not pd.isnull(mouse_row['set_variables'].values):
+                        persistent_variables = eval(mouseRow['persistent_variables'].values[0])
+                        for k,v in persistent_variables.item(): self.PYC.set_variable(k,v)
+
+
+
+                    
+
                 else:
                     # If running a real protocol, handle (potential) update of protocol.
                     newStage = False
@@ -209,6 +223,7 @@ class system_controller(Data_logger):
 
 
 
+
                 self.open_data_file_(self.mouse_data['RFID'],now)
 
 
@@ -226,10 +241,13 @@ class system_controller(Data_logger):
 
         elif state=='allow_exit':
             self.mouse_data['exit_time'] = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
+            self.GUI.mouse_df
+
             #print("HERE")
             self.PYC.stop_framework()
             time.sleep(.05)
             self.PYC.process_data()
+
             self.close_files()
 
     def open_data_file_(self,RFID,now):
@@ -271,6 +289,13 @@ class system_controller(Data_logger):
 
             self.data_file.writelines("Variables")
             v_ = self.PYC.get_variables()
+            persistent_variables = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
+            for k,v__ in v_.items():
+                if k in persistent_variables.keys():
+                    persistent_variables[k] = v__
+
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'] = json.dumps(persistent_variables)
+
             self.data_file.writelines(repr(v_))
             self.data_file.close()
 
@@ -278,6 +303,10 @@ class system_controller(Data_logger):
 
             self.data_file = None
             self.file_path = None
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = False
+            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+            self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = ''
+            self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
         for analog_file in self.analog_files.values():
             if analog_file:
                 analog_file.close()

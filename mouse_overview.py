@@ -106,7 +106,9 @@ class mouse_window(QtGui.QWidget):
         unique_mice = list(set([i['subject'] for i in all_variables]))
 
         for ms_rfid in unique_mice:
+            print(ms_rfid)
             #persistent variables persist over sessions
+            #all_variables =  self.variables_table.subject_variable_names[ms_rfid]
             persistent_variables_dict = dict([(str(i['name']),i['value']) for i in all_variables if ((i['subject']==ms_rfid) and (i['persistent']))])
             #summary variables are send with the data 
             summary_variables_dict = dict([(str(i['name']),i['value']) for i in all_variables if ((i['subject']==ms_rfid) and (i['summary']))])
@@ -115,13 +117,16 @@ class mouse_window(QtGui.QWidget):
                                                                                              not (i['persistent'])
                                                                                              and i['value']!=self.default_variables[i['name']]
                                                                                              )])
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'summary_variables'] = json.dumps(summary_variables_dict)
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'persistent_variables'] = json.dumps(persistent_variables_dict)
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid,'set_variables'] =json.dumps(set_variables_dict)
 
-            print('P',persistent_variables_dict)
-            print('S',summary_variables_dict)
-            print('Set',set_variables_dict)
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(ms_rfid),'summary_variables'] = json.dumps(summary_variables_dict)
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(ms_rfid),'persistent_variables'] = json.dumps(persistent_variables_dict)
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(ms_rfid),'set_variables'] =json.dumps(set_variables_dict)
+            print(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ms_rfid])
+            #print('P',persistent_variables_dict)
+            #print('S',summary_variables_dict)
+            #print('Set',set_variables_dict)
+            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+
 
 
     def update_variables_filt(self):
@@ -129,22 +134,34 @@ class mouse_window(QtGui.QWidget):
         filtby = str(self.vars_combo.currentText())
         self.variables_table.clearContents()
         if filtby=='RFID':
+            RFIDs = [str(self.vars_combo_sel.currentText())]
 
-            sel_RFID = str(self.vars_combo_sel.currentText())
-            self.variables_table.set_available_subjects([sel_RFID])
+        elif filtby=='Mouse_ID':
+            ID = self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==self.vars_combo_sel.currentText(),'RFID'].values
+            RFIDs = [str(i) for i in ID]
+            #self.variables_table.set_available_subjects(RFIDs)
+        elif filtby=='Experiment':
+            #OK THIS IS MORE COMPLICATED BECAUSE DIFFERENT MICE IN THE SAME EXPERIMENT MIGHT HAVE DIFFERENT VARIABLES
+            RFIDs = list(set([str(i) for i in self.GUI.mouse_df.loc[self.GUI.mouse_df['Experiment']==self.vars_combo_sel.currentText(),'RFID'].values]))
+            #print(RFIDs)
+
+        self.variables_table.set_available_subjects(RFIDs)
+        for sel_RFID in RFIDs:
 
             mouseRow = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(sel_RFID)]
+            #print(mouseRow)
             mouseTask = mouseRow['Task'].values[0] + '.py'
-            #print(mouseRow['summary_variables'].values)
+
             summary_variables = {}; persistent_variables = {}; set_variables = {}
-            if not pd.isnull(mouseRow['summary_variables'].values): summary_variables = eval(mouseRow['summary_variables'])
-            if not pd.isnull(mouseRow['persistent_variables'].values): persistent_variables = eval(mouseRow['persistent_variables'])
-            if not pd.isnull(mouseRow['set_variables'].values): set_variables = eval(mouseRow['set_variables'])  #set variables are persistent variables that are not updated. Is this necessary??
+            if not pd.isnull(mouseRow['summary_variables'].values): summary_variables = eval(mouseRow['summary_variables'].values[0])
+            if not pd.isnull(mouseRow['persistent_variables'].values): persistent_variables = eval(mouseRow['persistent_variables'].values[0])
+            if not pd.isnull(mouseRow['set_variables'].values): set_variables = eval(mouseRow['set_variables'].values[0])  #set variables are persistent variables that are not updated. Is this necessary??
             task_dir = os.path.join(main_path,'tasks')
             task_path = os.path.join(task_dir,mouseTask)
             self.default_variables =  get_variables_and_values_from_taskfile(task_path)
             self.variable_names =  list(set(self.default_variables.keys()))#get_variables_from_taskfile(task_path)
             self.variables_table.set_variable_names(self.variable_names)
+            self.variables_table.set_variable_names_by_subject(sel_RFID,self.variable_names)
             if self.show_all_vars_checkbox.isChecked():
                 for k,v in self.default_variables.items():
                     persistent = False; summary = False
@@ -169,11 +186,14 @@ class mouse_window(QtGui.QWidget):
     def update_available_vfilt(self):
         "Change what you are filtering variables you show by"
         filtby = str(self.vars_combo.currentText())
-
+        self.vars_combo_sel.clear()
         if filtby in ('Mouse_ID','RFID'):
             self.vars_combo_sel.clear()
             dat = self.GUI.mouse_df[filtby]
             self.vars_combo_sel.addItems(['Select'] + [str(i) for i in dat.values])
+        elif filtby=='Experiment':
+            dat = list(set(self.GUI.mouse_df[filtby].values))
+            self.vars_combo_sel.addItems(['Select'] + [str(i) for i in dat])
             
 
     def remove_mouse(self):

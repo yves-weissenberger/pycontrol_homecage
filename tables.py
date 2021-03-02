@@ -49,11 +49,11 @@ class variables_table(QtGui.QTableWidget):
         self.variable_names = []
         self.available_variables = []
         self.assigned = {v_name:[] for v_name in self.variable_names} # Which subjects have values assigned for each variable.
-
+        self.subject_variable_names = {}
     def remove_variable(self, variable_n):
         self.removeRow(variable_n)
         self.n_variables -= 1
-        #self.update_available()
+        self.update_available()
         null_resize(self)
 
     def reset(self):
@@ -62,6 +62,8 @@ class variables_table(QtGui.QTableWidget):
             self.removeRow(i)
         self.n_variables = 0
         self.assigned = {v_name:[] for v_name in self.variable_names} 
+        #self.subject_variable_names = {}
+        #self.variable_names = []
 
     def add_variable(self, var_dict=None):
         '''Add a row to the variables table.'''
@@ -105,6 +107,16 @@ class variables_table(QtGui.QTableWidget):
     def update_available(self, i=None):
             # Find out what variable-subject combinations already assigned.
             self.assigned = {v_name:[] for v_name in self.variable_names}
+
+
+            #to maintain consistency with main pycontrol, the way this works
+            #is by setting variables assigned that 
+            for v_name in self.variable_names:
+                for subject,vars_ in self.subject_variable_names.items():
+
+                    if v_name not in vars_:
+                        self.assigned[v_name].append(subject)
+
             #print(self.assigned)
             for v in range(self.n_variables):
                 v_name = self.cellWidget(v,0).currentText()
@@ -139,7 +151,20 @@ class variables_table(QtGui.QTableWidget):
         self.subjects_in_group = subjects
 
     def set_variable_names(self,variable_names):
-        self.variable_names = variable_names
+        """ """
+        if not self.variable_names:
+            self.variable_names = variable_names
+        else:
+            #print(self.variable_names,variable_names)
+            self.variable_names.extend(variable_names)
+            self.variable_names = list(set(self.variable_names))
+
+
+    def set_variable_names_by_subject(self,subject,variable_names):
+        """ Allow tracking of which subject has which variables available
+            to them in principle
+        """
+        self.subject_variable_names[subject] = variable_names
 
 
     def available_subjects(self, v_name, s_name=None):
