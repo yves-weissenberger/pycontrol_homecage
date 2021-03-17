@@ -50,7 +50,7 @@ class system_tab(QtGui.QWidget):
 
 
         #Experiments Table
-        
+        self.experiment_groupbox = QtGui.QGroupBox("Experiments")
         self.scrollable_experiments =  QtGui.QScrollArea()
         self.scrollable_experiments.setWidgetResizable(True)
         self.list_of_experiments = experiment_overview_table(GUI=self.GUI)
@@ -67,8 +67,11 @@ class system_tab(QtGui.QWidget):
         self.Hlayout_exp_buttons.addWidget(self.start_experiment_button)
         self.Hlayout_exp_buttons.addWidget(self.end_experiment_button)
 
-        self.experiment_label = QtGui.QLabel()
-        self.experiment_label.setText("Experiments")
+        self.Vlayout_exp = QtGui.QVBoxLayout(self)
+        self.Vlayout_exp.addLayout(self.Hlayout_exp_buttons)
+        self.Vlayout_exp.addWidget(self.scrollable_experiments)
+
+        self.experiment_groupbox.setLayout(self.Vlayout_exp)
 
 
         # ------------------------ #
@@ -147,11 +150,7 @@ class system_tab(QtGui.QWidget):
         #self.Vlayout.addLayout(self.Hlayout_users)
         self.Vlayout.addWidget(self.user_groupbox)
 
-        self.Vlayout.addWidget(self.experiment_label)
-        self.Vlayout.addLayout(self.Hlayout_exp_buttons)
-
-
-        self.Vlayout.addWidget(self.scrollable_experiments)
+        self.Vlayout.addWidget(self.experiment_groupbox)
         #self.Vlayout.addWidget(self.setup_label)
         #self.Vlayout.addLayout(self.Hlayout_setup_buttons)
 

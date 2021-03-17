@@ -25,7 +25,7 @@ from utils import load_data_csv
 import com
 from tables import cageTable, experiment_overview_table
 from dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog
-
+import datetime
 
 ## Here want to implement a GUI for managing the homecage datasets. Thoughts on how to structure it. I think natural way is to ]
 # create a central landing interface that presents and lvie updates some basic features of the behavior sufficient to tell you 
@@ -87,7 +87,14 @@ class Visualizator(QtGui.QMainWindow):
 
         ##################################################
 
-
+        self.mouse_window_tab.setEnabled(False)
+        self.setup_window_tab.setEnabled(False)
+        self.schedule_tab.setEnabled(False)
+        self.system_tab.setup_groupbox.setEnabled(False)
+        self.system_tab.log_groupbox.setEnabled(False)
+        self.system_tab.experiment_groupbox.setEnabled(False)
+        #self.system_tab.
+        self.experiment_tab.setEnabled(False)
         ################ Setup the tabs ##################
 
         self.login = login_dialog()
@@ -95,7 +102,7 @@ class Visualizator(QtGui.QMainWindow):
 
         self.system_tab.login_button.clicked.connect(self.change_user)
         self.system_tab.add_user_button.clicked.connect(self.add_user_)
-
+        self.system_tab.logout_button.clicked.connect(self.logout_user)
 
         self.setGeometry(10, 30, 700, 800) # Left, top, width, height.
         self.setCentralWidget(self.tab_widget)
@@ -123,7 +130,13 @@ class Visualizator(QtGui.QMainWindow):
         self.login.exec_()
         self.active_user = self.login.userID
         self.setWindowTitle('Logged in as {}'.format(self.active_user))
-
+        self.mouse_window_tab.setEnabled(True)
+        self.setup_window_tab.setEnabled(True)
+        self.schedule_tab.setEnabled(True)
+        self.system_tab.setup_groupbox.setEnabled(True)
+        self.system_tab.log_groupbox.setEnabled(True)
+        self.system_tab.experiment_groupbox.setEnabled(True)
+        self.experiment_tab.setEnabled(True)
     def print_msg(self,msg,ac_pyc=None,setup_ID=None):
         self.system_tab.write_to_log(msg)
         if ac_pyc=='pyc':
@@ -136,7 +149,17 @@ class Visualizator(QtGui.QMainWindow):
         self.add_user.exec_()
         self.login = login_dialog()
 
-
+    def logout_user(self):
+        self.active_user = None
+        self.setWindowTitle('Not logged in')
+        self.mouse_window_tab.setEnabled(False)
+        self.setup_window_tab.setEnabled(False)
+        self.schedule_tab.setEnabled(False)
+        self.system_tab.setup_groupbox.setEnabled(False)
+        self.system_tab.log_groupbox.setEnabled(False)
+        self.system_tab.experiment_groupbox.setEnabled(False)
+        self.system_tab.user_groupbox.setEnabled(True)
+        self.experiment_tab.setEnabled(False)
 ##########################################################
 #####################     Main    ########################
 ##########################################################

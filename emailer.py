@@ -10,6 +10,9 @@ import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+
+from utils import get_users, get_user_dicts
+
 lines_ = open(user_path,'r').readlines()
 users = get_users()
 sender_email = [re.findall('"(.*)"',l)[0] for l in lines_ if "system_email" in l][0]
@@ -74,65 +77,79 @@ def get_behaviour_dat(root_path):
 
 
     return tot_rews
-
-
-
-tmp_logP = r"C:\Users\yweissenberger\Desktop\pyhomecage\setups\loggers\test1_-2021-03-03-111413.txt"
-mouse_dict = get_weight_history(tmp_logP)
-#print(mouse_dict)
-ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
-
-
-
-mouse_df =  pd.read_csv(os.path.join(mice_dir,'mice.csv'))
-#print(mouse_df)
-
-send_mouse_df = pd.DataFrame(columns=['Mouse','last_seen','last_weight','baseline_weight','number_of_visits','current_task','Experiment','n_rewards'])
-#print(mouse_dict.keys())
-for k,d in mouse_dict.items():
-
-
-    tmp = {}
-    tmp['Experiment'] = str(mouse_df.loc[mouse_df['RFID']==int(k),'Experiment'].values[0])
-    tmp['Mouse'] = k
-    tmp['last_seen'] = d[-1][0]
-    tmp['last_weight'] = float(d[-1][1])/1.9
-    tmp['baseline_weight'] = int(mouse_df.loc[mouse_df['RFID']==int(k),'Start_weight'])
-    tmp['number_of_visits'] = len(d)
-    tmp['current_task'] = str(mouse_df.loc[mouse_df['RFID']==int(k),'Task'].values[0])
-
-    mouse_id = str(mouse_df.loc[mouse_df['RFID']==int(k),'Mouse_ID'].values[0])
-    dat_path = os.path.join(data_dir,tmp['Experiment'],mouse_id)
-    beh_dat = get_behaviour_dat(dat_path)
-    tmp['n_rewards'] = beh_dat
-    #print(tmp)
-    send_mouse_df = send_mouse_df.append(tmp.copy(),ignore_index=True)
-
-#print(send_mouse_df)
 opening = """\
-Subject: Hi there,
+        Subject: Hi there,
 
-here is the scheduled 24h update on your mice
-
-
-
+        here is the scheduled 24h update on your mice
 
 """
 
+if __name__ == "__main__":
+
+    users = get_users()  #get all users
+    user_dicts = get_user_dicts()
+    ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
+
+    setup_df = pd.read_csv(os.path.join(setup_dir,'setups.csv'))
+    for user in users:
+        send_mouse_df = pd.DataFrame(columns=['Mouse','last_seen','last_weight','baseline_weight','number_of_visits','current_task','Experiment','n_rewards'])
+        receiver_email = user_dicts[user]  #this gets users email
+        print(receiver_email)
+        for _,setup_row in setup_df.iterrows():
+            #print(setup_df)
+
+            #print('!!!!!!!!!!!!!!!!!!!!!!!!')
+            print(setup_row)
+            print(user)
+            if setup_row['User']==user:
+                #tmp_logP = setup_row['']
+                tmp_logP =setup_row['logger_path']
+                print('loggerP',tmp_logP)
+                mouse_dict = get_weight_history(tmp_logP)
+                #print(mouse_dict)
 
 
-# Turn these into plain/html MIMEText objects
-part1 = MIMEText(opening, "plain")
-part2 = MIMEText( send_mouse_df.to_html(), "html")
 
-# Add HTML/plain-text parts to MIMEMultipart message
-# The email client will try to render the last part first
-message.attach(part1)
-message.attach(part2)
+                mouse_df =  pd.read_csv(os.path.join(mice_dir,'mice.csv'))
+                #print(mouse_df)
 
-context = ssl.create_default_context()
-with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-    server.login(sender_email, password)
-    server.sendmail(
-        sender_email, receiver_email, message.as_string()
-    )
+                #print(mouse_dict.keys())
+                for k,d in mouse_dict.items():
+
+
+                    tmp = {}
+                    tmp['Experiment'] = str(mouse_df.loc[mouse_df['RFID']==int(k),'Experiment'].values[0])
+                    tmp['Mouse'] = k
+                    tmp['last_seen'] = d[-1][0]
+                    tmp['last_weight'] = float(d[-1][1])/1.9
+                    tmp['baseline_weight'] = int(mouse_df.loc[mouse_df['RFID']==int(k),'Start_weight'])
+                    tmp['number_of_visits'] = len(d)
+                    tmp['current_task'] = str(mouse_df.loc[mouse_df['RFID']==int(k),'Task'].values[0])
+
+                    mouse_id = str(mouse_df.loc[mouse_df['RFID']==int(k),'Mouse_ID'].values[0])
+                    dat_path = os.path.join(data_dir,tmp['Experiment'],mouse_id)
+                    beh_dat = get_behaviour_dat(dat_path)
+                    tmp['n_rewards'] = beh_dat
+                    #print(tmp)
+                    send_mouse_df = send_mouse_df.append(tmp.copy(),ignore_index=True)
+
+        
+
+
+        if len(send_mouse_df)>0:
+
+            # Turn these into plain/html MIMEText objects
+            part1 = MIMEText(opening, "plain")
+            part2 = MIMEText( send_mouse_df.to_html(), "html")
+
+            # Add HTML/plain-text parts to MIMEMultipart message
+            # The email client will try to render the last part first
+            message.attach(part1)
+            message.attach(part2)
+
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+                server.login(sender_email, password)
+                server.sendmail(
+                    sender_email, receiver_email, message.as_string()
+                )
