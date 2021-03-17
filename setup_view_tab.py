@@ -28,6 +28,7 @@ class setups_tab(QtGui.QWidget):
 
         self.board = None
         self.callibrate_dialog = None
+        self.configure_box_dialog = None
 
         ### Add cages cages
         self.add_cage_button = QtGui.QPushButton('Add setup')
@@ -129,7 +130,8 @@ class setups_tab(QtGui.QWidget):
             for k,G in self.GUI.controllers.items():
                 if k==checked_setup_id:
                     #print("YA")
-                    configure_box_dialog(k,self.GUI).exec_()
+                    self.configure_box_dialog = configure_box_dialog(k,self.GUI)
+                    self.configure_box_dialog.exec_()
 
 
             #self.GUI.controllers.append(SC)

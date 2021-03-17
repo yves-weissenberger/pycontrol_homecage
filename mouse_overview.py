@@ -109,11 +109,11 @@ class mouse_window(QtGui.QWidget):
             print(ms_rfid)
             #persistent variables persist over sessions
             #all_variables =  self.variables_table.subject_variable_names[ms_rfid]
-            persistent_variables_dict = dict([(str(i['name']),i['value']) for i in all_variables if ((i['subject']==ms_rfid) and (i['persistent']))])
+            persistent_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables if ((i['subject']==ms_rfid) and (i['persistent']))])
             #summary variables are send with the data 
-            summary_variables_dict = dict([(str(i['name']),i['value']) for i in all_variables if ((i['subject']==ms_rfid) and (i['summary']))])
+            summary_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables if ((i['subject']==ms_rfid) and (i['summary']))])
             #set variables are different to default values in the task file but not persistent across sessions
-            set_variables_dict = dict([(str(i['name']),i['value']) for i in all_variables if ((i['subject']==ms_rfid) and 
+            set_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables if ((i['subject']==ms_rfid) and 
                                                                                              not (i['persistent'])
                                                                                              and i['value']!=self.default_variables[i['name']]
                                                                                              )])

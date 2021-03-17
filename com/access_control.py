@@ -56,7 +56,7 @@ class Access_control(Pyboard):
         self.print('\nTransfering access control framework to pyboard.', end='')
         #self.transfer_folder(framework_dir, file_type='py', show_progress=True)  #upload pycontrol framework
         self.transfer_folder(accCtrl_dir, file_type='py', show_progress=True)    #upload access control framework
-        self.transfer_folder(devices_dir  , file_type='py', show_progress=True)
+        #self.transfer_folder(devices_dir  , file_type='py', show_progress=True)
         self.transfer_file(os.path.join(accCtrl_dir,'main_script_for_pyboard.py'),'main.py')
 
         try:
@@ -109,6 +109,8 @@ class Access_control(Pyboard):
                             #print(msg)
                             if self.GUI.setup_window_tab.callibrate_dialog:
                                 self.GUI.setup_window_tab.callibrate_dialog.print_msg(msg)
+                            if self.GUI.setup_window_tab.configure_box_dialog:
+                                self.GUI.setup_window_tab.configure_box_dialog.print_msg(msg)
 
                     self.data_logger.process_data_AC(messages)
 

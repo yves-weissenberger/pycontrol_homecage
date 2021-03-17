@@ -77,7 +77,7 @@ def get_behaviour_dat(root_path):
 
 
 
-tmp_logP = r"C:\Users\yweissenberger\Desktop\pyhomecage\setups\loggers\test1_-2021-02-23-102859.txt"
+tmp_logP = r"C:\Users\yweissenberger\Desktop\pyhomecage\setups\loggers\test1_-2021-03-03-111413.txt"
 mouse_dict = get_weight_history(tmp_logP)
 #print(mouse_dict)
 ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths

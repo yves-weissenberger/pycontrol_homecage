@@ -112,8 +112,13 @@ class configure_box_dialog(QtGui.QDialog):
 
 
 
-        self.load_framework_button = QtGui.QPushButton('Load framework', self)
+        self.load_framework_button = QtGui.QPushButton('Load Pycontrol \nframework', self)
         self.load_framework_button.clicked.connect(self.load_framework)
+
+
+        self.load_ac_framework_button = QtGui.QPushButton('Load Access control \nframework', self)
+        self.load_ac_framework_button.clicked.connect(self.load_ac_framework)
+
         self.load_hardware_definition_button = QtGui.QPushButton('Load hardware definition',self)
         self.load_hardware_definition_button.clicked.connect(self.load_hardware_definition)
 
@@ -123,6 +128,7 @@ class configure_box_dialog(QtGui.QDialog):
         layout2.addWidget(self.load_framework_button)
         layout2.addWidget(self.load_hardware_definition_button)
         layout2.addWidget(self.disable_flashdrive_button)
+        layout2.addWidget(self.load_ac_framework_button)
 
 
         self.ac = self.GUI.controllers[self.setup_id].AC
@@ -166,19 +172,30 @@ class configure_box_dialog(QtGui.QDialog):
         layoutH.addLayout(layout)
         layoutH.addWidget(self.log_textbox)
 
-
+    def load_ac_framework(self):
+        self.log_textbox.insertPlainText('Loading access control framework...')
+        self.GUI.controllers[self.setup_id].AC.reset()
+        self.GUI.controllers[self.setup_id].AC.load_framework()
+        self.log_textbox.insertPlainText('done!')
     def load_framework(self):
-         self.GUI.controllers[self.setup_id].PYC.load_framework()
-
-
+        self.log_textbox.insertPlainText('Loading framework...')
+        self.GUI.controllers[self.setup_id].PYC.load_framework()
+        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+        self.log_textbox.insertPlainText('done!')
+        self.log_textbox.moveCursor(QtGui.QTextCursor.End)  
     def disable_flashdrive(self):
         self.GUI.controllers[self.setup_id].PYC.disable_flashdrive()
 
     def load_hardware_definition(self):
         hwd_path = QtGui.QFileDialog.getOpenFileName(self, 'Select hardware definition:',
                 os.path.join(config_dir, 'hardware_definition.py'), filter='*.py')[0]
-        self.GUI.controllers[self.setup_id].PYC.load_hardware_definition(hwd_path)
 
+
+        self.log_textbox.insertPlainText('uploading hardware definition...')
+        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+
+        self.GUI.controllers[self.setup_id].PYC.load_hardware_definition(hwd_path)
+        self.log_textbox.insertPlainText('done!')
         #setup.load_hardware_definition(hwd_path)
 
 
@@ -198,7 +215,7 @@ class configure_box_dialog(QtGui.QDialog):
         self.ac.serial.write(b'weigh')
 
     def _done(self):
-        self.ac.GUI.setup_window_tab.callibrate_dialog = None  #sorry
+        self.ac.GUI.setup_window_tab.configure_box_dialog = None  #sorry
         self.accept()
 
     def print_msg(self,msg):
