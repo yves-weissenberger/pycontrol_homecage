@@ -124,6 +124,11 @@ class system_controller(Data_logger):
         #print(state,now)
         self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'AC_state'] = state
 
+        if state=='error_state':
+            self.PYC.stop_framework()
+            self.PYC.process_data()
+            self.close_files()
+
         if state=='allow_entry':
 
             self.mouse_data = {'weight': None,

@@ -128,6 +128,7 @@ def handle_poke(event):
                     goto_state('deliver_reward')
                 else:
                     v.isActive = False
+                    lights_off()
                     set_timer("lights_on_timer",v.lights_on_lag*ms,output_event=True)
             else:
                 v.dark_pokes += 1

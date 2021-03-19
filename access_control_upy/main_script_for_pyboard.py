@@ -37,7 +37,7 @@ class handler():
         com = pyb.USB_VCP()
 
         ONE_MOUSE = 13
-        TWO_MICE = 80
+        TWO_MICE = 40
         NEWSTATE = True
         state = 'allow_entry'
         build_msg = lambda x: 'start_' + x + '_end'
@@ -246,7 +246,6 @@ class handler():
                 ##here re-baseline the scale
                 if abs(micros.counter() - last_check)>500000:
                     last_check = micros.counter()
-                    CW = AC_handler.loadcell.weigh(times=1)
 
 
                     #if abs(CW-self.baseline_read)<1:
@@ -254,6 +253,13 @@ class handler():
                     self.baseline_read = self.baseline_alpha*Wbase + (1-self.baseline_alpha)*self.baseline_read
                     com.write(build_msg('Wbase:'+str(Wbase)))
                     #com.write(build_msg('Wbase:' + str(Wbase)))
+
+                    if Wbase>ONE_MOUSE:
+                        CW = AC_handler.loadcell.weigh(times=10)
+                        if float(CW)>ONE_MOUSE:
+                            state = 'error_state'
+                            com.write(build_msg('state:' error_state))
+
 
             if state=='allow_exit':
 
@@ -292,6 +298,11 @@ class handler():
                         state = 'allow_exit'
                         NEWSTATE = True; pyb.delay(self.forced_delay)
 
+
+
+            if state=='error_state':
+                for mag in range(4):
+                        MAGs[mag].value(0)
 
             sent_data = com.readline()
 

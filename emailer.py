@@ -77,12 +77,43 @@ def get_behaviour_dat(root_path):
 
 
     return tot_rews
-opening = """\
-        Subject: Hi there,
 
-        here is the scheduled 24h update on your mice
 
-"""
+def send_email(send_message,subject,receiver_email):
+    """ This function actually send an email"""
+    lines_ = open(user_path,'r').readlines()
+    users = get_users()
+    sender_email = [re.findall('"(.*)"',l)[0] for l in lines_ if "system_email" in l][0]
+    password = [re.findall('"(.*)"',l)[0] for l in lines_ if "password" in l][0]
+
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "Pyhomecage 24h summary"
+    message["From"] = sender_email
+    message["To"] = receiver_email
+
+
+    if opening is None:
+        opening = """\
+                This is an automated message from pycontrol
+
+        """
+    # Turn these into plain/html MIMEText objects
+    part1 = MIMEText(opening, "plain")
+
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    send_message.attach(part1)
+    message.attach(message)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(
+            sender_email, receiver_email, message.as_string()
+        )
+    return None
+
 
 if __name__ == "__main__":
 
@@ -137,19 +168,6 @@ if __name__ == "__main__":
 
 
         if len(send_mouse_df)>0:
-
-            # Turn these into plain/html MIMEText objects
-            part1 = MIMEText(opening, "plain")
-            part2 = MIMEText( send_mouse_df.to_html(), "html")
-
-            # Add HTML/plain-text parts to MIMEMultipart message
-            # The email client will try to render the last part first
-            message.attach(part1)
-            message.attach(part2)
-
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-                server.login(sender_email, password)
-                server.sendmail(
-                    sender_email, receiver_email, message.as_string()
-                )
+            message = MIMEText(send_mouse_df.to_html(), "html")
+            send_email(message) 
+         
