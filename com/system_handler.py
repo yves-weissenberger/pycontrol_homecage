@@ -339,7 +339,7 @@ class system_controller(Data_logger):
 
         df_mouseLog.loc[entry_nr,'Variables'] = repr(v_)
         #print(df_mouseLog,entry_nr)
-
+        df_mouseLog = df_mouseLog.loc[:, ~df_mouseLog.columns.str.contains('^Unnamed')]
         df_mouseLog.to_csv(logPth)
 
 
