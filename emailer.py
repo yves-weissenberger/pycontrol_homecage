@@ -121,7 +121,7 @@ if __name__ == "__main__":
                     tmp['Experiment'] = str(mouse_df.loc[mouse_df['RFID']==int(k),'Experiment'].values[0])
                     tmp['Mouse'] = k
                     tmp['last_seen'] = d[-1][0]
-                    tmp['last_weight'] = float(d[-1][1])/1.9
+                    tmp['last_weight'] = float(d[-1][1])
                     tmp['baseline_weight'] = int(mouse_df.loc[mouse_df['RFID']==int(k),'Start_weight'])
                     tmp['number_of_visits'] = len(d)
                     tmp['current_task'] = str(mouse_df.loc[mouse_df['RFID']==int(k),'Task'].values[0])
