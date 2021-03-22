@@ -79,7 +79,7 @@ def get_behaviour_dat(root_path):
     return tot_rews
 
 
-def send_email(send_message,subject,receiver_email):
+def send_email(send_message,subject,receiver_email,opening=None):
     """ This function actually send an email"""
     lines_ = open(user_path,'r').readlines()
     users = get_users()
@@ -103,8 +103,8 @@ def send_email(send_message,subject,receiver_email):
 
     # Add HTML/plain-text parts to MIMEMultipart message
     # The email client will try to render the last part first
-    send_message.attach(part1)
-    message.attach(message)
+    message.attach(part1)
+    message.attach(send_message)
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
