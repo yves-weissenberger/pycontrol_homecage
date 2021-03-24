@@ -27,7 +27,8 @@ def check_loggers_running(user):
     for _,setup_row in setup_rows.iterrows():
 
         logger_path = setup_row['logger_path']
-        logger_line = open(logger_path,'r').readlines()[-1]
+        with open(logger_path,'r') as lgF:
+            logger_line = lgF.readlines()[-1]
         last_time_str = re.findall(r'_-(20.*)',logger_line)[0]  #-2021-03-19-125542
         last_time = datetime.strptime(last_time_str,'%Y-%m-%d-%H%M%S')
 
@@ -49,7 +50,8 @@ def check_ac_status(user):
     for _,setup_row in setup_rows.iterrows():
 
         logger_path = setup_row['logger_path']
-        logger_lines = open(logger_path,'r').readlines()
+        with open(logger_path,'r') as lgF:
+            logger_lines = lgF.readlines()
 
         for l in reversed(logger_lines):
 
@@ -104,8 +106,9 @@ def construct_warning_message(logger_active,ac_state,weight_dict):
 
 def send_email(send_message,subject,receiver_email,opening=None):
     """ This function actually send an email"""
-    lines_ = open(user_path,'r').readlines()
-    users = get_users()
+    with open(user_path,'r') as usrF:
+        lines_ = usrF.readlines()
+    #users = get_users()
     sender_email = [re.findall('"(.*)"',l)[0] for l in lines_ if "system_email" in l][0]
     password = [re.findall('"(.*)"',l)[0] for l in lines_ if "password" in l][0]
 
@@ -198,6 +201,6 @@ if __name__=='__main__':
 
 
             last_check = datetime.now()
-        time.sleep(10)
+        time.sleep(600)
 
 
