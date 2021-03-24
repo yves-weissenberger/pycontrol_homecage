@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import re
+import numpy as np
 from loc_def import user_path, all_paths
 from pyqtgraph.Qt import QtGui, QtCore
 
@@ -154,3 +155,24 @@ def get_tasks(GUI_fp):
     task_dir = os.path.join(GUI_fp,'tasks')
     tasks =  [t.split('.')[0] for t in os.listdir(task_dir) if t[-3:] == '.py']
     return tasks
+
+
+def find_prev_base(dat):
+    """Find most recent baseline weight (going back in time). This is 
+       to account for drift in the system. Gets the 5 most recent baseline
+       measurements
+    """
+    findbase = True
+
+    store= []
+    wbase = 0
+    for line in reversed(dat): #start at the end and work through the lines
+        tmp = re.findall(r'Wbase:([0-9]*\.[0-9]*)_',line)
+        if tmp:
+            store.append(float(tmp[0]))
+            if len(store)>5:
+                break
+
+    wbase = np.mean(store)
+
+    return wbase

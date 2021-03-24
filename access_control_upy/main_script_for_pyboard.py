@@ -258,7 +258,7 @@ class handler():
                         CW = AC_handler.loadcell.weigh(times=10)
                         if float(CW)>ONE_MOUSE:
                             state = 'error_state'
-                            com.write(build_msg('state:' error_state))
+                            com.write(build_msg('state:' + str(state)))
 
 
             if state=='allow_exit':

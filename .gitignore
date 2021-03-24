@@ -2,4 +2,5 @@
 *.pyc
 .DS_store
 *.swp
+*users.txt
 

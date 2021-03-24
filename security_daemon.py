@@ -112,7 +112,8 @@ if __name__=='__main__':
     while True:
         now = datetime.now()
         #print(now,last_check)
-        if abs((now-last_check)).seconds>1:
+        if abs((now-last_check)).seconds>10:
+            print(now)
             users = get_users(); user_dicts = get_user_dicts()
             for u in users:
                 if u not in warning_checkDict.keys():

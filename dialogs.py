@@ -6,7 +6,7 @@ import string
 import random
 from utils import get_pyhomecage_email
 import smtplib, ssl
-
+from utils import get_tasks 
 class calibrate_dialog(QtGui.QDialog):
 
     """ Simple dialog that allows you to tare and callibrate the scales"""
@@ -258,6 +258,105 @@ class login_dialog(QtGui.QDialog):
             self.accept()
 
 
+class direct_pyboard_dialog(QtGui.QDialog):
+    """ In this dialog, the idea is that you can directly run scripts on
+        the pyboard. This is useful for e.g. flushing solenoids or testing
+        a task.
+     """ 
+    def __init__(self,setup_id,GUI,parent=None):
+        super(configure_box_dialog,self).__init__(parent)
+        self.setGeometry(10, 30, 500, 200) # Left, top, width, height.
+        self.setup_id = setup_id
+        self.GUI = GUI
+        layoutH = QtGui.QHBoxLayout(self)
+
+
+
+
+        self.load_framework_button = QtGui.QPushButton('Load Pycontrol \nframework', self)
+        self.load_framework_button.clicked.connect(self.load_framework)
+
+
+        self.load_hardware_definition_button = QtGui.QPushButton('Load hardware definition',self)
+        self.load_hardware_definition_button.clicked.connect(self.load_hardware_definition)
+
+        self.disable_flashdrive_button = QtGui.QPushButton('Disable flashdrive')
+        self.disable_flashdrive_button.clicked.connect(self.disable_flashdrive)
+        layout2 = QtGui.QVBoxLayout(self)
+        layout2.addWidget(self.load_framework_button)
+        layout2.addWidget(self.load_hardware_definition_button)
+        layout2.addWidget(self.disable_flashdrive_button)
+        layout2.addWidget(self.load_ac_framework_button)
+
+
+        self.PYC = self.GUI.controllers[self.setup_id].PYC
+        self.reject = self._done
+
+
+        #self.setGeometry(10, 30, 400, 200) # Left, top, width, height.
+        self.task_combo = QtGui.QComboBox()
+        self.task_combo.addItems(['None'] + get_tasks(self.GUI.GUI_filepath))
+
+        self.start_stop_button = QtGui.QPushButton('start')
+        self.start_stop_button.clicked.connect(self.start_task)
+
+
+        self.log_textbox = QtGui.QTextEdit()
+        self.log_textbox.setFont(QtGui.QFont('Courier', 9))
+        self.log_textbox.setReadOnly(True)
+
+
+
+        layout = QtGui.QVBoxLayout()
+
+        layout.addWidget(self.buttonWeigh)
+        layout.addWidget(self.buttonTare)
+        layout.addWidget(self.calibration_weight)
+        layout.addWidget(self.buttonCal)
+        layout.addWidget(self.buttonDone)
+
+        layoutH.addLayout(layout2)
+        layoutH.addLayout(layout)
+        layoutH.addWidget(self.log_textbox)
+
+   
+    def load_framework(self):
+        self.log_textbox.insertPlainText('Loading framework...')
+        self.GUI.controllers[self.setup_id].PYC.load_framework()
+        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+        self.log_textbox.insertPlainText('done!')
+        self.log_textbox.moveCursor(QtGui.QTextCursor.End)  
+    def disable_flashdrive(self):
+        self.GUI.controllers[self.setup_id].PYC.disable_flashdrive()
+
+    def load_hardware_definition(self):
+        hwd_path = QtGui.QFileDialog.getOpenFileName(self, 'Select hardware definition:',
+                os.path.join(config_dir, 'hardware_definition.py'), filter='*.py')[0]
+
+
+        self.log_textbox.insertPlainText('uploading hardware definition...')
+        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+
+        self.GUI.controllers[self.setup_id].PYC.load_hardware_definition(hwd_path)
+        self.log_textbox.insertPlainText('done!')
+        #setup.load_hardware_definition(hwd_path)
+
+
+    def _done(self):
+        self.PYC.stop_framework()
+        self.accept()
+
+    def print_msg(self,msg):
+        "print weighing messages"
+        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+
+        if 'calT' in msg:
+            self.log_textbox.insertPlainText('Weight after Tare: ' + msg.replace('calT:','')+'g\n')
+        elif 'calW' in msg:
+            self.log_textbox.insertPlainText('Weight: ' + msg.replace('calW:','')+'g\n')
+        if 'calC' in msg:
+            self.log_textbox.insertPlainText('Measured post-calibration weight: ' + msg.replace('calC:','')+'g\n')
+        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
 
 
 class add_user_dialog(QtGui.QDialog):
