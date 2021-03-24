@@ -270,7 +270,7 @@ class system_controller(Data_logger):
 
 
         elif state=='allow_exit':
-            self.mouse_data['exit_time'] = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
+            self.mouse_data['exit_time'] = datetime.now().strftime('%Y-%m-%d-%H%M%S')
             self.GUI.mouse_df
 
             #print("HERE")

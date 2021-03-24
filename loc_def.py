@@ -60,7 +60,7 @@ def create_empty_csv(index,pth):
         df = pd.DataFrame(columns=['Mouse_ID','RFID','Sex','Age','Experiment',
                                    'Protocol','Stage','Task','User','Start_date','Current_weight',
                                    'Start_weight','is_training','is_assigned',
-                                   'training_log','Setup_ID','in_system','summary_variables','persistent_variables'])
+                                   'training_log','Setup_ID','in_system','summary_variables','persistent_variables','set_variables'])
         fp = os.path.join(pth,'mice.csv')
 
     if (fp is not None) and (not os.path.isfile(fp)):
