@@ -124,9 +124,16 @@ class system_controller(Data_logger):
             use custom method to interrogate weight"""
         weight = 0
         logger_lines = open(self.AC.logger_path,'r').readlines()
-        wbase = find_prev_base(logger_lines[-300:-50])
+
+        end_line = None
+        for lix,l in enumerate(reversed(logger_lines)):
+            if str(rfid) in l:
+                end_line = len(logger_lines) - lix
+                break
+
+        wbase = find_prev_base(logger_lines[:end_line])
         print(wbase)
-        weight_lines = logger_lines[-150:]  #since just sent weight all relevant data should be recent
+        weight_lines = logger_lines[end_line-100:end_line]  #since just sent weight all relevant data should be recent
         res = list(reversed([(float(re.findall(r'temp_w:([0-9]*\.[0-9]*)_',l_)[0])-wbase) 
                                 for l_ in weight_lines 
                                 if ('temp_w' in l_ and 'out' not in l_)]))
