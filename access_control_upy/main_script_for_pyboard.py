@@ -122,8 +122,12 @@ class handler():
                     #This is a second check so that the entry door does not stay unnecessarily closed
                     if ((mean(weights)-self.baseline_read)<ONE_MOUSE and len(weights)>1):
                         break
+                filt_w = [0] + [1./(abs(weights[ix]-j)+abs(weights[ix+2]-j))**2 for ix,j in enumerate(weights[1:-1])] + [0]
+                filt_sum = float(sum(filt_w))
+                filt_w2 = [wtmp/filt_sum for wtmp in filt_w]
+                weight = sum([i*j for i,j in zip(weights,filt_w2)])
 
-                weight = mean(weights) #- self.baseline_read
+                weight = weight - self.baseline_read
                 #weight = 25
                 com.write(build_msg('weight:' + str(weight)))
 

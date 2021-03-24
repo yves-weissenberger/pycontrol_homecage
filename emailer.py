@@ -94,7 +94,7 @@ def send_email(send_message,subject,receiver_email,opening=None):
 
     if opening is None:
         opening = """\
-                This is an automated message from pycontrol
+                This is an automated message from pycontrol about the status of your mice.
 
         """
     # Turn these into plain/html MIMEText objects

@@ -1,6 +1,7 @@
 import smtplib, ssl
 from datetime import date, timedelta
 from datetime import datetime
+import time
 import numpy as np
 import re
 import os
@@ -60,7 +61,7 @@ def check_ac_status(user):
             logger_state[setup_row['Setup_ID']] = current_state
             warn = True
         else:
-            logger_state[setup_row['Setup_ID']] = 'GOOD'
+            logger_state[setup_row['Setup_ID']] = 'System state healthy'
     return logger_state, warn
 
 
@@ -74,7 +75,10 @@ def check_mouse_weights(user,all_mouse_csv):
             baseline = mouse_row['Start_weight']
             mouse_csv = pd.read_csv(os.path.join(mice_dir,mouseID + '.csv'))
             now_weight = mouse_csv.iloc[-1]['weight']
-            last_seen = mouse_csv.iloc[-1]['entry_time'][1:]
+            if mouse_csv.iloc[-1]['entry_time'][0]!='2':
+                last_seen = mouse_csv.iloc[-1]['entry_time'][1:] 
+            else: 
+                last_seen = mouse_csv.iloc[-1]['entry_time']
             frac_baseline = float(now_weight)/float(baseline)
             last_seen_datetime = datetime.strptime(last_seen,'%Y-%m-%d-%H%M%S')
 
@@ -146,7 +150,8 @@ def send_regular_update(mouse_dict,receiver_email):
                     'hours_since_last_visit': np.round((datetime.now()-last_seen).total_seconds()/3600.,decimals=1)})
     df = pd.DataFrame.from_dict(rows, orient='columns')
     message = MIMEText(df.to_html(), "html")
-    send_email(message,subject='Daily Update',receiver_email=receiver_email) 
+    send_email(message,subject='Daily Update',receiver_email=receiver_email)
+    #send_email(message,subject='Daily Update',receiver_email="thomas.akam@psy.ox.ac.uk") 
 
 if __name__=='__main__':
 
@@ -193,5 +198,6 @@ if __name__=='__main__':
 
 
             last_check = datetime.now()
+        time.sleep(10)
 
 

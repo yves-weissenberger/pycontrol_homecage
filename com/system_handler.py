@@ -94,7 +94,7 @@ class system_controller(Data_logger):
             weights etc
 
         """
-        now = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
+        now = datetime.now().strftime('%Y-%m-%d-%H%M%S')
         #print(self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port])
         exp_running_now = self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port]['Experiment'].values
 
@@ -109,9 +109,8 @@ class system_controller(Data_logger):
                         self.process_ac_state(msg[6:],now)
                     if 'RFID' in msg:
                         self.mouse_data['RFID'] = int(msg.strip('RFID:'))
-                    #if 'weight' in msg:
-                    #    self.mouse_data['weight'] = float(self.get_mouse_weight(self.mouse_data['RFID']))
-                        #if self.mouse_data['weight'] = 0: self.mouse_data['weight'] = float(msg.strip('weight:'))
+                    if 'weight' in msg:
+                        self.mouse_data['weight'] = float(msg.strip('weight:'))
                         
 
         else:
@@ -169,7 +168,7 @@ class system_controller(Data_logger):
 
 
         elif state=='mouse_training':
-            self.mouse_data['weight'] = float(self.get_mouse_weight(self.mouse_data['RFID']))
+            #self.mouse_data['weight'] = float(self.get_mouse_weight(self.mouse_data['RFID']))
             if self.data_file is None:
 
                 #print("DATA FILE IS NONE", self.mouse_data['RFID'],type(self.mouse_data['RFID']))
