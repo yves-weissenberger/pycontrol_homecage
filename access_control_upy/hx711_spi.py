@@ -29,7 +29,7 @@ class HX711:
         self.in_data = bytearray(7)
 
         self.OFFSET = 0
-        self.SCALE = 1700
+        self.SCALE = 3500
 
         self.time_constant = 0.1
         self.filtered = 0

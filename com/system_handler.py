@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import time
+import re
 import pandas as pd
 import json
 import numpy as np
@@ -108,8 +109,8 @@ class system_controller(Data_logger):
                         self.process_ac_state(msg[6:],now)
                     if 'RFID' in msg:
                         self.mouse_data['RFID'] = int(msg.strip('RFID:'))
-                    if 'weight' in msg:
-                        self.mouse_data['weight'] = get_mouse_weight(self.mouse_data['RFID'])
+                    #if 'weight' in msg:
+                    #    self.mouse_data['weight'] = float(self.get_mouse_weight(self.mouse_data['RFID']))
                         #if self.mouse_data['weight'] = 0: self.mouse_data['weight'] = float(msg.strip('weight:'))
                         
 
@@ -124,14 +125,16 @@ class system_controller(Data_logger):
         weight = 0
         logger_lines = open(self.AC.logger_path,'r').readlines()
         wbase = find_prev_base(logger_lines[-300:-50])
+        print(wbase)
         weight_lines = logger_lines[-150:]  #since just sent weight all relevant data should be recent
         res = list(reversed([(float(re.findall(r'temp_w:([0-9]*\.[0-9]*)_',l_)[0])-wbase) 
                                 for l_ in weight_lines 
                                 if ('temp_w' in l_ and 'out' not in l_)]))
         if len(res)>0:
-            filt_w = np.array([0] + [1./(np.abs(i[ix]-j)+np.abs(i[ix+2]-j))**2 for ix,j in enumerate(res[1:-1])] + [0])
+            filt_w = np.array([0] + [1./(np.abs(res[ix]-j)+np.abs(res[ix+2]-j))**2 for ix,j in enumerate(res[1:-1])] + [0])
             filt_w /= np.sum(filt_w)
             weight = np.sum(filt_w*np.array(res))
+            print(weight)
 
 
         return weight
@@ -159,7 +162,7 @@ class system_controller(Data_logger):
 
 
         elif state=='mouse_training':
-
+            self.mouse_data['weight'] = float(self.get_mouse_weight(self.mouse_data['RFID']))
             if self.data_file is None:
 
                 #print("DATA FILE IS NONE", self.mouse_data['RFID'],type(self.mouse_data['RFID']))
