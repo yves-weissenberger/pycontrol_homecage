@@ -20,7 +20,6 @@ password = [re.findall('"(.*)"',l)[0] for l in lines_ if "password" in l][0]
 
 port = 587  # For starttls
 smtp_server = "smtp.gmail.com"
-receiver_email = 'yvesweissenberger@gmail.com'
 
 message = MIMEMultipart("alternative")
 message["Subject"] = "Pyhomecage 24h summary"
@@ -169,5 +168,5 @@ if __name__ == "__main__":
 
         if len(send_mouse_df)>0:
             message = MIMEText(send_mouse_df.to_html(), "html")
-            send_email(message) 
+            send_email(message,subject='Daily Update',receiver_email=receiver_email) 
          
