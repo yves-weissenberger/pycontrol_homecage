@@ -11,7 +11,7 @@ from serial import SerialException, SerialTimeoutException
 
 
 ##### YW code imports
-from dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog
+from dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog, direct_pyboard_dialog
 from tables import cageTable
 from com.data_logger import Data_logger
 from utils import find_setups
@@ -69,6 +69,9 @@ class setups_tab(QtGui.QWidget):
         self.update_cage_button = QtGui.QPushButton('Update Connected setup')
         self.update_cage_button.clicked.connect(self.update_setup)
 
+        self.check_beh_hardware_button = QtGui.QPushButton('Access task pyboard')
+        self.check_beh_hardware_button.clicked.connect(self.cbh)
+
         self.cage_summary_button = QtGui.QPushButton('Get setup Summary')
         self.cage_summary_button.clicked.connect(self.get_summary)
 
@@ -76,6 +79,7 @@ class setups_tab(QtGui.QWidget):
         self.cage_manager_layout = QtGui.QHBoxLayout()
         self.cage_manager_layout.addWidget(self.remove_cage_button)
         self.cage_manager_layout.addWidget(self.update_cage_button)
+        self.cage_manager_layout.addWidget(self.check_beh_hardware_button)
         self.cage_manager_layout.addWidget(self.cage_summary_button)
 
         ##############################################################
@@ -110,6 +114,36 @@ class setups_tab(QtGui.QWidget):
         self.Vlayout.addWidget(self.scrollable_cage,15)
 
 
+
+    def cbh(self):
+        """ This is used to access the pyboard running the task directly
+            which can be used to test a task and e.g. flush out the 
+            system
+        """
+        isChecked = []
+        for row in range(self.list_of_setups.rowCount()):
+            isChecked.append(self.list_of_setups.item(row,self.list_of_setups.select_nr).checkState()==2)
+        if len(self.GUI.controllers)==0:
+            boxM = QtGui.QMessageBox()
+            boxM.setIcon(QtGui.QMessageBox.Information)
+            boxM.setText("You must be connected to a setup to update it")
+            boxM.exec()
+
+        if sum(isChecked)==1:
+            checked_row = isChecked.index(1)
+            setup_col = self.list_of_setups.header_names.index("Setup_ID")
+            checked_setup_id = self.list_of_setups.item(checked_row,setup_col).text()
+            for k,G in self.GUI.controllers.items():
+                if k==checked_setup_id:
+                    #print("YA")
+                    self.configure_box_dialog = direct_pyboard_dialog(k,self.GUI)
+                    self.configure_box_dialog.exec_()
+
+
+            #self.GUI.controllers.append(SC)
+        else:
+            pass
+            print('You must edit one setup at a time')
     def update_setup(self):
 
         isChecked = []

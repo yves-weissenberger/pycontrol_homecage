@@ -1,12 +1,18 @@
 from pyqtgraph.Qt import QtGui, QtCore
+import string 
+import random
+import smtplib, ssl
+
+
+## - package imports --
 from utils import get_users
 from loc_def import user_path
 from config.paths import *
-import string 
-import random
 from utils import get_pyhomecage_email
-import smtplib, ssl
-from utils import get_tasks 
+from utils import get_tasks
+
+
+
 class calibrate_dialog(QtGui.QDialog):
 
     """ Simple dialog that allows you to tare and callibrate the scales"""
@@ -264,32 +270,20 @@ class direct_pyboard_dialog(QtGui.QDialog):
         a task.
      """ 
     def __init__(self,setup_id,GUI,parent=None):
-        super(configure_box_dialog,self).__init__(parent)
+        super(direct_pyboard_dialog,self).__init__(parent)
         self.setGeometry(10, 30, 500, 200) # Left, top, width, height.
         self.setup_id = setup_id
+        self.selected_task = 'None'
         self.GUI = GUI
         layoutH = QtGui.QHBoxLayout(self)
 
-
-
-
-        self.load_framework_button = QtGui.QPushButton('Load Pycontrol \nframework', self)
-        self.load_framework_button.clicked.connect(self.load_framework)
-
-
-        self.load_hardware_definition_button = QtGui.QPushButton('Load hardware definition',self)
-        self.load_hardware_definition_button.clicked.connect(self.load_hardware_definition)
-
-        self.disable_flashdrive_button = QtGui.QPushButton('Disable flashdrive')
-        self.disable_flashdrive_button.clicked.connect(self.disable_flashdrive)
-        layout2 = QtGui.QVBoxLayout(self)
-        layout2.addWidget(self.load_framework_button)
-        layout2.addWidget(self.load_hardware_definition_button)
-        layout2.addWidget(self.disable_flashdrive_button)
-        layout2.addWidget(self.load_ac_framework_button)
-
-
+        #
         self.PYC = self.GUI.controllers[self.setup_id].PYC
+        if not self.GUI.controllers[self.setup_id].data_consumers:
+            self.GUI.controllers[self.setup_id].data_consumers = [self]
+        else:
+            self.GUI.controllers[self.setup_id].data_consumers.append(self)
+        self.GUI.controllers[self.setup_id]
         self.reject = self._done
 
 
@@ -297,65 +291,48 @@ class direct_pyboard_dialog(QtGui.QDialog):
         self.task_combo = QtGui.QComboBox()
         self.task_combo.addItems(['None'] + get_tasks(self.GUI.GUI_filepath))
 
-        self.start_stop_button = QtGui.QPushButton('start')
-        self.start_stop_button.clicked.connect(self.start_task)
+        self.start_stop_button = QtGui.QPushButton('Start')
+        self.start_stop_button.clicked.connect(self.start_stop)
 
+        layout2 = QtGui.QVBoxLayout(self)
+        layout2.addWidget(self.task_combo)
+        layout2.addWidget(self.start_stop_button)
 
         self.log_textbox = QtGui.QTextEdit()
         self.log_textbox.setFont(QtGui.QFont('Courier', 9))
         self.log_textbox.setReadOnly(True)
 
-
-
-        layout = QtGui.QVBoxLayout()
-
-        layout.addWidget(self.buttonWeigh)
-        layout.addWidget(self.buttonTare)
-        layout.addWidget(self.calibration_weight)
-        layout.addWidget(self.buttonCal)
-        layout.addWidget(self.buttonDone)
-
         layoutH.addLayout(layout2)
-        layoutH.addLayout(layout)
         layoutH.addWidget(self.log_textbox)
 
-   
-    def load_framework(self):
-        self.log_textbox.insertPlainText('Loading framework...')
-        self.GUI.controllers[self.setup_id].PYC.load_framework()
-        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
-        self.log_textbox.insertPlainText('done!')
-        self.log_textbox.moveCursor(QtGui.QTextCursor.End)  
-    def disable_flashdrive(self):
-        self.GUI.controllers[self.setup_id].PYC.disable_flashdrive()
 
-    def load_hardware_definition(self):
-        hwd_path = QtGui.QFileDialog.getOpenFileName(self, 'Select hardware definition:',
-                os.path.join(config_dir, 'hardware_definition.py'), filter='*.py')[0]
+    def start_stop(self):
+        """ Button that allows you to start and stop task"""
+
+        if self.start_stop_button.text()=="Start":
+            self.selected_task = self.task_combo.currentText()
+            if self.task_combo.currentText()!='None':
+                self.process_data("Uploading: " + str(self.selected_task))
+                self.PYC.setup_state_machine(sm_name=self.selected_task)
+                self.PYC.start_framework()
+            self.start_stop_button.setText("Stop")
+        elif self.start_stop_button.text()=="Stop":
+            self.PYC.stop_framework()
+            self.start_stop_button.setText("Start")
 
 
-        self.log_textbox.insertPlainText('uploading hardware definition...')
-        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
-
-        self.GUI.controllers[self.setup_id].PYC.load_hardware_definition(hwd_path)
-        self.log_textbox.insertPlainText('done!')
-        #setup.load_hardware_definition(hwd_path)
 
 
     def _done(self):
-        self.PYC.stop_framework()
-        self.accept()
+        del self.GUI.controllers[self.setup_id].data_consumers[-1]  #remove this dialog from the data consumers of the system handler
+        self.PYC.stop_framework()  #stop the framework
+        self.accept()   #close the dialog
 
-    def print_msg(self,msg):
-        "print weighing messages"
+
+    def process_data(self,msg):
+        "function to accept data from the system handler"
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
-
-        if 'calT' in msg:
-            self.log_textbox.insertPlainText('Weight after Tare: ' + msg.replace('calT:','')+'g\n')
-        elif 'calW' in msg:
-            self.log_textbox.insertPlainText('Weight: ' + msg.replace('calW:','')+'g\n')
-        if 'calC' in msg:
-            self.log_textbox.insertPlainText('Measured post-calibration weight: ' + msg.replace('calC:','')+'g\n')
+        self.log_textbox.insertPlainText(str(msg)+'\n')
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
 
 

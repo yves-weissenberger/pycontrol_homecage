@@ -3,7 +3,7 @@ import os
 import time
 import pandas as pd
 import json
-
+import numpy as np
 from loc_def import mice_dir, protocol_dir
 from .data_logger import Data_logger
 from config.paths import config_dir, framework_dir, devices_dir, tasks_dir
@@ -15,7 +15,7 @@ class system_controller(Data_logger):
         mice enter/exit the training apparatus. There is one system controller 
         for each homecage system.
     """
-    def __init__(self,GUI,print_func=print,data_consumers=None,setup_id=None):
+    def __init__(self,GUI,print_func=print,data_consumers=[],setup_id=None):
 
 
         self.GUI = GUI
@@ -121,27 +121,24 @@ class system_controller(Data_logger):
     def get_mouse_weight(self,rfid):
         """ Don't report the mean weight returned by the reader
             use custom method to interrogate weight"""
-            weight = 0
-            logger_lines = open(self.AC.logger_path,'r').readlines()
-            wbase = find_prev_base(logger_lines[-300:-50])
-            weight_lines = logger_lines[-150:]  #since just sent weight all relevant data should be recent
-            res = list(reversed([(float(re.findall(r'temp_w:([0-9]*\.[0-9]*)_',l_)[0])-wbase) 
-                                    for l_ in weight_lines 
-                                    if ('temp_w' in l_ and 'out' not in l_)]))
-            if len(res)>0:
-                filt_w = np.array([0] + [1./(np.abs(i[ix]-j)+np.abs(i[ix+2]-j))**2 for ix,j in enumerate(res[1:-1])] + [0])
-                filt_w /= np.sum(filt_w)
-                weight = np.sum(filt_w*np.array(res))
+        weight = 0
+        logger_lines = open(self.AC.logger_path,'r').readlines()
+        wbase = find_prev_base(logger_lines[-300:-50])
+        weight_lines = logger_lines[-150:]  #since just sent weight all relevant data should be recent
+        res = list(reversed([(float(re.findall(r'temp_w:([0-9]*\.[0-9]*)_',l_)[0])-wbase) 
+                                for l_ in weight_lines 
+                                if ('temp_w' in l_ and 'out' not in l_)]))
+        if len(res)>0:
+            filt_w = np.array([0] + [1./(np.abs(i[ix]-j)+np.abs(i[ix+2]-j))**2 for ix,j in enumerate(res[1:-1])] + [0])
+            filt_w /= np.sum(filt_w)
+            weight = np.sum(filt_w*np.array(res))
 
 
         return weight
-    
+
     def process_ac_state(self,state,now):
         """ Here do more global updates of stuff based on state """
 
-        #print("HEREIAM",state)
-        #
-        #print(state,now)
         self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'AC_state'] = state
 
         if state=='error_state':
@@ -162,7 +159,6 @@ class system_controller(Data_logger):
 
 
         elif state=='mouse_training':
-            #print("HERE")
 
             if self.data_file is None:
 
