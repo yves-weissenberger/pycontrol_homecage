@@ -1,14 +1,15 @@
+import smtplib, ssl
 from datetime import date, timedelta
 from datetime import datetime
+import numpy as np
 import re
 import os
 from utils import get_users, get_user_dicts
 from loc_def import user_path, all_paths
-from emailer import send_email
 import json
 import pandas as pd
 from email.mime.text import MIMEText
-
+from email.mime.multipart import MIMEMultipart
 #This is a basic script that runs, independently of pycontrol and looks for errors
 
 
@@ -83,10 +84,10 @@ def check_mouse_weights(user,all_mouse_csv):
                 warn = True
             if frac_baseline<0.88:
                 warn = True
-            weight_dict[mouseID+'now_weight'] = now_weight
-            weight_dict[mouseID+'last_seen'] = last_seen
-            weight_dict[mouseID+'baseline'] = baseline
-            weight_dict[mouseID+'frac_baseline'] = frac_baseline
+            weight_dict[mouseID+'__now_weight'] = now_weight
+            weight_dict[mouseID+'__last_seen'] = last_seen
+            weight_dict[mouseID+'__baseline'] = baseline
+            weight_dict[mouseID+'__frac_baseline'] = frac_baseline
 
 
 
@@ -97,6 +98,55 @@ def construct_warning_message(logger_active,ac_state,weight_dict):
                   + json.dumps(ac_state,indent=4) + '\n' + json.dumps(weight_dict,indent=4) + '\n' +  json.dumps(logger_active,indent=4)
     return warning_message
 
+def send_email(send_message,subject,receiver_email,opening=None):
+    """ This function actually send an email"""
+    lines_ = open(user_path,'r').readlines()
+    users = get_users()
+    sender_email = [re.findall('"(.*)"',l)[0] for l in lines_ if "system_email" in l][0]
+    password = [re.findall('"(.*)"',l)[0] for l in lines_ if "password" in l][0]
+
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "Pyhomecage 24h summary"
+    message["From"] = sender_email
+    message["To"] = receiver_email
+
+
+    if opening is None:
+        opening = """\
+                This is an automated message from pycontrol
+
+        """
+    # Turn these into plain/html MIMEText objects
+    part1 = MIMEText(opening, "plain")
+
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    message.attach(part1)
+    message.attach(send_message)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(
+            sender_email, receiver_email, message.as_string()
+        )
+    return None
+def send_regular_update(mouse_dict,receiver_email):
+    mouse_IDs = np.unique([re.findall(r'(.*)__',k) for k in mouse_dict.keys()])
+
+    rows = []
+    for mouseID in mouse_IDs:
+        last_seen = datetime.strptime( mouse_dict[mouseID+'__last_seen'],'%Y-%m-%d-%H%M%S')
+        rows.append({'MouseID': mouseID,
+                    'Baseline': mouse_dict[mouseID+'__baseline'],
+                    'Current_weight': mouse_dict[mouseID+'__now_weight'],
+                    'frac_baseline': mouse_dict[mouseID+'__frac_baseline'],
+                    'last_seen': mouse_dict[mouseID+'__last_seen'],
+                    'hours_since_last_visit': np.round((datetime.now()-last_seen).total_seconds()/3600.,decimals=1)})
+    df = pd.DataFrame.from_dict(rows, orient='columns')
+    message = MIMEText(df.to_html(), "html")
+    send_email(message,subject='Daily Update',receiver_email=receiver_email) 
 
 if __name__=='__main__':
 
@@ -109,6 +159,7 @@ if __name__=='__main__':
         if u not in warning_checkDict.keys():
             warning_checkDict[u] = datetime.now() - timedelta(days=1)
 
+    last_regular_update = datetime.now() - timedelta(days=2)
     while True:
         now = datetime.now()
         #print(now,last_check)
@@ -128,6 +179,11 @@ if __name__=='__main__':
                 ac_state,w2 = check_ac_status(user)
 
                 weight_dict, w3 = check_mouse_weights(user,all_mice_csv)
+
+                if (abs(now-last_regular_update).total_seconds()/3600.)>24:
+                    send_regular_update(weight_dict,user_dicts[user])
+                    last_regular_update = datetime.now()
+
                 if any([w1,w2,w3]) and (((datetime.now()-warning_checkDict[u]).total_seconds()/3600.)>1):
                     print('SENDING WARNING')
                     warning_message = construct_warning_message(logger_active,ac_state,weight_dict)
