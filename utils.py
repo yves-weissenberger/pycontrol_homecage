@@ -142,7 +142,9 @@ def load_data_csv():
     fp = os.path.join(mice_dir,'mice.csv')
     mouse_df = pd.read_csv(fp)
     mouse_df.file_location = fp
-
+    #fl = mouse_df.file_location
+    #mouse_df['set_variables'] = ""
+    #mouse_df.to_csv(fl)
     for col in mouse_df.columns:
         if 'Unnamed' in col:
             mouse_df.drop(col, inplace=True, axis=1)
@@ -162,7 +164,6 @@ def find_prev_base(dat):
        to account for drift in the system. Gets the 5 most recent baseline
        measurements
     """
-    findbase = True
 
     store= []
     wbase = 0
@@ -176,3 +177,5 @@ def find_prev_base(dat):
     wbase = np.mean(store)
 
     return wbase
+
+#def excepthook()

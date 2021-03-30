@@ -79,8 +79,6 @@ class system_controller(Data_logger):
         human readable data strings are passed to it.'''
         if self.data_file:
             self.write_to_file(new_data)
-        #if self.print_func:
-        #    self.print_func(self.data_to_string(new_data, verbose=True), end='\n')
         if self.data_consumers:
             for data_consumer in self.data_consumers:
                 data_consumer.process_data(new_data)
@@ -190,13 +188,13 @@ class system_controller(Data_logger):
 
 
 
-                    #summary_variables = eval(mouseRow['summary_variables'])
-                    #if not pd.isnull(mouse_row['set_variables'].values):
-                    #    set_variables = eval(mouse_row['set_variables'].values[0])
-                    #    for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
-                    #if not pd.isnull(mouse_row['persistent_variables'].values):
-                    #    persistent_variables = eval(mouse_row['persistent_variables'].values[0])
-                    #    for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                    #summary_variables = eval(mouse_row['summary_variables'])
+                    if not pd.isnull(mouse_row['set_variables'].values):
+                        set_variables = eval(mouse_row['set_variables'].values[0])
+                        for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                    if not pd.isnull(mouse_row['persistent_variables'].values):
+                        persistent_variables = eval(mouse_row['persistent_variables'].values[0])
+                        for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],eval(v))
 
 
 
@@ -217,7 +215,7 @@ class system_controller(Data_logger):
 
                         df_mouseLog = df_mouseLog.iloc[-1]
 
-                        print('hasLog')
+                        #print('hasLog')
                         v_ = eval(df_mouseLog['Variables'])
 
                         #handle moving to next stage
@@ -266,7 +264,6 @@ class system_controller(Data_logger):
 
                 self.GUI.setup_window_tab.list_of_setups.fill_table()
                 self.GUI.system_tab.list_of_setups.fill_table()
-                hasClosed = False
 
 
         elif state=='allow_exit':

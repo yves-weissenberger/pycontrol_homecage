@@ -205,12 +205,12 @@ class system_tab(QtGui.QWidget):
             if self.list_of_experiments.item(rowN,0).checkState()==2:
 
                 expName = self.list_of_experiments.item(rowN,self.list_of_experiments.header_names.index('Name')).text()
-                print(expName)
-                print(self.GUI.exp_df)
-                print(self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName])
+                #print(expName)
+                #print(self.GUI.exp_df)
+                #print(self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName])
                 for setup in self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Setups'].values:
                     setup = eval(setup)[0]
-                    print('HERE4',setup)
+                    #print('HERE4',setup)
                     #for k,setup_ in self.GUI.controllers.items():
                     #    print(k,setup_)
                     

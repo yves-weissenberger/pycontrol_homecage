@@ -154,14 +154,14 @@ def send_regular_update(mouse_dict,receiver_email):
     df = pd.DataFrame.from_dict(rows, orient='columns')
     message = MIMEText(df.to_html(), "html")
     send_email(message,subject='Daily Update',receiver_email=receiver_email)
-    #send_email(message,subject='Daily Update',receiver_email="thomas.akam@psy.ox.ac.uk") 
+    send_email(message,subject='Daily Update',receiver_email="thomas.akam@psy.ox.ac.uk") 
 
 if __name__=='__main__':
 
     users = get_users(); user_dicts = get_user_dicts()
     ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
 
-    last_check = datetime.now()
+    last_check = datetime.now() -timedelta(seconds=20)
     warning_checkDict = {}
     for u in users:
         if u not in warning_checkDict.keys():

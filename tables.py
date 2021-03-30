@@ -1,12 +1,8 @@
 import numpy as np
-import pandas as pd
+
 from pyqtgraph.Qt import QtGui, QtCore
 from pyqtgraph import Qt
-from pyqtgraph.Qt import QtWidgets
-from pyqtgraph import mkPen
-import pyqtgraph as pg
-import sys, os, pickle, time
-import copy as cp
+import sys, os, pickle
 from datetime import datetime
 import time
 import re
@@ -354,20 +350,16 @@ class cage_list_table(QtGui.QTableWidget):
     def run_task(self):
         ""
         setup,task = self.sender().name
-        #task = self.task_combo.currentText()
-        #setup = self.setup_combo.currentText()
-        #print([brd.serial_port for i,brd in enumerate(self.GUI.connected_boards)])
-        board_ix = [i for i,brd in enumerate(self.GUI.connected_boards) if brd.serial_port==setup]
-        #print(board_ix)
 
-        #print(self.GUI.GUI_filepath)
+        board_ix = [i for i,brd in enumerate(self.GUI.connected_boards) if brd.serial_port==setup]
+
         self.task_hash = _djb2_file(os.path.join(self.GUI.GUI_filepath,'tasks', task + '.py'))
         self.GUI.connected_boards[int(board_ix[0])].setup_state_machine(task, uploaded=False)
         self.GUI.connected_boards[int(board_ix[0])].start_framework()
 
 
     def fill_table(self):
-        #print(self.GUI.mouse_df)
+
         self.clear()
         self.setHorizontalHeaderLabels(self.header_names)
         self.setRowCount(len(self.tab.df_setup_tmp))
@@ -388,9 +380,8 @@ class cage_list_table(QtGui.QTableWidget):
 
 
             chkBoxItem = QtGui.QTableWidgetItem()
-            print(self.tab.global_task)
             if self.tab.global_task:
-                #print('global')
+
                 chkBoxItem.setFlags(QtCore.Qt.ItemIsEnabled)
             else:
                 chkBoxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
@@ -425,7 +416,7 @@ class cage_list_table(QtGui.QTableWidget):
 
     def show_mice_in_setup(self,row,col):
         #row = item.row()
-        print(row,'ROW',col,'COL')
+
         item = self.item(row, col)
 
         if col==1:
@@ -459,14 +450,14 @@ class cage_list_table(QtGui.QTableWidget):
             if len(self.selected_setups)>0:
                 self.tab.MICE.setEnabled(True)
                 self.tab.add_mouse_button.setEnabled(True)
-                #print("ENABLED")
+
             else:
                 self.tab.MICE.setEnabled(False)
-                #print("DISABLED_EARLY")
 
-            #print('NSEL',len(self.selected_setups),self.selected_setups)
+
+
             if len(self.selected_setups)>1:
-                #print("DISABLED_AFTER")
+
                 self.tab.add_mouse_button.setEnabled(False)
 
         self.tab.MLT.fill_table()
@@ -490,13 +481,12 @@ class mouse_list_table(QtGui.QTableWidget):
         self.fill_table()
 
     def fill_table(self):
-        #print(self.GUI.mouse_df)
+
         self.clear()
         self.setHorizontalHeaderLabels(self.header_names)
         df = self.tab.df_mouse_tmp.loc[self.tab.df_mouse_tmp['Setup_ID'].isin(self.tab.CLT.selected_setups)]
         df.index = np.arange(len(df))
-        print(self.tab.CLT.selected_setups)
-        #print(df)
+
 
         df.reset_index(drop=True)
         self.setRowCount(len(df))
@@ -504,7 +494,7 @@ class mouse_list_table(QtGui.QTableWidget):
         for row_index, row in df.iterrows():    
 
             for col_index in range(self.columnCount()-1):
-                #print(row_index,col_index)
+
                 self.setItem(row_index,col_index+1,Qt.QtWidgets.QTableWidgetItem(str(row[col_index])))
 
             chkBoxItem = QtGui.QTableWidgetItem()
@@ -543,17 +533,17 @@ class cageTable(QtGui.QTableWidget):
         self.fill_table()
 
     def fill_table(self):
-        #print(self.GUI.setup_df)
+
         self.setRowCount(len(self.GUI.setup_df))
 
         self.buttons = []
         for row_index, row in self.GUI.setup_df.iterrows():    
 
             for col_index in range(self.columnCount()):
-                #print(index,col,row[col])
+
                 try:
                     cHeader = self.header_names[col_index]
-                    #print(cHeader,row)
+
                     self.setItem(row_index,col_index,Qt.QtWidgets.QTableWidgetItem(str(row[cHeader])))
                 except KeyError:
                     pass
@@ -583,17 +573,18 @@ class cageTable(QtGui.QTableWidget):
     def connect(self):
 
         try:
-            #print(self.sender().name)
+
             setup_id, com_,comAC_ = self.sender().name
-            #print(com_,comAC_)
-            SC = system_controller(print_func=print,GUI=self.GUI,setup_id=setup_id)
+
+            print_func = partial(print, flush=True)
+            SC = system_controller(print_func=print_func,GUI=self.GUI,setup_id=setup_id)
             #DL = Data_logger(print_func=print,GUI=self.GUI)
-            board = Pycboard(com_, print_func=print, data_logger=SC)
+            board = Pycboard(com_, print_func=print_func, data_logger=SC)
 
             board.load_framework()
             time.sleep(0.05)
             self.GUI.connected_boards.append(board)
-            ac = Access_control(comAC_,print_func=print,data_logger=SC,GUI=self.GUI)
+            ac = Access_control(comAC_,print_func=print_func,data_logger=SC,GUI=self.GUI)
             time.sleep(0.05)
             SC.add_PYC(board)
             SC.add_AC(ac)
@@ -616,8 +607,8 @@ class cageTable(QtGui.QTableWidget):
 
         except (PyboardError,SerialException) as e:   
 
-            print(e)
-            print("Failed to connect")
+            print(e, flush=True)
+            print("Failed to connect", flush=True)
 
     def _fill_setup_df_row(self,send_name):
         " Just fill that row of the df"

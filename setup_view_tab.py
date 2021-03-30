@@ -176,7 +176,7 @@ class setups_tab(QtGui.QWidget):
 
     def add_cage(self):
         #print(self.GUI.setup_df)
-        cage_dat = []
+
         entry_nr = len(self.GUI.setup_df)
 
         #add a check to see that something about the cage has been filled in
@@ -234,12 +234,10 @@ class setups_tab(QtGui.QWidget):
             isChecked.append(self.list_of_setups.item(row,self.list_of_setups.select_nr).checkState()==2)
 
         if any(isChecked):
-            checked_index = isChecked.index(True)
             sure = are_you_sure_dialog()
             sure.exec_()
             if sure.GO:
                 fl = self.GUI.setup_df.file_location
-                setup_id = self.GUI.setup_df['Setup_ID'].index[isChecked]
                 #self.
                 self.GUI.setup_df = self.GUI.setup_df.drop(self.GUI.setup_df.index[isChecked])
                 self.GUI.setup_df.file_location = fl
