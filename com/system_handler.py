@@ -320,7 +320,8 @@ class system_controller(Data_logger):
             self.data_file.close()
             mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
             if not pd.isnull(mouse_row['persistent_variables'].values):
-                persistent_variables = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
+                persistent_variables = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values)
+                print(persistent_variables)
                 for k,v__ in v_.items():
                     if k in persistent_variables.keys():
                         persistent_variables[k] = v__
