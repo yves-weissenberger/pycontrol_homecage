@@ -1,28 +1,23 @@
-import numpy as np
-
-from pyqtgraph.Qt import QtGui, QtCore
-from pyqtgraph import Qt
-import sys, os, pickle
-from datetime import datetime
-import time
+import os
+import pickle
 import re
-from serial import SerialException
+import time
+from datetime import datetime
 from functools import partial
 
-from dialogs import calibrate_dialog
-from utils import find_setups
-from utils import get_tasks, null_resize
+import numpy as np
+from pyqtgraph import Qt
+from pyqtgraph.Qt import QtCore, QtGui
+from serial import SerialException
 
-
-
+from com.access_control import Access_control
 ##### TA code imports
-from com.pycboard import Pycboard, PyboardError, _djb2_file
+from com.pycboard import PyboardError, Pycboard, _djb2_file
 #from com.data_logger import Data_logger
 from com.system_handler import system_controller
-from com.access_control import Access_control
-
-
-from utils import TableCheckbox, cbox_update_options, cbox_set_item, null_resize
+from dialogs import calibrate_dialog
+from utils import (TableCheckbox, cbox_set_item, cbox_update_options,
+                   find_setups, get_tasks, null_resize)
 
 #######################################################################
 ####################      Experiment Table      #######################

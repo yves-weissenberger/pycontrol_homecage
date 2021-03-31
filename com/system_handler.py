@@ -165,24 +165,17 @@ class system_controller(Data_logger):
                     self.PYC.setup_state_machine(sm_name=task)
 
 
-                    try:
-                        if not pd.isnull(mouse_row['summary_variables'].values):
-                            summary_variables = eval(mouse_row['summary_variables'].values[0])
-                        if not pd.isnull(mouse_row['set_variables'].values):
-                            set_variables = eval(mouse_row['set_variables'].values[0])
-                            if set_variables:
-                                for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
-                        if not pd.isnull(mouse_row['persistent_variables'].values):
-                            persistent_variables = eval(mouse_row['persistent_variables'].values[0])
-                            if persistent_variables:
-                                for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],eval(v))
-                    except Exception as e:
-                        print("Unexpected error:")
-                        print(mouse_row['set_variables'])
-                        print(mouse_row['set_variables'].values)
-                        print(mouse_row['persistent_variables'])
-                        print(e)
-                        traceback.print_exc()
+                    if not pd.isnull(mouse_row['summary_variables'].values):
+                        summary_variables = eval(mouse_row['summary_variables'].values[0])
+                    if not pd.isnull(mouse_row['set_variables'].values):
+                        set_variables = eval(mouse_row['set_variables'].values[0])
+                        if set_variables:
+                            for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                    if not pd.isnull(mouse_row['persistent_variables'].values):
+                        persistent_variables = eval(mouse_row['persistent_variables'].values[0])
+                        if persistent_variables:
+                            for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+
 
 
 

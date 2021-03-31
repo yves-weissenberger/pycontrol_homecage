@@ -9,9 +9,6 @@ from pyqtgraph.Qt import QtGui, QtCore
 from serial.tools import list_ports
 
 
-def excepthook(type, exception, traceback):
-    
-    pass
 # --------------------------------------------------------------------------------
 
 def null_resize(widget):

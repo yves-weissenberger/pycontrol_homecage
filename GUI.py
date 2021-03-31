@@ -7,10 +7,10 @@ import pyqtgraph as pg
 import sys, os, pickle, time
 import copy as cp
 import pandas as pd
-
+from functools import partial
 #imports for interacting with serial ports
 from serial.tools import list_ports
-
+import traceback
 
 
 from mouse_overview import mouse_window
@@ -25,8 +25,7 @@ from utils import load_data_csv
 import com
 from tables import cageTable, experiment_overview_table
 from dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog
-import datetime
-
+from datetime import datetime
 ## Here want to implement a GUI for managing the homecage datasets. Thoughts on how to structure it. I think natural way is to ]
 # create a central landing interface that presents and lvie updates some basic features of the behavior sufficient to tell you 
 #if you need up check in on a page and then detailed information about each cage in tabs. 
@@ -35,7 +34,24 @@ import datetime
 #Should the overview be by mouse or by cage?
 
 
+sys._excepthook = sys.excepthook
+def custom_excepthook(type_, exception, traceback_,filepath):
+    """ This is supposed to be a custom exception hook that prints
+        exceptions to a file so that they can then be used as alerts 
+        for an email daemon
+    """
+    now = datetime.strftime(datetime.now(),'%Y-%m-%d-%H%M%S')
+    #print("NOOOOO")
+    #print(traceback.attrs())
+    with open(filepath,'a') as f:
+        f.write('----------------- \n')
+        f.write(repr(type_))
+        f.write(repr(exception))
+        traceback.print_exception(type_, exception, traceback_,file=f)
+        f.write(now + '\n')
+    sys._excepthook(type_, exception, traceback)
 
+    
 
 
 class Visualizator(QtGui.QMainWindow):
@@ -44,7 +60,7 @@ class Visualizator(QtGui.QMainWindow):
     def __init__(self):
         super().__init__()
 
-
+        #1+s
         self.connected_boards = []
         self.connected_access_controls = []
         self.controllers = {}
@@ -96,7 +112,7 @@ class Visualizator(QtGui.QMainWindow):
         #self.system_tab.
         self.experiment_tab.setEnabled(False)
         ################ Setup the tabs ##################
-
+        
         self.login = login_dialog()
         self.add_user = add_user_dialog()
 
@@ -168,7 +184,12 @@ class Visualizator(QtGui.QMainWindow):
 if __name__ == "__main__":
 
     create_paths(all_paths)
-
+    pths__ = all_paths
+    ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = pths__
+    exception_path = os.path.join(setup_dir,'exception_store.txt')
+    except_hook = partial(custom_excepthook,filepath=exception_path)
+    sys.excepthook = except_hook
+    
     app = QtGui.QApplication(sys.argv)
     gui = Visualizator()
     gui.app = app # To allow app functions to be called from GUI.
