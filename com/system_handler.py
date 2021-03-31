@@ -1,14 +1,20 @@
-from datetime import datetime
-import os
-import time
-import re
-import pandas as pd
 import json
+import os
+import re
+import sys
+import time
+import traceback
+from datetime import datetime
+
 import numpy as np
+import pandas as pd
+from config.paths import config_dir, devices_dir, framework_dir, tasks_dir
 from loc_def import mice_dir, protocol_dir
-from .data_logger import Data_logger
-from config.paths import config_dir, framework_dir, devices_dir, tasks_dir
 from utils import find_prev_base
+
+from .data_logger import Data_logger
+
+
 class system_controller(Data_logger):
 
     """ This is a class that sits on top of access control and pycboard classes
@@ -116,32 +122,7 @@ class system_controller(Data_logger):
                 self.GUI.print_msg(msg,ac_pyc='ac')
 
 
-    def get_mouse_weight(self,rfid):
-        """ Don't report the mean weight returned by the reader
-            use custom method to interrogate weight"""
-        weight = 0
-        logger_lines = open(self.AC.logger_path,'r').readlines()
 
-        end_line = None
-        for lix,l in enumerate(reversed(logger_lines)):
-            if str(rfid) in l:
-                end_line = len(logger_lines) - lix
-                break
-
-        wbase = find_prev_base(logger_lines[:end_line])
-        print(wbase)
-        weight_lines = logger_lines[end_line-100:end_line]  #since just sent weight all relevant data should be recent
-        res = list(reversed([(float(re.findall(r'temp_w:([0-9]*\.[0-9]*)_',l_)[0])-wbase) 
-                                for l_ in weight_lines 
-                                if ('temp_w' in l_ and 'out' not in l_)]))
-        if len(res)>0:
-            filt_w = np.array([0] + [1./(np.abs(res[ix]-j)+np.abs(res[ix+2]-j))**2 for ix,j in enumerate(res[1:-1])] + [0])
-            filt_w /= np.sum(filt_w)
-            weight = np.sum(filt_w*np.array(res))
-            print(weight)
-
-
-        return weight
 
     def process_ac_state(self,state,now):
         """ Here do more global updates of stuff based on state """
@@ -166,14 +147,11 @@ class system_controller(Data_logger):
 
 
         elif state=='mouse_training':
-            #self.mouse_data['weight'] = float(self.get_mouse_weight(self.mouse_data['RFID']))
+
             if self.data_file is None:
 
-                #print("DATA FILE IS NONE", self.mouse_data['RFID'],type(self.mouse_data['RFID']))
-                #print(self.GUI.mouse_df['RFID'])
                 mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
-                #print(mouse_row)
-                #print(mouse_row['Protocol'])
+
                 mouse_ID = mouse_row['Mouse_ID'].values[0]
                 prot = mouse_row['Protocol'].values[0]
 
@@ -187,14 +165,24 @@ class system_controller(Data_logger):
                     self.PYC.setup_state_machine(sm_name=task)
 
 
-
-                    #summary_variables = eval(mouse_row['summary_variables'])
-                    if not pd.isnull(mouse_row['set_variables'].values):
-                        set_variables = eval(mouse_row['set_variables'].values[0])
-                        for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
-                    if not pd.isnull(mouse_row['persistent_variables'].values):
-                        persistent_variables = eval(mouse_row['persistent_variables'].values[0])
-                        for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                    try:
+                        if not pd.isnull(mouse_row['summary_variables'].values):
+                            summary_variables = eval(mouse_row['summary_variables'].values[0])
+                        if not pd.isnull(mouse_row['set_variables'].values):
+                            set_variables = eval(mouse_row['set_variables'].values[0])
+                            if set_variables:
+                                for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                        if not pd.isnull(mouse_row['persistent_variables'].values):
+                            persistent_variables = eval(mouse_row['persistent_variables'].values[0])
+                            if persistent_variables:
+                                for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                    except Exception as e:
+                        print("Unexpected error:")
+                        print(mouse_row['set_variables'])
+                        print(mouse_row['set_variables'].values)
+                        print(mouse_row['persistent_variables'])
+                        print(e)
+                        traceback.print_exc()
 
 
 
@@ -318,15 +306,16 @@ class system_controller(Data_logger):
             v_ = self.PYC.get_variables()
             self.data_file.writelines(repr(v_))
             self.data_file.close()
-            mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
-            if not pd.isnull(mouse_row['persistent_variables'].values):
-                persistent_variables = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values)
-                print(persistent_variables)
+            try:
+                persistent_variables = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
                 for k,v__ in v_.items():
+                    k = 'v.' + k
                     if k in persistent_variables.keys():
                         persistent_variables[k] = v__
-
                 self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'] = json.dumps(persistent_variables)
+            except ValueError as e:
+                print(e)
+
 
 
             self.update_mouseLog(v_)

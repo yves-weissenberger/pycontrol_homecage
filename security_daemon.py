@@ -1,16 +1,20 @@
-import smtplib, ssl
+import json
+import os
+import re
+import smtplib
+import ssl
+import time
 from datetime import date, timedelta
 from datetime import datetime
-import time
-import numpy as np
-import re
-import os
-from utils import get_users, get_user_dicts
-from loc_def import user_path, all_paths
-import json
-import pandas as pd
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import numpy as np
+import pandas as pd
+
+from loc_def import all_paths, user_path
+from utils import get_user_dicts, get_users
+
 #This is a basic script that runs, independently of pycontrol and looks for errors
 
 

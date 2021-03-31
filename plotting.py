@@ -1,10 +1,12 @@
 import time
-import numpy as np
 from datetime import timedelta
-import pyqtgraph as pg
-from pyqtgraph.Qt import QtGui, QtCore, QtWidgets
 
-from config.gui_settings import event_history_len, state_history_len, analog_history_dur
+import numpy as np
+import pyqtgraph as pg
+from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
+
+from config.gui_settings import (analog_history_dur, event_history_len,
+                                 state_history_len)
 
 # ----------------------------------------------------------------------------------------
 # Task_plot 

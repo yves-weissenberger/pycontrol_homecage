@@ -3,4 +3,5 @@
 .DS_store
 *.swp
 *users.txt
+.vscode
 

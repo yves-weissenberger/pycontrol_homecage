@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import sys
 import re
 import numpy as np
 from loc_def import user_path, all_paths
@@ -8,7 +9,9 @@ from pyqtgraph.Qt import QtGui, QtCore
 from serial.tools import list_ports
 
 
-
+def excepthook(type, exception, traceback):
+    
+    pass
 # --------------------------------------------------------------------------------
 
 def null_resize(widget):
