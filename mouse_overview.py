@@ -106,7 +106,7 @@ class mouse_window(QtGui.QWidget):
         unique_mice = list(set([i['subject'] for i in all_variables]))
 
         for ms_rfid in unique_mice:
-            print(ms_rfid)
+            #print(ms_rfid)
             #persistent variables persist over sessions
             #all_variables =  self.variables_table.subject_variable_names[ms_rfid]
             persistent_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables if ((i['subject']==ms_rfid) and (i['persistent']))])

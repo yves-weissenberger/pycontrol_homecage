@@ -36,9 +36,10 @@ def check_loggers_running(user):
         last_time_str = re.findall(r'_-(20.*)',logger_line)[0]  #-2021-03-19-125542
         last_time = datetime.strptime(last_time_str,'%Y-%m-%d-%H%M%S')
 
-        last_delta = (now-last_time).total_seconds()
+        last_delta = ((now-last_time).total_seconds())
         active_dict[setup_row['Setup_ID']] = last_time.strftime("%m/%d/%Y, %H:%M:%S")
-        if last_delta>20: warn = True
+
+        if (last_delta>12): warn = True
     return active_dict,warn
 
 def check_ac_status(user):
@@ -71,7 +72,7 @@ def check_ac_status(user):
     return logger_state, warn
 
 
-def check_mouse_weights(user,all_mouse_csv):
+def check_mouse_weights(user,all_mouse_csv,logger_start):
     weight_dict = {}
     warn = False
     now = datetime.now()
@@ -88,9 +89,11 @@ def check_mouse_weights(user,all_mouse_csv):
             frac_baseline = float(now_weight)/float(baseline)
             last_seen_datetime = datetime.strptime(last_seen,'%Y-%m-%d-%H%M%S')
 
+            delta_since_start = (now-logger_start).total_seconds()/3600.
+
             delta = (last_seen_datetime-now)
-            time_delta_hours = delta.days * 24 + delta.seconds/3600
-            if time_delta_hours>24:
+            time_delta_hours = delta.days * 24 + delta.seconds/3600.
+            if (time_delta_hours>12.) and (delta_since_start>12.):
                 warn = True
             if frac_baseline<0.88:
                 warn = True
@@ -161,7 +164,7 @@ def send_regular_update(mouse_dict,receiver_email):
     send_email(message,subject='Daily Update',receiver_email="thomas.akam@psy.ox.ac.uk") 
 
 if __name__=='__main__':
-
+    daemon_start_time = datetime.now()
     users = get_users(); user_dicts = get_user_dicts()
     ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
 
@@ -190,7 +193,7 @@ if __name__=='__main__':
 
                 ac_state,w2 = check_ac_status(user)
 
-                weight_dict, w3 = check_mouse_weights(user,all_mice_csv)
+                weight_dict, w3 = check_mouse_weights(user,all_mice_csv,daemon_start_time)
 
                 if (abs(now-last_regular_update).total_seconds()/3600.)>24:
                     send_regular_update(weight_dict,user_dicts[user])
