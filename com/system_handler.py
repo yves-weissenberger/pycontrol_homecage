@@ -156,7 +156,7 @@ class system_controller(Data_logger):
                 prot = mouse_row['Protocol'].values[0]
 
                 
-                #print("HERE")
+
                 if 'task' in prot:
                     # if the current protocol is simply to run a task do so
                     task = mouse_row['Task'].values[0]
@@ -196,7 +196,7 @@ class system_controller(Data_logger):
 
                         df_mouseLog = df_mouseLog.iloc[-1]
 
-                        #print('hasLog')
+
                         v_ = eval(df_mouseLog['Variables'])
 
                         #handle moving to next stage
@@ -251,7 +251,7 @@ class system_controller(Data_logger):
             self.mouse_data['exit_time'] = datetime.now().strftime('%Y-%m-%d-%H%M%S')
             self.GUI.mouse_df
 
-            #print("HERE")
+
             self.PYC.stop_framework()
             time.sleep(.05)
             self.PYC.process_data()
@@ -339,11 +339,11 @@ class system_controller(Data_logger):
 
         for k in self.mouse_data.keys():
             if k in df_mouseLog.columns:
-                #print(k,self.mouse_data[k])
+
                 df_mouseLog.loc[entry_nr,k] = self.mouse_data[k]
 
         df_mouseLog.loc[entry_nr,'Variables'] = repr(v_)
-        #print(df_mouseLog,entry_nr)
+
         df_mouseLog = df_mouseLog.loc[:, ~df_mouseLog.columns.str.contains('^Unnamed')]
         df_mouseLog.to_csv(logPth)
 
