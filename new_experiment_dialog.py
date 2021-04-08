@@ -387,9 +387,8 @@ class new_experiment_dialog(QtGui.QDialog):
 
     def run_experiment(self):
 
-        """ ADD WARNING IF YOU ARE DUPLICATING MOUSE NAMES OR RFIDS!!!!
-
-
+        """ 
+        ADD WARNING IF YOU ARE DUPLICATING MOUSE NAMES OR RFIDS!!!!
         """
         ## Create all the paths for data
         exp_path = os.path.join(data_dir,self.set_experiment_name)
@@ -418,8 +417,8 @@ class new_experiment_dialog(QtGui.QDialog):
 
                 self._create_mouse_exp_log(row['Mouse_ID'])
 
-            print("HERE")
-            print(self.GUI.mouse_df)
+
+
             self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
             self.GUI.mouse_window_tab.list_of_mice.fill_table()
 
@@ -432,6 +431,8 @@ class new_experiment_dialog(QtGui.QDialog):
             self.GUI.exp_df.loc[entry_nr,'User'] = self.GUI.active_user
             self.GUI.exp_df.loc[entry_nr,'Protocol'] = self.set_protocol
             self.GUI.exp_df.loc[entry_nr,'Subjects'] = self.df_mouse_tmp['Mouse_ID'].values
+            self.GUI.exp_df.loc[entry_nr,'n_subjects'] = len(self.df_mouse_tmp['Mouse_ID'].values)
+            self.GUI.exp_df.loc[entry_nr,'Active'] = True
 
             for stup in self.df_setup_tmp['Setup_ID'].values:
 
