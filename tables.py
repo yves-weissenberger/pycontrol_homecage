@@ -28,8 +28,8 @@ class variables_table(QtGui.QTableWidget):
     " Table that tracks what variables a mouse currently running in a task has"
 
     def __init__(self,GUI,parent=None):
-        super(QtGui.QTableWidget, self).__init__(1,6, parent=parent)
-        self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent','Summary',''])
+        super(QtGui.QTableWidget, self).__init__(1,7, parent=parent)
+        self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent','Summary','Set',''])
         self.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
         self.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.Stretch)
         self.horizontalHeader().setResizeMode(5, QtGui.QHeaderView.ResizeToContents)
@@ -64,6 +64,10 @@ class variables_table(QtGui.QTableWidget):
         subject_cbox.activated.connect(self.update_available)
         persistent = TableCheckbox()
         summary    = TableCheckbox()
+        set_var = TableCheckbox()
+        
+        set_var.checkbox.stateChanged.connect(partial(self.setVar_changed,self.n_variables))
+        persistent.checkbox.stateChanged.connect(partial(self.persistent_changed,self.n_variables))
         remove_button = QtGui.QPushButton('remove')
         ind = QtCore.QPersistentModelIndex(self.model().index(self.n_variables, 2))
         remove_button.clicked.connect(lambda :self.remove_variable(ind.row()))
@@ -74,8 +78,9 @@ class variables_table(QtGui.QTableWidget):
         self.setCellWidget(self.n_variables  ,1, subject_cbox)
         self.setCellWidget(self.n_variables  ,3, persistent)
         self.setCellWidget(self.n_variables  ,4, summary)
-        self.setCellWidget(self.n_variables  ,5, remove_button)
-        self.setCellWidget(self.n_variables+1,5, add_button)
+        self.setCellWidget(self.n_variables  ,5, set_var)
+        self.setCellWidget(self.n_variables  ,6, remove_button)
+        self.setCellWidget(self.n_variables+1,6, add_button)
         if var_dict: # Set cell values from provided dictionary.
             variable_cbox.addItems([var_dict['name']])
             subject_cbox.addItems([var_dict['subject']])
@@ -84,6 +89,7 @@ class variables_table(QtGui.QTableWidget):
             self.setItem(self.n_variables, 2, value_item)
             persistent.setChecked(var_dict['persistent'])
             summary.setChecked(var_dict['summary'])
+            set_var.setChecked(var_dict['set'])
         else:
             variable_cbox.addItems(['select variable']+self.available_variables)
             if self.n_variables > 0: # Set variable to previous variable if available.
@@ -95,6 +101,14 @@ class variables_table(QtGui.QTableWidget):
         self.update_available()
         null_resize(self)
     
+    def persistent_changed(self,row,item):
+        """ A variables cannot be both persistent and set"""
+        #print("updateing",row)
+        self.cellWidget(row,5).setChecked(False)
+
+    def setVar_changed(self,row,item):
+        self.cellWidget(row,3).setChecked(False)
+
     def update_available(self, i=None):
             # Find out what variable-subject combinations already assigned.
             self.assigned = {v_name:[] for v_name in self.variable_names}
@@ -175,7 +189,8 @@ class variables_table(QtGui.QTableWidget):
                  'subject'   : str(self.cellWidget(v,1).currentText()),
                  'value'     : str(self.item(v, 2).text()) if self.item(v,2) else '',
                  'persistent': self.cellWidget(v,3).isChecked(),
-                 'summary'   : self.cellWidget(v,4).isChecked()}
+                 'summary'   : self.cellWidget(v,4).isChecked(),
+                 'set'       : self.cellWidget(v,5).isChecked()}
                  for v in range(self.n_variables)]
 
 

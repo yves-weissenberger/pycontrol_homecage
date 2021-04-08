@@ -100,7 +100,7 @@ class mouse_window(QtGui.QWidget):
         """ This function updates variables in the mousetable for future use 
             REMEMBER TO CHECK TYPES OF DICT ELEMENTS ONCE THIS IS RUNNING!!!!
         """
-        self.variables_table.setEnabled(False)
+        self.variables_table.setEnabled(False)  #after update of variables table, turn this off
 
         all_variables = self.variables_table.variables_list()
         unique_mice = list(set([i['subject'] for i in all_variables]))
@@ -109,14 +109,18 @@ class mouse_window(QtGui.QWidget):
             #print(ms_rfid)
             #persistent variables persist over sessions
             #all_variables =  self.variables_table.subject_variable_names[ms_rfid]
-            persistent_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables if ((i['subject']==ms_rfid) and (i['persistent']))])
+            persistent_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables
+                                            if ((i['subject']==ms_rfid) and
+                                            (i['persistent']))])
             #summary variables are send with the data 
-            summary_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables if ((i['subject']==ms_rfid) and (i['summary']))])
+            summary_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables
+                                     if ((i['subject']==ms_rfid) and
+                                     (i['summary']))])
             #set variables are different to default values in the task file but not persistent across sessions
-            set_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables if ((i['subject']==ms_rfid) and 
-                                                                                             not (i['persistent'])
-                                                                                             and i['value']!=self.default_variables[i['name']]
-                                                                                             )])
+            set_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables 
+                                    if ((i['subject']==ms_rfid) and 
+                                    not (i['persistent'])
+                                    and i['set'] )])
 
             self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(ms_rfid),'summary_variables'] = json.dumps(summary_variables_dict)
             self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(ms_rfid),'persistent_variables'] = json.dumps(persistent_variables_dict)
@@ -153,23 +157,31 @@ class mouse_window(QtGui.QWidget):
             mouseTask = mouseRow['Task'].values[0] + '.py'
 
             summary_variables = {}; persistent_variables = {}; set_variables = {}
-            if not pd.isnull(mouseRow['summary_variables'].values): summary_variables = eval(mouseRow['summary_variables'].values[0])
-            if not pd.isnull(mouseRow['persistent_variables'].values): persistent_variables = eval(mouseRow['persistent_variables'].values[0])
-            if not pd.isnull(mouseRow['set_variables'].values): set_variables = eval(mouseRow['set_variables'].values[0])  #set variables are persistent variables that are not updated. Is this necessary??
+            if not pd.isnull(mouseRow['summary_variables'].values): 
+                summary_variables = eval(mouseRow['summary_variables'].values[0])
+            if not pd.isnull(mouseRow['persistent_variables'].values):
+                persistent_variables = eval(mouseRow['persistent_variables'].values[0])
+            if not pd.isnull(mouseRow['set_variables'].values):
+                set_variables = eval(mouseRow['set_variables'].values[0])  #set variables are persistent variables that are not updated. Is this necessary?? YES
+            
             task_dir = os.path.join(main_path,'tasks')
             task_path = os.path.join(task_dir,mouseTask)
             self.default_variables =  get_variables_and_values_from_taskfile(task_path)
             self.variable_names =  list(set(self.default_variables.keys()))#get_variables_from_taskfile(task_path)
             self.variables_table.set_variable_names(self.variable_names)
             self.variables_table.set_variable_names_by_subject(sel_RFID,self.variable_names)
+            #if you are showing all variables
             if self.show_all_vars_checkbox.isChecked():
+                #for all variables
                 for k,v in self.default_variables.items():
-                    persistent = False; summary = False
+                    persistent = False; summary = False; set_var = False
 
+                    #set varaible has lesser priority than persistent
+                    if k in set_variables.keys():
+                        v = set_variables[k]; set_var = True
+                    #if the variable in persistent, store that it is persistent and store its value
                     if k in persistent_variables.keys():
                         v = persistent_variables[k]; persistent = True
-                    if k in set_variables.keys():
-                        v = set_variables[k]
                     if k in summary_variables.keys():
                         summary = True
 
@@ -177,7 +189,8 @@ class mouse_window(QtGui.QWidget):
                                 'subject': sel_RFID,
                                 'value': v,
                                 'persistent': persistent,
-                                'summary': summary}
+                                'summary': summary,
+                                'set': set_var}
                     self.variables_table.add_variable(var_dict)
 
 
