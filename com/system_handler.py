@@ -239,7 +239,7 @@ class system_controller(Data_logger):
                 self.PYC.start_framework()
 
 
-                self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'current_weight'] = self.mouse_data['weight']
+                self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Current_weight'] = self.mouse_data['weight']
                 self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = True
                 self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = mouse_ID
 
