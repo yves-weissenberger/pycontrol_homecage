@@ -105,7 +105,23 @@ def check_mouse_weights(user,all_mouse_csv,logger_start):
 
 
     return weight_dict,warn
+def check_GUI_error_log(setup_dir,error_log_on_startup=None):
+    """ Function to check the error log."""
+    w4 = False
 
+    GUI_error_log_path = os.path.join(setup_dir,'exception_store.txt')
+
+    with open(GUI_error_log_path,'r') as f:
+        GELP = f.readlines()
+
+    if error_log_on_startup is not None:
+        elog = [l_ for l_ in GELP if l_ not in error_log_on_startup]
+    else: #if its none just return the whole error log for reference
+        elog = GELP
+        
+    if elog:
+        w4 = True
+    return w4, elog
 def construct_warning_message(logger_active,ac_state,weight_dict):
     warning_message = "SOMETHING IS WRONG, CHECK NOW!" \
                   + json.dumps(ac_state,indent=4) + '\n' + json.dumps(weight_dict,indent=4) + '\n' +  json.dumps(logger_active,indent=4)
@@ -175,6 +191,7 @@ if __name__=='__main__':
             warning_checkDict[u] = datetime.now() - timedelta(days=1)
 
     last_regular_update = datetime.now() - timedelta(days=2)
+    _,error_log_on_startup = check_GUI_error_log(setup_dir)
     while True:
         now = datetime.now()
         #print(now,last_check)
@@ -195,6 +212,7 @@ if __name__=='__main__':
 
                 weight_dict, w3 = check_mouse_weights(user,all_mice_csv,daemon_start_time)
 
+                w4, message = check_GUI_error_log(setup_dir,error_log_on_startup)
                 if (abs(now-last_regular_update).total_seconds()/3600.)>24:
                     send_regular_update(weight_dict,user_dicts[user])
                     last_regular_update = datetime.now()
