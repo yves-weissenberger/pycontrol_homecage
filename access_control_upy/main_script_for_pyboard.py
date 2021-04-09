@@ -121,7 +121,8 @@ class handler():
                         weights.append(weight)
 
                         #This is a second check so that the entry door does not stay unnecessarily closed
-                        if ((mean(weights)-self.baseline_read)<ONE_MOUSE and len(weights)>1):
+                        #this value must be greater than 2
+                        if ((mean(weights)-self.baseline_read)<ONE_MOUSE and len(weights)>2):
                             break
                     filt_w = [0] + [1./(abs(weights[ix]-j)+abs(weights[ix+2]-j))**2 for ix,j in enumerate(weights[1:-1])] + [0]
                     filt_sum = float(sum(filt_w))
@@ -336,13 +337,15 @@ class handler():
                         weight = AC_handler.loadcell.weigh()
                         pyb.delay(10)
                         com.write(build_msg('calW:'+str(weight)))
-        except:
+        except Exception as e:
+            for mag in range(4):
+                MAGs[mag].value(0)
+
                 state = 'error_state'
                 com.write(build_msg('state:' + str(state)))
+                com.write(build_msg(str(e)))
 
-                for mag in range(4):
-                    MAGs[mag].value(0)
-
+               
 
 
 
