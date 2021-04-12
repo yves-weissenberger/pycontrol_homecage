@@ -1,3 +1,4 @@
+import sys
 import pyb
 from pyb import Pin
 from access_control_upy.access_control_1_0 import Access_control_upy
@@ -57,6 +58,7 @@ class handler():
         #state = 'error_state'
         has_send_error = False
         try:
+
             while True:
 
                 if state=='allow_entry':
@@ -341,10 +343,9 @@ class handler():
             for mag in range(4):
                 MAGs[mag].value(0)
 
-                state = 'error_state'
-                com.write(build_msg('state:' + str(state)))
-                com.write(build_msg(str(e)))
-
+            state = 'error_state'
+            com.write(build_msg('state:' + str(state)))
+            com.write(build_msg(str(e)))
                
 
 

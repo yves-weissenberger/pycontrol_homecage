@@ -62,8 +62,8 @@ def check_ac_status(user):
 
             if 'state' in l:
                 current_state = re.findall('state:(.*)_-2',l)[0]
-
                 break
+            
         if current_state=='error_state':
             logger_state[setup_row['Setup_ID']] = current_state
             warn = True

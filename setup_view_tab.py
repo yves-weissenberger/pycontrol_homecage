@@ -206,16 +206,16 @@ class setups_tab(QtGui.QWidget):
 
 
     def _refresh(self):
-
+        """ find which training seutps are available """
         ports = find_setups(self.GUI)
+        ports = [i for i in ports if i not in (self.GUI.setup_df['COM'].tolist() + self.GUI.setup_df['COM_AC'].tolist())]   
 
         prev = ['Select Training Setup'] + list(ports)
 
         new_prop_cat = [self.cat_combo_box.itemText(i) for i in range(self.cat_combo_box.count())]
-
-
-        if new_prop_cat!=['Select Training Setup'] + list(find_setups(self.GUI)):
-
+        #print(new_prop_cat)
+        if new_prop_cat!=prev:
+            print(new_prop_cat,prev)
             self.cat_combo_box.clear()
             self.cact_combo_box.clear()
             tmp = [i for i in ports if i not in (self.GUI.setup_df['COM'].tolist() + self.GUI.setup_df['COM_AC'].tolist())]   
