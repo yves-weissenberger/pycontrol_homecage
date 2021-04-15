@@ -149,6 +149,10 @@ class system_controller(Data_logger):
         elif state=='mouse_training':
 
             if self.data_file is None:
+                #The purpose of this if statement is to guard against
+                #cases where the state changes to check_mouse_in_ac
+                #then decides to back into training chamber so state
+                #changes back to 'mouse_training'
 
                 mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
 

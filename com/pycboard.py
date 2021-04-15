@@ -146,7 +146,7 @@ class Pycboard(Pyboard):
         self.serial.write(b'\x03') # Stop signal
         self.framework_running = False
 
-    def process_data(self):
+def process_data(self):
         '''Read data from serial line, generate list new_data of data tuples, 
         pass new_data to data_logger and print_func if specified, return new_data.'''
         new_data = []
@@ -155,7 +155,10 @@ class Pycboard(Pyboard):
             new_byte = self.serial.read(1)  
             if new_byte == b'A': # Analog data, 13 byte header + variable size content.
                 data_header = self.serial.read(13)
-                typecode      = data_header[0:1].decode()             
+                typecode      = data_header[0:1].decode() 
+                if typecode not in ('b','B','h','H','l','L'):
+                    new_data.append(('!','bad typecode A'))
+                    continue   
                 ID            = int.from_bytes(data_header[1:3], 'little')
                 sampling_rate = int.from_bytes(data_header[3:5], 'little')
                 data_len      = int.from_bytes(data_header[5:7], 'little')
