@@ -146,7 +146,7 @@ class Pycboard(Pyboard):
         self.serial.write(b'\x03') # Stop signal
         self.framework_running = False
 
-def process_data(self):
+    def process_data(self):
         '''Read data from serial line, generate list new_data of data tuples, 
         pass new_data to data_logger and print_func if specified, return new_data.'''
         new_data = []
