@@ -296,39 +296,49 @@ class system_controller(Data_logger):
 
 
     def close_files(self):
-        
+        ##NEED TO UPDATE THIS FUNCTION SO THAT ON ERROR IT CLOSES THE DATA FILES AND 
+        # UPDATES THE variables file appropriately. Also should make a note that an error 
+        #ocurred if it does.
         if self.data_file:
-
-            self.data_file.writelines("Variables")
-            v_ = self.PYC.get_variables()
-            self.data_file.writelines(repr(v_))
-            self.data_file.close()
+            RUN_ERROR = False
             try:
+                v_ = self.PYC.get_variables()
+                self.data_file.writelines("Variables")
+                self.data_file.writelines(repr(v_))
                 persistent_variables = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
                 for k,v__ in v_.items():
                     k = 'v.' + k
                     if k in persistent_variables.keys():
                         persistent_variables[k] = v__
-                self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'] = json.dumps(persistent_variables)
+                self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'] = json.dumps(persistent_variables) #ignore this line
             except ValueError as e:
                 print(e)
+                v_ = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
+                RUN_ERROR = True
 
-
-
-            self.update_mouseLog(v_)
+            self.data_file.close()
+            self.update_mouseLog(v_,RUN_ERROR)
 
             self.data_file = None
             self.file_path = None
+            if 'RUN_ERROR' not in self.GUI.mouse_df.columns:
+                self.GUI.mouse_df.insert(len(self.GUI.mouse_df.columns),'RUN_ERROR',pd.Series(),True) 
+
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'RUN_ERROR'] = RUN_ERROR
             self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = False
+            self.GUI.mouse_df =  self.GUI.mouse_df.loc[:, ~ self.GUI.mouse_df.columns.str.contains('^Unnamed')]
+
             self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
             self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = ''
+            self.GUI.setup_df =  self.GUI.setup_df.loc[:, ~ self.GUI.setup_df.columns.str.contains('^Unnamed')]
             self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+
         for analog_file in self.analog_files.values():
             if analog_file:
                 analog_file.close()
                 analog_file = None
 
-    def update_mouseLog(self,v_):
+    def update_mouseLog(self,v_,RUN_ERROR):
 
         " Update the log of mouse behavior. v_ are the variables"
 
@@ -337,16 +347,19 @@ class system_controller(Data_logger):
 
         logPth = os.path.join(mice_dir,mouse_ID+'.csv')
         df_mouseLog = pd.read_csv(logPth)
+
         
         entry_nr = len(df_mouseLog)
         df_mouseLog.append(pd.Series(), ignore_index = True)
+        if 'RUN_ERROR' not in df_mouseLog.columns:
+            df_mouseLog.insert(len(df_mouseLog.columns),'RUN_ERROR',pd.Series(),True) 
 
         for k in self.mouse_data.keys():
             if k in df_mouseLog.columns:
-
                 df_mouseLog.loc[entry_nr,k] = self.mouse_data[k]
 
         df_mouseLog.loc[entry_nr,'Variables'] = repr(v_)
+        df_mouseLog.loc[entry_nr,'RUN_ERROR'] = RUN_ERROR
 
         df_mouseLog = df_mouseLog.loc[:, ~df_mouseLog.columns.str.contains('^Unnamed')]
         df_mouseLog.to_csv(logPth)
