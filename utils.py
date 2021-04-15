@@ -142,9 +142,7 @@ def load_data_csv():
     fp = os.path.join(mice_dir,'mice.csv')
     mouse_df = pd.read_csv(fp)
     mouse_df.file_location = fp
-    #fl = mouse_df.file_location
-    #mouse_df['set_variables'] = ""
-    #mouse_df.to_csv(fl)
+
     for col in mouse_df.columns:
         if 'Unnamed' in col:
             mouse_df.drop(col, inplace=True, axis=1)

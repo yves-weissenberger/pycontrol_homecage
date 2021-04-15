@@ -39,7 +39,9 @@ def check_loggers_running(user):
         last_delta = ((now-last_time).total_seconds())
         active_dict[setup_row['Setup_ID']] = last_time.strftime("%m/%d/%Y, %H:%M:%S")
 
-        if (last_delta>12): warn = True
+        #extended the time until warning message comes on to 5 minutes
+        # for mice who linger in the training apparatus.
+        if (last_delta>300): warn = True
     return active_dict,warn
 
 def check_ac_status(user):

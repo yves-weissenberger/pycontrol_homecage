@@ -238,10 +238,9 @@ class setups_tab(QtGui.QWidget):
             sure.exec_()
             if sure.GO:
                 fl = self.GUI.setup_df.file_location
-                #self.
+
                 self.GUI.setup_df = self.GUI.setup_df.drop(self.GUI.setup_df.index[isChecked])
                 self.GUI.setup_df.file_location = fl
-                #print(self.GUI.setup_df)
 
                 self.list_of_setups.fill_table()
                 self.GUI.system_tab.list_of_setups.fill_table()

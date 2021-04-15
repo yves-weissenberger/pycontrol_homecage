@@ -57,6 +57,7 @@ class handler():
         ## This is the infinite loop
         #state = 'error_state'
         has_send_error = False
+        first_check = True  #first check is a variable that basically ensures that a mouse must be stuck for 2 sets of scale readings before an error state is raised
         try:
 
             while True:
@@ -251,22 +252,30 @@ class handler():
 
                 if (state=='mouse_training') or (state=='allow_entry'):
                     ##here re-baseline the scale
-                    if abs(micros.counter() - last_check)>500000:
+                    if abs(micros.counter() - last_check)>(10**6):  #do handshake once per second
                         last_check = micros.counter()
+                       
 
 
                         #if abs(CW-self.baseline_read)<1:
                         Wbase = float(AC_handler.loadcell.weigh(times=1))
-                        self.baseline_read = self.baseline_alpha*Wbase + (1-self.baseline_alpha)*self.baseline_read
                         com.write(build_msg('Wbase:'+str(Wbase)))
                         #com.write(build_msg('Wbase:' + str(Wbase)))
 
+                        #if one Wbase weight is greater than the weight of one mouse, then double check
+                        #that weight by weighing 10 times. If that weight is still above the weight of one
+                        #mouse, then come back in 1s and check again. If the weight is still too high, go
+                        #into an error state
                         if Wbase>ONE_MOUSE:
                             CW = AC_handler.loadcell.weigh(times=10)
                             if float(CW)>ONE_MOUSE:
-                                state = 'error_state'
-                                com.write(build_msg('state:' + str(state)))
-
+                                if not first_check:
+                                    state = 'error_state'
+                                    com.write(build_msg('state:' + str(state)))
+                                first_check = False
+                        else:
+                            first_check = True
+                            self.baseline_read = self.baseline_alpha*Wbase + (1-self.baseline_alpha)*self.baseline_read
 
                 if state=='allow_exit':
 

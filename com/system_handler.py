@@ -324,13 +324,17 @@ class system_controller(Data_logger):
             if 'RUN_ERROR' not in self.GUI.mouse_df.columns:
                 self.GUI.mouse_df.insert(len(self.GUI.mouse_df.columns),'RUN_ERROR',pd.Series(),True) 
 
+            mouse_fl = self.GUI.mouse_df.file_location
             self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'RUN_ERROR'] = RUN_ERROR
             self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = False
             self.GUI.mouse_df =  self.GUI.mouse_df.loc[:, ~ self.GUI.mouse_df.columns.str.contains('^Unnamed')]
+            self.GUI.mouse_df.file_location = mouse_fl 
 
+            setup_fl = self.GUI.setup_df.file_location
             self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
             self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = ''
             self.GUI.setup_df =  self.GUI.setup_df.loc[:, ~ self.GUI.setup_df.columns.str.contains('^Unnamed')]
+            self.GUI.setup_df.file_location = setup_fl
             self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
 
         for analog_file in self.analog_files.values():
@@ -340,7 +344,12 @@ class system_controller(Data_logger):
 
     def update_mouseLog(self,v_,RUN_ERROR):
 
-        " Update the log of mouse behavior. v_ are the variables"
+        """ Update the log of mouse behavior. v_ are the variables
+            If there is an error retrieving variables from the
+            pyboard, then copies over variables from the previous
+            session
+            
+        """
 
         mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
         mouse_ID = mouse_row['Mouse_ID'].values[0]
