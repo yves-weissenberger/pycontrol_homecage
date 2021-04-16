@@ -167,7 +167,21 @@ def ITI(event):
             v.rewarded_state = v.fixed_seq.index(v.rewarded_poke)
             v.n_rewards_at_loc = 0 
         v.current_state = random.choice([i for i in range(len(v.fixed_seq)) if i!=v.rewarded_state])
+        v.isActive = False
     if event=='iti_timer':
-        goto_state('handle_poke')
+        v.available_pokes = [v.fixed_seq[v.current_state]]
+        for pk in range(9):
+            if pk in v.available_pokes:
+                hw.poke_list[pk].LED.on()
+            else:
+                hw.poke_list[pk].LED.off()       
+        v.isActive = True
+
+    if event[-1] in v.state_str:  #check that event is an in-poke
+        if v.isActive:
+            chosen_poke = int(event[-1]) - 1
+            if chosen_poke in v.available_pokes:
+                v.current_state = v.fixed_seq.index(chosen_poke)
+                goto_state('handle_poke')
 
 

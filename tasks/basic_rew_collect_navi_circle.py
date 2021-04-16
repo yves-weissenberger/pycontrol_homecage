@@ -179,5 +179,6 @@ def ITI(event):
         if v.isActive:
             chosen_poke = int(event[-1]) - 1
             if chosen_poke in v.available_pokes:
+                v.current_state = v.fixed_seq.index(chosen_poke)
                 goto_state('handle_poke')
 
