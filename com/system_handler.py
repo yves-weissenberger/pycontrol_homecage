@@ -311,7 +311,7 @@ class system_controller(Data_logger):
                     if k in persistent_variables.keys():
                         persistent_variables[k] = v__
                 self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'] = json.dumps(persistent_variables) #ignore this line
-            except ValueError as e:
+            except Exception as e:
                 print(e)
                 v_ = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
                 RUN_ERROR = True
@@ -329,9 +329,9 @@ class system_controller(Data_logger):
             self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = False
             self.GUI.mouse_df =  self.GUI.mouse_df.loc[:, ~ self.GUI.mouse_df.columns.str.contains('^Unnamed')]
             self.GUI.mouse_df.file_location = mouse_fl 
+            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
 
             setup_fl = self.GUI.setup_df.file_location
-            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
             self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = ''
             self.GUI.setup_df =  self.GUI.setup_df.loc[:, ~ self.GUI.setup_df.columns.str.contains('^Unnamed')]
             self.GUI.setup_df.file_location = setup_fl
