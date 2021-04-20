@@ -159,96 +159,96 @@ class system_controller(Data_logger):
                 mouse_ID = mouse_row['Mouse_ID'].values[0]
                 prot = mouse_row['Protocol'].values[0]
 
-                
+                if prot:
+            
+                    if 'task' in prot:
+                        # if the current protocol is simply to run a task do so
+                        task = mouse_row['Task'].values[0]
+                        self.GUI.print_msg("Uploading: " + str(task) ,ac_pyc='pyc')
 
-                if 'task' in prot:
-                    # if the current protocol is simply to run a task do so
-                    task = mouse_row['Task'].values[0]
-                    self.GUI.print_msg("Uploading: " + str(task) ,ac_pyc='pyc')
-
-                    self.PYC.setup_state_machine(sm_name=task)
-
-
-                    if not pd.isnull(mouse_row['summary_variables'].values):
-                        summary_variables = eval(mouse_row['summary_variables'].values[0])
-                    if not pd.isnull(mouse_row['set_variables'].values):
-                        set_variables = eval(mouse_row['set_variables'].values[0])
-                        if set_variables:
-                            for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
-                    if not pd.isnull(mouse_row['persistent_variables'].values):
-                        persistent_variables = eval(mouse_row['persistent_variables'].values[0])
-                        if persistent_variables:
-                            for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                        self.PYC.setup_state_machine(sm_name=task)
 
 
-
-
-                    
-
-                else:
-                    # If running a real protocol, handle (potential) update of protocol.
-                    newStage = False
-                    stage = mouse_row['Stage'].values[0]
-                    with open(os.path.join(protocol_dir,prot),'r') as f:
-                        mouse_prot = json.loads(f.read())
-
-                    #read last stage of training
-                    logPth = os.path.join(mice_dir,mouse_ID+'.csv')
-                    df_mouseLog = pd.read_csv(logPth)
-
-                    if len(df_mouseLog)>0:
-
-                        df_mouseLog = df_mouseLog.iloc[-1]
-
-
-                        v_ = eval(df_mouseLog['Variables'])
-
-                        #handle moving to next stage
-                        if mouse_prot[str(stage)]['threshV']:
-
-                            for k,thresh in mouse_prot[str(stage)]['threshV']:
-                                print(float(v_[k]),float(thresh),float(v_[k])>=float(thresh))
-                                if float(v_[k])>=float(thresh):
-                                    newStage = True
-                                    stage += 1
-
-
-                    task = mouse_prot[str(stage)]['task']
-
-                    self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Task'] = task
-                    self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Stage'] = stage
-
-                    self.PYC.setup_state_machine(sm_name=task)
-
-                    #handle setting varibles
-
-                    for k,defV in mouse_prot[str(stage)]['defaultV']:
-                        self.PYC.set_variable(k,float(defV))
-
-                    if len(df_mouseLog)>0:
-                        if not newStage:
-                            for k in mouse_prot[str(stage)]['trackV']:
-                                self.PYC.set_variable(k,float(v_[k]))
-
-
-                self.mouse_data['entry_time'] = now
-                self.mouse_data['task'] = task
+                        if not pd.isnull(mouse_row['summary_variables'].values):
+                            summary_variables = eval(mouse_row['summary_variables'].values[0])
+                        if not pd.isnull(mouse_row['set_variables'].values):
+                            set_variables = eval(mouse_row['set_variables'].values[0])
+                            if set_variables:
+                                for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                        if not pd.isnull(mouse_row['persistent_variables'].values):
+                            persistent_variables = eval(mouse_row['persistent_variables'].values[0])
+                            if persistent_variables:
+                                for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],eval(v))
 
 
 
 
-                self.open_data_file_(self.mouse_data['RFID'],now)
+                        
+
+                    else:
+                        # If running a real protocol, handle (potential) update of protocol.
+                        newStage = False
+                        stage = mouse_row['Stage'].values[0]
+                        with open(os.path.join(protocol_dir,prot),'r') as f:
+                            mouse_prot = json.loads(f.read())
+
+                        #read last stage of training
+                        logPth = os.path.join(mice_dir,mouse_ID+'.csv')
+                        df_mouseLog = pd.read_csv(logPth)
+
+                        if len(df_mouseLog)>0:
+
+                            df_mouseLog = df_mouseLog.iloc[-1]
 
 
-                self.PYC.start_framework()
+                            v_ = eval(df_mouseLog['Variables'])
+
+                            #handle moving to next stage
+                            if mouse_prot[str(stage)]['threshV']:
+
+                                for k,thresh in mouse_prot[str(stage)]['threshV']:
+                                    print(float(v_[k]),float(thresh),float(v_[k])>=float(thresh))
+                                    if float(v_[k])>=float(thresh):
+                                        newStage = True
+                                        stage += 1
 
 
-                self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Current_weight'] = self.mouse_data['weight']
-                self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = True
-                self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = mouse_ID
+                        task = mouse_prot[str(stage)]['task']
 
-                self.GUI.setup_window_tab.list_of_setups.fill_table()
-                self.GUI.system_tab.list_of_setups.fill_table()
+                        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Task'] = task
+                        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Stage'] = stage
+
+                        self.PYC.setup_state_machine(sm_name=task)
+
+                        #handle setting varibles
+
+                        for k,defV in mouse_prot[str(stage)]['defaultV']:
+                            self.PYC.set_variable(k,float(defV))
+
+                        if len(df_mouseLog)>0:
+                            if not newStage:
+                                for k in mouse_prot[str(stage)]['trackV']:
+                                    self.PYC.set_variable(k,float(v_[k]))
+
+
+                    self.mouse_data['entry_time'] = now
+                    self.mouse_data['task'] = task
+
+
+
+
+                    self.open_data_file_(self.mouse_data['RFID'],now)
+
+
+                    self.PYC.start_framework()
+
+
+                    self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Current_weight'] = self.mouse_data['weight']
+                    self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = True
+                    self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = mouse_ID
+
+                    self.GUI.setup_window_tab.list_of_setups.fill_table()
+                    self.GUI.system_tab.list_of_setups.fill_table()
 
 
         elif state=='allow_exit':
