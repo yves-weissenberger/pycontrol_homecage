@@ -123,7 +123,7 @@ class experiment_tab(QtGui.QWidget):
         for mouse in mice_in_exp:
 
             self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==mouse,'is_assigned'] = assigned
-            #self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
 
     def _update_setups(self,setups_in_exp,experiment=None):
         for setup in setups_in_exp:
@@ -131,7 +131,7 @@ class experiment_tab(QtGui.QWidget):
             #print(self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'])
             self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'] = experiment
             self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'in_use'] = experiment is not None  #this is what is checked in the new experiment dialog
-            #self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+            self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
 
 
     def _get_checks(self,table):
