@@ -39,7 +39,41 @@ class experiment_tab(QtGui.QWidget):
         pass
 
     def restart_experiment(self):
-        pass
+        """ Restart an experiment that is currently active that was running before """
+        isChecked = []
+        checked_ids =[]
+        name_col = self.list_of_experiments.header_names.index("Name")
+
+        for row in range(self.list_of_experiments.rowCount()):
+            checked = self.list_of_experiments.item(row,0).checkState()==2
+            if checked:
+                checked_ids.append(self.list_of_experiments.item(row,name_col).text())
+            isChecked.append(checked)
+
+        if len(isChecked)==1:
+            sure = are_you_sure_dialog()
+            sure.exec_()
+            if sure.GO:
+                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0]]
+                experiment_name = exp_row['Name'].values[0]
+                self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = True
+                #self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
+                mice_in_experiment = exp_row['Subjects']
+                setups = exp_row['Setups']
+                ###add check here to ensure setups are not double booked
+
+                self._update_mice(mice_in_exp=mice_in_experiment,assigned=True)
+                self._update_setups(setups_in_exp=setups,experiment=experiment_name)
+
+                self.GUI.setup_window_tab.list_of_setups.fill_table()
+                self.GUI.system_tab.list_of_setups.fill_table()
+                self.GUI.system_tab.list_of_experiments.fill_table()
+                self.GUI.mouse_window_tab.list_of_mice.fill_table()
+
+        else:
+            pass
+
+            
     def stop_experiment(self):
         #update the relevant mouse tables
         #update the experiment table
@@ -51,7 +85,7 @@ class experiment_tab(QtGui.QWidget):
         for row in range(self.list_of_experiments.rowCount()):
             checked = self.list_of_experiments.item(row,0).checkState()==2
             if checked:
-                checked_ids.append(self.list_of_experiments.item(row,name_col.text()))
+                checked_ids.append(self.list_of_experiments.item(row,name_col).text())
             isChecked.append(checked)
 
         if len(isChecked)==1:
@@ -60,24 +94,42 @@ class experiment_tab(QtGui.QWidget):
             if sure.GO:
                 exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0]]
                 self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = False
-                mice_in_experiment = exp_row['subjects']
-                setups = exp_row['Setups']
+                #self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
+                mice_in_experiment = exp_row['Subjects'].values[0]
+                setups = eval(exp_row['Setups'].values[0])
+                print(mice_in_experiment)
+                print(type(mice_in_experiment))
+                print("!!!!!!!!!!!")
                 self._update_mice(mice_in_exp=mice_in_experiment)
                 self._update_setups(setups_in_exp=setups)
+
+            #print(self.GUI.exp_df)
+            #print(self.GUI.setup_df['in_use'])
+            self.GUI.setup_window_tab.list_of_setups.fill_table()
+            self.GUI.system_tab.list_of_setups.fill_table()
+            self.GUI.system_tab.list_of_experiments.fill_table()
+            self.GUI.mouse_window_tab.list_of_mice.fill_table()
+            print("DONE")
+
         else:
             pass
 
         pass
     
-    def _update_mice(self,mice_in_exp):
+    def _update_mice(self,mice_in_exp,assigned=False):
         for mouse in mice_in_exp:
-            #This is not correct!!!!
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID'],'Protocol'] = None
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID'],'is_assigned'] = False
-            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
 
-    def _update_setups(self,setups_in_exp):
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==mouse,'is_assigned'] = False
+            #self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+
+    def _update_setups(self,setups_in_exp,experiment=None):
         for setup in setups_in_exp:
-            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID'],'Experiment'] = None
-            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID'],'in_use'] = False  #this is what is checked in the new experiment dialog
-            self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+            print(setup)
+            print(self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'])
+            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'] = experiment
+            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'in_use'] = experiment is None  #this is what is checked in the new experiment dialog
+            #self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+
+
+    def _get_checks(self,table):
+        pass

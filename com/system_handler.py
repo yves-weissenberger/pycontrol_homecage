@@ -158,8 +158,9 @@ class system_controller(Data_logger):
 
                 mouse_ID = mouse_row['Mouse_ID'].values[0]
                 prot = mouse_row['Protocol'].values[0]
+                isAssigned = mouse_row['is_assigned'].values[0]
 
-                if prot:
+                if isAssigned:
             
                     if 'task' in prot:
                         # if the current protocol is simply to run a task do so
@@ -253,14 +254,14 @@ class system_controller(Data_logger):
 
         elif state=='allow_exit':
             self.mouse_data['exit_time'] = datetime.now().strftime('%Y-%m-%d-%H%M%S')
-            self.GUI.mouse_df
+            #self.GUI.mouse_df
 
+            if self.data_file:
+                self.PYC.stop_framework()
+                time.sleep(.05)
+                self.PYC.process_data()
 
-            self.PYC.stop_framework()
-            time.sleep(.05)
-            self.PYC.process_data()
-
-            self.close_files()
+                self.close_files()
 
     def open_data_file_(self,RFID,now):
 
