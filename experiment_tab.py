@@ -7,7 +7,7 @@ import sys, os, pickle, time
 import copy as cp
 from tables import cageTable, experiment_overview_table
 
-
+from dialogs import are_you_sure_dialog
 #Ok in this tab want to get an overview of the experiments. The most important thing to
 #be able to do here in the first instance is to change the protocol being run.
 
@@ -35,8 +35,42 @@ class experiment_tab(QtGui.QWidget):
         self.Vlayout.addLayout(self.Hlayout)
         self.Vlayout.addWidget(self.list_of_experiments)
 
+    def _refresh(self):
+        pass
     def stop_experiment(self):
         #update the relevant mouse tables
         #update the experiment table
-        
+        #update the setups table
+        isChecked = []
+        checked_ids =[]
+        name_col = self.list_of_experiments.header_names.index("Name")
+
+        for row in range(self.list_of_experiments.rowCount()):
+            checked = self.list_of_experiments.item(row,0).checkState()==2
+            if checked:
+                checked_ids.append(self.list_of_experiments.item(row,name_col.text()))
+            isChecked.append(checked)
+
+        if len(isChecked)==1:
+            sure = are_you_sure_dialog()
+            sure.exec_()
+            if sure.GO:
+                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0]]
+                self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = False
+                mice_in_experiment = exp_row['subjects']
+                setups = exp_row['Setups']
+
+                #mice_in_experiment = self.GUI.exp_df.loc[]
+        else:
+            pass
+
         pass
+    
+    def _update_mice(self,mice_in_exp):
+        for mouse in mice_in_exp:
+            #This is not correct!!!!
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID'],'Experiment'] = None
+    def _update_setups(self,setups_in_exp):
+        for setup in setups_in_exp:
+            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID'],'Experiment'] = None
+        
