@@ -4,11 +4,11 @@ import random
 
 
 states = ['handle_poke',
-                    'reward_consumption',
-                    'deliver_reward',
-                    'lights_off',
-                    'change_task'
-                    ]
+        'reward_consumption',
+        'deliver_reward',
+        'lights_off',
+        'change_task'
+        ]
 
 initial_state = 'handle_poke'
 
@@ -48,7 +48,7 @@ v.n_rewards = 0
 v.light_pokes = 0
 v.dark_pokes = 0
 v.first_entry = True
-v.rew_dur = 20
+v.rew_dur = 30
 v.get_free_rew = False
 
 #a = 

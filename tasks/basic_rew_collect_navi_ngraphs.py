@@ -59,15 +59,15 @@ v.rewarded_state = v.fixed_seq.index(v.rewarded_poke)
 v.available_pokes = []
 v.iti_dur = 3000
 v.n_pokes = 0
-
+v.lseq  = len(v.fixed_seq) - 1
 v.lights_on_lag = 200
 v.isActive = False
 #-------------------------------------------------------------------------
 
 
 def run_start(): 
+    v.n_tasks = len(v.fixed_seq)
     hw.speaker.set_volume(30)
-    v.lseq  = len(v.fixed_seq) - 1
  
 def run_end():
     hw.off()
@@ -97,7 +97,6 @@ def set_available_pokes():
             hw.poke_list[pk].LED.on()
         else:
             hw.poke_list[pk].LED.off()
-    print(v.available_pokes)
 
 def lights_off():
 

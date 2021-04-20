@@ -141,6 +141,9 @@ class Visualizator(QtGui.QMainWindow):
 
         self.setup_window_tab._refresh()
         self.system_tab._refresh()
+        self.experiment_tab._refresh()
+        self.mouse_window_tab._refresh()
+        self.schedule_tab._refresh()
 
     def change_user(self):
         self.login.exec_()

@@ -251,3 +251,5 @@ class mouse_window(QtGui.QWidget):
 
 
 
+    def _refresh(self):
+        pass

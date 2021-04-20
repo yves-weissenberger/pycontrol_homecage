@@ -241,7 +241,8 @@ class scheduler(QtGui.QWidget):
 
         self.reset()
 
-
+    def _refresh(self):
+        pass
     def save(self):
         pth = os.path.join(protocol_dir,self.protocol_name + '.prot')
         print(pth)

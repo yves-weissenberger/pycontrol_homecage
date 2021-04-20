@@ -197,17 +197,17 @@ class variables_table(QtGui.QTableWidget):
 class experiment_overview_table(QtGui.QTableWidget):
     " Table for system tab that shows all experiments currently running"
 
-    def __init__(self, GUI, tab=None,parent=None):
+    def __init__(self, GUI, tab=None,only_active=False,parent=None):
         super(QtGui.QTableWidget, self).__init__(1,7, parent=parent)
-        self.header_names = ['Select','Name','Setups','User','Protocol','Subjects','n_subjects']
+        self.header_names = ['Select','Name','Setups','User','Active','Protocol','Subjects','n_subjects']
 
         self.tab = tab
         self.GUI = GUI
         self.setHorizontalHeaderLabels(self.header_names)
-        #for i in range(8):
-        #    self.horizontalHeader().setResizeMode(i, QtGui.QHeaderView.Stretch)
+
         self.verticalHeader().setVisible(False)
         self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
+        self.only_active = only_active
 
         self.select_nr = self.header_names.index("Select")
 
@@ -225,12 +225,13 @@ class experiment_overview_table(QtGui.QTableWidget):
 
             for col_index in range(self.columnCount()):
                 #print(index,col,row[col])
-                try:
-                    cHeader = self.header_names[col_index]
-                    #print(cHeader,row)
-                    self.setItem(row_index,col_index,Qt.QtWidgets.QTableWidgetItem(str(row[cHeader])))
-                except KeyError:
-                    pass
+                if ((not self.only_active) or (self.only_active and row['Active'])):
+                    try:
+                        cHeader = self.header_names[col_index]
+                        #print(cHeader,row)
+                        self.setItem(row_index,col_index,Qt.QtWidgets.QTableWidgetItem(str(row[cHeader])))
+                    except KeyError:
+                        pass
 
            
 
