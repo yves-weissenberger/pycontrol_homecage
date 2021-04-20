@@ -39,7 +39,7 @@ class new_experiment_dialog(QtGui.QDialog):
 
 
 
-
+        #print(self.GUI.setup_df)
         self.used_setups = []
         self.used_mice = []
         self.global_task = True
@@ -427,10 +427,10 @@ class new_experiment_dialog(QtGui.QDialog):
             entry_nr = len(self.GUI.exp_df)
             self.GUI.exp_df.append(pd.Series(), ignore_index=True)
             self.GUI.exp_df.loc[entry_nr,'Name'] = self.set_experiment_name
-            self.GUI.exp_df.loc[entry_nr,'Setups'] = list(self.df_setup_tmp['Setup_ID'].values)
+            self.GUI.exp_df.loc[entry_nr,'Setups'] = self.df_setup_tmp['Setup_ID'].values
             self.GUI.exp_df.loc[entry_nr,'User'] = self.GUI.active_user
             self.GUI.exp_df.loc[entry_nr,'Protocol'] = self.set_protocol
-            self.GUI.exp_df.loc[entry_nr,'Subjects'] = list(self.df_mouse_tmp['Mouse_ID'].values)
+            self.GUI.exp_df.loc[entry_nr,'Subjects'] = self.df_mouse_tmp['Mouse_ID'].values
             self.GUI.exp_df.loc[entry_nr,'n_subjects'] = len(self.df_mouse_tmp['Mouse_ID'].values)
             self.GUI.exp_df.loc[entry_nr,'Active'] = True
 

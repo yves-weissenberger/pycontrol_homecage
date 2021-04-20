@@ -21,6 +21,7 @@ class experiment_tab(QtGui.QWidget):
         self.Hlayout = QtGui.QHBoxLayout()
         self.new_experiment_button = QtGui.QPushButton('Start new Experiment')
         self.restart_experiment_button = QtGui.QPushButton('Restart Experiment')
+        self.restart_experiment_button.clicked.connect(self.restart_experiment)
         self.stop_experiment_button = QtGui.QPushButton('Stop Experiment')
         self.stop_experiment_button.clicked.connect(self.stop_experiment)
         self.Hlayout.addWidget(self.new_experiment_button)
@@ -58,18 +59,20 @@ class experiment_tab(QtGui.QWidget):
                 experiment_name = exp_row['Name'].values[0]
                 self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = True
                 #self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
-                mice_in_experiment = exp_row['Subjects']
-                setups = exp_row['Setups']
+                mice_in_experiment = eval(exp_row['Subjects'].values[0].replace(' ',','))
+                setups = eval(exp_row['Setups'].values[0].replace(' ',','))
                 ###add check here to ensure setups are not double booked
 
                 self._update_mice(mice_in_exp=mice_in_experiment,assigned=True)
                 self._update_setups(setups_in_exp=setups,experiment=experiment_name)
 
-                self.GUI.setup_window_tab.list_of_setups.fill_table()
-                self.GUI.system_tab.list_of_setups.fill_table()
                 self.GUI.system_tab.list_of_experiments.fill_table()
-                self.GUI.mouse_window_tab.list_of_mice.fill_table()
+                self.GUI.system_tab.list_of_setups.fill_table()
 
+                self.GUI.experiment_tab.list_of_experiments.fill_table()
+                self.GUI.mouse_window_tab.list_of_mice.fill_table()
+                self.GUI.setup_window_tab.list_of_setups.fill_table()
+                print("DONE")
         else:
             pass
 
@@ -95,22 +98,22 @@ class experiment_tab(QtGui.QWidget):
                 exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0]]
                 self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = False
                 #self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
-                mice_in_experiment = exp_row['Subjects'].values[0]
-                setups = eval(exp_row['Setups'].values[0])
-                print(mice_in_experiment)
-                print(type(mice_in_experiment))
-                print("!!!!!!!!!!!")
+                mice_in_experiment = eval(exp_row['Subjects'].values[0].replace(' ',','))
+                setups = eval(exp_row['Setups'].values[0].replace(' ',','))
+
                 self._update_mice(mice_in_exp=mice_in_experiment)
-                self._update_setups(setups_in_exp=setups)
+                self._update_setups(setups_in_exp=setups,experiment=None)
 
             #print(self.GUI.exp_df)
             #print(self.GUI.setup_df['in_use'])
-            self.GUI.setup_window_tab.list_of_setups.fill_table()
-            self.GUI.system_tab.list_of_setups.fill_table()
-            self.GUI.system_tab.list_of_experiments.fill_table()
-            self.GUI.mouse_window_tab.list_of_mice.fill_table()
-            print("DONE")
 
+            self.GUI.system_tab.list_of_experiments.fill_table()
+            self.GUI.system_tab.list_of_setups.fill_table()
+
+            self.GUI.experiment_tab.list_of_experiments.fill_table()
+            self.GUI.mouse_window_tab.list_of_mice.fill_table()
+            self.GUI.setup_window_tab.list_of_setups.fill_table()
+            
         else:
             pass
 
@@ -119,15 +122,15 @@ class experiment_tab(QtGui.QWidget):
     def _update_mice(self,mice_in_exp,assigned=False):
         for mouse in mice_in_exp:
 
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==mouse,'is_assigned'] = False
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==mouse,'is_assigned'] = assigned
             #self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
 
     def _update_setups(self,setups_in_exp,experiment=None):
         for setup in setups_in_exp:
-            print(setup)
-            print(self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'])
+            #print(setup)
+            #print(self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'])
             self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'] = experiment
-            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'in_use'] = experiment is None  #this is what is checked in the new experiment dialog
+            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'in_use'] = experiment is not None  #this is what is checked in the new experiment dialog
             #self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
 
 

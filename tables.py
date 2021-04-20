@@ -218,7 +218,7 @@ class experiment_overview_table(QtGui.QTableWidget):
 
     def fill_table(self):
         #print(self.GUI.setup_df)
-        
+        self.clearContents()
         self.setRowCount(len(self.GUI.exp_df))
 
         self.buttons = []
