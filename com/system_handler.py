@@ -179,7 +179,9 @@ class system_controller(Data_logger):
                         if not pd.isnull(mouse_row['persistent_variables'].values):
                             persistent_variables = eval(mouse_row['persistent_variables'].values[0])
                             if persistent_variables:
-                                for k,v in persistent_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                                for k,v in persistent_variables.items(): 
+                                    if v!='auto':
+                                        self.PYC.set_variable(k[2:],eval(v))
 
 
 

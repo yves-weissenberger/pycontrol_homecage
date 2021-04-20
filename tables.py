@@ -105,6 +105,7 @@ class variables_table(QtGui.QTableWidget):
         """ A variables cannot be both persistent and set"""
         #print("updateing",row)
         self.cellWidget(row,5).setChecked(False)
+        self.item(row,2).setText("auto")
 
     def setVar_changed(self,row,item):
         self.cellWidget(row,3).setChecked(False)
