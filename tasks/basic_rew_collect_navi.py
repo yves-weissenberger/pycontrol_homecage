@@ -70,6 +70,10 @@ def run_start():
     v.lseq  = len(v.fixed_seq) - 1
  
 def run_end():
+    if v.n_rewards>2:
+        v.n_till_guide -= 0 
+        if v.n_till_guide==0:
+            v.n_till_guide = 1
     hw.off()
 
 

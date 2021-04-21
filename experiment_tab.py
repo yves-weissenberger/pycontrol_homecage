@@ -49,7 +49,7 @@ class experiment_tab(QtGui.QWidget):
             checked = self.list_of_experiments.item(row,0).checkState()==2
             if checked:
                 checked_ids.append(self.list_of_experiments.item(row,name_col).text())
-            isChecked.append(checked)
+                isChecked.append(checked)
 
         if len(isChecked)==1:
             sure = are_you_sure_dialog()
@@ -81,6 +81,7 @@ class experiment_tab(QtGui.QWidget):
         #update the relevant mouse tables
         #update the experiment table
         #update the setups table
+        print("STOP")
         isChecked = []
         checked_ids =[]
         name_col = self.list_of_experiments.header_names.index("Name")
@@ -89,9 +90,10 @@ class experiment_tab(QtGui.QWidget):
             checked = self.list_of_experiments.item(row,0).checkState()==2
             if checked:
                 checked_ids.append(self.list_of_experiments.item(row,name_col).text())
-            isChecked.append(checked)
-
+                isChecked.append(checked)
+        print(isChecked)
         if len(isChecked)==1:
+            print("2222")
             sure = are_you_sure_dialog()
             sure.exec_()
             if sure.GO:
