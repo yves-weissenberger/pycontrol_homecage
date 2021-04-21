@@ -100,8 +100,8 @@ class experiment_tab(QtGui.QWidget):
                 exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0]]
                 self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = False
                 #self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
-                mice_in_experiment = eval(exp_row['Subjects'].values[0].replace(' ',','))
-                setups = eval(exp_row['Setups'].values[0].replace(' ',','))
+                mice_in_experiment = eval(exp_row['Subjects'].values[0])
+                setups = eval(exp_row['Setups'].values[0])
 
                 self._update_mice(mice_in_exp=mice_in_experiment)
                 self._update_setups(setups_in_exp=setups,experiment=None)

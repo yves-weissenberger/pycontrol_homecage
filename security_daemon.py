@@ -80,25 +80,34 @@ def check_mouse_weights(user,all_mouse_csv,logger_start):
     now = datetime.now()
     for _,mouse_row in all_mouse_csv.iterrows():
         if mouse_row['User']==user:
-            mouseID = mouse_row['Mouse_ID']
-            baseline = mouse_row['Start_weight']
-            mouse_csv = pd.read_csv(os.path.join(mice_dir,mouseID + '.csv'))
-            now_weight = mouse_csv.iloc[-1]['weight']
-            if mouse_csv.iloc[-1]['entry_time'][0]!='2':
-                last_seen = mouse_csv.iloc[-1]['entry_time'][1:] 
-            else: 
-                last_seen = mouse_csv.iloc[-1]['entry_time']
-            frac_baseline = float(now_weight)/float(baseline)
-            last_seen_datetime = datetime.strptime(last_seen,'%Y-%m-%d-%H%M%S')
+            try:
+                mouseID = mouse_row['Mouse_ID']
+                baseline = mouse_row['Start_weight']
+                start_time = datetime.strptime(mouse_row['Start_date'],'%m/%d/%Y, %H:%M:%S')
+                mouse_csv = pd.read_csv(os.path.join(mice_dir,mouseID + '.csv'))
+                now_weight = mouse_csv.iloc[-1]['weight']
 
-            delta_since_start = (now-logger_start).total_seconds()/3600.
+                if mouse_csv.iloc[-1]['entry_time'][0]!='2':
+                    last_seen = mouse_csv.iloc[-1]['entry_time'][1:] 
+                else: 
+                    last_seen = mouse_csv.iloc[-1]['entry_time']
+                frac_baseline = float(now_weight)/float(baseline)
+                last_seen_datetime = datetime.strptime(last_seen,'%Y-%m-%d-%H%M%S')
 
-            delta = (last_seen_datetime-now)
-            time_delta_hours = delta.days * 24 + delta.seconds/3600.
-            if (time_delta_hours>12.) and (delta_since_start>12.):
-                warn = True
-            if frac_baseline<0.88:
-                warn = True
+                delta_since_start = (now-logger_start).total_seconds()/3600.
+
+                delta = (last_seen_datetime-now)
+                time_delta_hours = delta.days * 24 + delta.seconds/3600.
+                if (time_delta_hours>12.) and (delta_since_start>12.):
+                    warn = True
+                if frac_baseline<0.88:
+                    warn = True
+            except IndexError:
+                if  ((now-start_time).total_seconds()/3600)>12:
+                    warn = True
+                now_weight = 'Not seen yet'
+                last_seen = start_time.strftime('%Y-%m-%d-%H%M%S')
+                frac_baseline = 'Not seen yet'
             weight_dict[mouseID+'__now_weight'] = now_weight
             weight_dict[mouseID+'__last_seen'] = last_seen
             weight_dict[mouseID+'__baseline'] = baseline
