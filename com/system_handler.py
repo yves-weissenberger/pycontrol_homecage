@@ -131,6 +131,7 @@ class system_controller(Data_logger):
 
         if state=='error_state':
             self.PYC.stop_framework()
+            time.sleep(.05)
             self.PYC.process_data()
             self.close_files()
 
@@ -321,6 +322,7 @@ class system_controller(Data_logger):
                 print(e)
                 if not (self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables']).isnull().values.any():
                     v_ = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
+                self.PYC.reset()
                 RUN_ERROR = True
 
             self.data_file.close()

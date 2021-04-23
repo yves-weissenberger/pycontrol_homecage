@@ -53,7 +53,6 @@ v.dark_pokes = 0
 v.first_entry = True
 v.rew_dur = 50
 v.get_free_rew = False
-
 #a = 
 # a.tolist()[:-1] + list(reversed(a[:]))  
 #v.seq = [1, 3, 6, 7, 2, 0, 2, 7, 6, 3]#[5,3,6,4,8,4,6,3]
@@ -61,8 +60,11 @@ v.seq =  [5, 4, 6, 8, 2, 0, 2, 8, 6, 4]
 print(v.seq)
 v.seq_ix = 0
 v.probe_probability = 0.25
+v.rew_probability = 0.5  # in [0,1] if 1 always rewards.
 v.probe_dur = 2000
 v.lseq  = len(v.seq)
+#v.current_rew_loc = [random.choice(v.seq[:6])]
+v.current_rew_loc = [5, 4, 6, 8, 2, 0]  #this is default deliver reward at all ports
 #-------------------------------------------------------------------------
 
 
@@ -79,7 +81,7 @@ def handle_poke(event):
 
     if event=='entry':
 
-        v.choice_poke = v.seq[v.seq_ix %v.lseq]#random.choice(range(9))
+        v.choice_poke = v.seq[v.seq_ix %v.lseq]
         v.seq_ix += 1
 
         if v.get_free_rew:
@@ -121,10 +123,12 @@ def handle_poke(event):
     if event[-1] in v.state_str:  #check that event is an in-poke
         chosen_poke = int(event[-1]) - 1
         if v.choice_poke==chosen_poke:
+            v.light_pokes += 1
+            if withprob(v.rew_probability):
                 goto_state('delay_state')
-                v.light_pokes += 1
+           
         else:
-                v.dark_pokes += 1
+            v.dark_pokes += 1
     if event=='rew_timer':
             hw.poke_list[v.choice_poke].SOL.off()
 
@@ -133,7 +137,8 @@ def delay_state(event):
         delay = random.randint(100,400)
         set_timer("rew_delay_timer",delay,output_event=True)
     if event=='rew_delay_timer':
-        goto_state('deliver_reward')
+        if v.choice_poke in v.current_rew_loc:
+            goto_state('deliver_reward')
 
 
 def deliver_reward(event):

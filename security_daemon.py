@@ -11,10 +11,11 @@ from email.mime.text import MIMEText
 
 import numpy as np
 import pandas as pd
+import requests
 
 from loc_def import all_paths, user_path
 from utils import get_user_dicts, get_users
-
+from pyhomecage_conf import post_url, SECRET_TOKEN
 #This is a basic script that runs, independently of pycontrol and looks for errors
 
 
@@ -188,7 +189,7 @@ def send_regular_update(mouse_dict,receiver_email):
     df = pd.DataFrame.from_dict(rows, orient='columns')
     message = MIMEText(df.to_html(), "html")
     send_email(message,subject='Daily Update',receiver_email=receiver_email)
-    send_email(message,subject='Daily Update',receiver_email="thomas.akam@psy.ox.ac.uk") 
+    #send_email(message,subject='Daily Update',receiver_email="thomas.akam@psy.ox.ac.uk") 
 
 if __name__=='__main__':
     daemon_start_time = datetime.now()
@@ -202,11 +203,12 @@ if __name__=='__main__':
             warning_checkDict[u] = datetime.now() - timedelta(days=1)
 
     last_regular_update = datetime.now() - timedelta(days=2)
+    last_post = datetime.now() - timedelta(days=2)
     _,error_log_on_startup = check_GUI_error_log(setup_dir)
     while True:
         now = datetime.now()
         #print(now,last_check)
-        if abs((now-last_check)).seconds>10:
+        if abs((now-last_check)).total_seconds()>10:
             print(now)
             users = get_users(); user_dicts = get_user_dicts()
             for u in users:
@@ -230,12 +232,20 @@ if __name__=='__main__':
 
                 if any([w1,w2,w3]) and (((datetime.now()-warning_checkDict[u]).total_seconds()/3600.)>1):
                     print('SENDING WARNING')
-                    warning_message = construct_warning_message(logger_active,ac_state,weight_dict)
-                    warning_message = MIMEText(warning_message)
+                    warning_message0 = construct_warning_message(logger_active,ac_state,weight_dict)
+                    warning_message = MIMEText(warning_message0)
                     send_email(warning_message,'WARNING',user_dicts[user])
                     warning_checkDict[u] = datetime.now()
 
-
+                if abs((now-last_post)).total_seconds()>7200:
+                    try:
+                        payload = {'token':SECRET_TOKEN,
+                                'text': warning_message0}
+                        out = requests.post(post_url,data=payload, timeout=15)
+                        print(out)
+                    except:
+                        pass
+                    last_post = datetime.now()
             last_check = datetime.now()
         time.sleep(600)
 
