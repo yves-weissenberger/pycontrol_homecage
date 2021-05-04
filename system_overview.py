@@ -217,10 +217,13 @@ class system_tab(QtGui.QWidget):
                         handler_.PYC.process_data()
                         handler_.close_files()
                         handler_.PYC.reset()
-                        handler_.PYC.close()
-                        handler_.AC.close()
-                        del self.GUI.controllers[setup]
+                        #handler_.PYC.close()
+                        #handler_.AC.close()
+                        #del self.GUI.controllers[setup]
                         self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Active'] = False
+                        self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'] = None
+                        self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+                        self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
                         #print(self.GUI.controllers)
                         print("CLOSED")
 
@@ -230,8 +233,9 @@ class system_tab(QtGui.QWidget):
                 pass
         #print(self.list_of_experiments.only_active)
         self.list_of_experiments.fill_table()
-        print(self.GUI.experiment_tab.list_of_experiments.only_active)
+        #print(self.GUI.experiment_tab.list_of_experiments.only_active)
         self.GUI.experiment_tab.list_of_experiments.fill_table()
+        self.GUI.setup_window_tab.list_of_setups.fill_table()
 
         #pass
 

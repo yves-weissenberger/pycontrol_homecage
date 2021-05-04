@@ -551,7 +551,7 @@ class cageTable(QtGui.QTableWidget):
         self.fill_table()
 
     def fill_table(self):
-
+        self.clearContents()
         self.setRowCount(len(self.GUI.setup_df))
 
         self.buttons = []

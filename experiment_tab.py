@@ -65,6 +65,8 @@ class experiment_tab(QtGui.QWidget):
 
                 self._update_mice(mice_in_exp=mice_in_experiment,assigned=True)
                 self._update_setups(setups_in_exp=setups,experiment=experiment_name)
+                self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+                self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
 
                 self.GUI.system_tab.list_of_experiments.fill_table()
                 self.GUI.system_tab.list_of_setups.fill_table()
