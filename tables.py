@@ -220,27 +220,32 @@ class experiment_overview_table(QtGui.QTableWidget):
     def fill_table(self):
         #print(self.GUI.setup_df)
         self.clearContents()
-        self.setRowCount(len(self.GUI.exp_df))
+        if self.only_active:
+            self.setRowCount(sum(self.GUI.exp_df['Active']))
+        else:
+            self.setRowCount(len(self.GUI.exp_df))
 
         self.buttons = []
-        for row_index, row in self.GUI.exp_df.iterrows():    
-
-            for col_index in range(self.columnCount()):
-                #print(index,col,row[col])
-                if ((not self.only_active) or (self.only_active and row['Active'])):
+        row_index = 0
+        for _, row in self.GUI.exp_df.iterrows():    
+            if ((not self.only_active) or (self.only_active and row['Active'])):
+                for col_index in range(self.columnCount()):
+                    #print(index,col,row[col])
                     try:
                         cHeader = self.header_names[col_index]
                         #print(cHeader,row)
                         self.setItem(row_index,col_index,Qt.QtWidgets.QTableWidgetItem(str(row[cHeader])))
                     except KeyError:
                         pass
+                
 
-           
+            
 
-            chkBoxItem = QtGui.QTableWidgetItem()
-            chkBoxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-            chkBoxItem.setCheckState(QtCore.Qt.Unchecked)   
-            self.setItem(row_index,self.select_nr,chkBoxItem)
+                chkBoxItem = QtGui.QTableWidgetItem()
+                chkBoxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+                chkBoxItem.setCheckState(QtCore.Qt.Unchecked)   
+                self.setItem(row_index,self.select_nr,chkBoxItem)
+                row_index += 1
 
 #######################################################################
 ###############      For setting up a new protocol      ###############
