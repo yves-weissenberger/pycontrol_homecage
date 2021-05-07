@@ -109,10 +109,7 @@ def handle_poke(event):
     if event=='entry':
         v.isActive = False
         lights_off()
-        set_timer("lights_on_timer",v.lights_on_lag*ms,output_event=True)
-
-             
-                                
+        set_timer("lights_on_timer",v.lights_on_lag*ms,output_event=True)           
 
     if event[-1] in v.state_str:  #check that event is an in-poke
         chosen_poke = int(event[-1]) - 1

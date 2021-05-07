@@ -148,14 +148,15 @@ class Visualizator(QtGui.QMainWindow):
     def change_user(self):
         self.login.exec_()
         self.active_user = self.login.userID
-        self.setWindowTitle('Logged in as {}'.format(self.active_user))
-        self.mouse_window_tab.setEnabled(True)
-        self.setup_window_tab.setEnabled(True)
-        self.schedule_tab.setEnabled(True)
-        self.system_tab.setup_groupbox.setEnabled(True)
-        self.system_tab.log_groupbox.setEnabled(True)
-        self.system_tab.experiment_groupbox.setEnabled(True)
-        self.experiment_tab.setEnabled(True)
+        if self.active_user:
+            self.setWindowTitle('Logged in as {}'.format(self.active_user))
+            self.mouse_window_tab.setEnabled(True)
+            self.setup_window_tab.setEnabled(True)
+            self.schedule_tab.setEnabled(True)
+            self.system_tab.setup_groupbox.setEnabled(True)
+            self.system_tab.log_groupbox.setEnabled(True)
+            self.system_tab.experiment_groupbox.setEnabled(True)
+            self.experiment_tab.setEnabled(True)
     def print_msg(self,msg,ac_pyc=None,setup_ID=None):
         self.system_tab.write_to_log(msg)
         if ac_pyc=='pyc':

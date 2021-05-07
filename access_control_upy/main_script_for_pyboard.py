@@ -36,7 +36,7 @@ class handler():
 
         com = pyb.USB_VCP()
 
-        ONE_MOUSE = 13
+        ONE_MOUSE = 8
         TWO_MICE = 40
         NEWSTATE = True
         state = 'allow_entry'

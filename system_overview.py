@@ -199,31 +199,45 @@ class system_tab(QtGui.QWidget):
 
     def end_experiment(self):
         #if False:
-
+        #print("END")
         for rowN in range(self.list_of_experiments.rowCount()):
 
             if self.list_of_experiments.item(rowN,0).checkState()==2:
-
+                #print("FOUND")
                 expName = self.list_of_experiments.item(rowN,self.list_of_experiments.header_names.index('Name')).text()
                 for setup in self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Setups'].values:
                     setup = eval(setup)[0]
 
                     if self.GUI.controllers.items():  #if there are any controllers
-
+                        print(expName)
                         handler_ = [setup_ for k,setup_ in self.GUI.controllers.items() if k==setup][0]
-
+                        
                         handler_.PYC.stop_framework()
                         time.sleep(.05)
                         handler_.PYC.process_data()
                         handler_.close_files()
                         handler_.PYC.reset()
-                        handler_.PYC.close()
-                        handler_.AC.close()
-
-
+                        #handler_.PYC.close()
+                        #handler_.AC.close()
+                        #del self.GUI.controllers[setup]
+                        self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Active'] = False
+                        self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'] = None
+                        self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+                        self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
+                        #print(self.GUI.controllers)
+                        print("CLOSED")
+                    #eval(exp_row['Subjects'].values[0])
+                    for subject in eval(self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Subjects'].values[0]):
+                        self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==subject,'in_system'] = False
                 #self.GUI.exp_df
             else:
                 pass
+        #print(self.list_of_experiments.only_active)
+        self.list_of_experiments.fill_table()
+        #print(self.GUI.experiment_tab.list_of_experiments.only_active)
+        self.GUI.experiment_tab.list_of_experiments.fill_table()
+        self.GUI.setup_window_tab.list_of_setups.fill_table()
+
         #pass
 
     def write_to_log(self,msg,from_sys=None):

@@ -294,8 +294,13 @@ class direct_pyboard_dialog(QtGui.QDialog):
         self.start_stop_button = QtGui.QPushButton('Start')
         self.start_stop_button.clicked.connect(self.start_stop)
 
+        #self.onClose_chechbox = QtGui.Qte
+        self.onClose_chechbox = QtGui.QCheckBox("Stop task when closing dialog?")
+        self.onClose_chechbox.setChecked(True)
+
         layout2 = QtGui.QVBoxLayout(self)
         layout2.addWidget(self.task_combo)
+        layout2.addWidget(self.onClose_chechbox)
         layout2.addWidget(self.start_stop_button)
 
         self.log_textbox = QtGui.QTextEdit()
@@ -325,7 +330,8 @@ class direct_pyboard_dialog(QtGui.QDialog):
 
     def _done(self):
         del self.GUI.controllers[self.setup_id].data_consumers[-1]  #remove this dialog from the data consumers of the system handler
-        self.PYC.stop_framework()  #stop the framework
+        if self.onClose_chechbox.isChecked():
+            self.PYC.stop_framework()  #stop the framework
         self.accept()   #close the dialog
 
 
