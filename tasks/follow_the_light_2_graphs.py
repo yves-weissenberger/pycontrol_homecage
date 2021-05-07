@@ -49,11 +49,11 @@ v.n_rewards = 0
 v.light_pokes = 0
 v.dark_pokes = 0
 v.first_entry = True
-v.rew_dur = 50
+v.rew_dur = 70
 v.get_free_rew = False
 
 
-v.sequences =  [[0,1,2,3,4,5,6,7,8],[5, 4, 6, 8, 2, 0]]
+v.sequences =  [[8,1,6,3,4,0,7,2,5], [7,5,2,3,6,8,1,0,4]]
 v.graph_types = ['loop','line']
 v.task_nr = 0  #which of the n-graphs are the mice currently on
 
@@ -62,20 +62,36 @@ v.rewards_in_task = 0    #how many rewards have been received in the current tas
 v.direction = (random.choice(range(2))*2) - 1 #direction is +1 or -1 for going up or down
 v.probe_probability = 0.1
 v.task_switch_p = 0.25
-v.rews_pre_task_switch = 200
-v.direction_switch_p = 0.125
+v.rews_pre_task_switch = 300
+v.direction_switch_p = 0.1
 v.change_task_timeout = 10000
 v.probe_dur = 2000
 v.timeout_dur = 1000
-v.len_seqs = [4,3]
+v.len_seqs = [3,3]
 v.isProbe = False
 v.max_seq_timeout = 3  #max number of sequential timeouts
 v.seq_timeout = 0     #current number of sequential timeouts
 v.from_timeout = 10
 v.since_timeout = 0
-v.rew_prob = 0.95
+v.rew_prob = 1.
 v.poke_history = []
 #-------------------------------------------------------------------------
+
+def run_start(): 
+    print('task_number{}'.format(v.task_nr))
+    hw.speaker.set_volume(60)
+    if v.len_seqs is None:
+         v.seq = v.sequences[v.task_nr]
+
+         v.len_seq  = len(v.seq) - 1
+    else:
+
+        v.len_seq = v.len_seqs[v.task_nr]
+        v.seq = v.sequences[v.task_nr][:v.len_seq]
+    
+    print('seq:{}'.format(v.seq))
+    v.graph_type = v.graph_types[v.task_nr]
+    print('graph_type:{}'.format(v.graph_type))
 
 def set_light():
     for pk in range(9):
@@ -87,14 +103,21 @@ def set_light():
 def get_next_state():
     v.seq_timeout = 0
     isProbe = False
+    changed_direction = False
     if withprob(v.direction_switch_p):
+        changed_direction = True
         if v.direction==1:
             v.direction = -1
         else:
             v.direction = 1
     else:
         if len(v.poke_history)>2:
-            if v.poke_history[-2][1]==v.direction:
+            #if v.poke_history[-2][1]==v.direction:
+            #    isProbe = withprob(v.probe_probability)
+
+            #if there has not been an unforced direction change in the last
+            #3 transitions
+            if not any([i[-1] for i in v.poke_history[-3:]]) and (not changed_direction): 
                 isProbe = withprob(v.probe_probability)
 
 
@@ -120,22 +143,12 @@ def get_next_state():
         print("probe_start")
         set_timer('probe_timer', v.probe_dur*ms,output_event=True)
 
-    v.poke_history.append([v.choice_poke,v.direction,v.seq_ix])
+    v.poke_history.append([v.choice_poke,v.direction,v.seq_ix,changed_direction])
     v.poke_history = v.poke_history[-10:]
     return isProbe
 
 
-def run_start(): 
-    hw.speaker.set_volume(60)
-    if v.len_seqs is None:
-         v.seq = v.sequences[v.task_nr]
-         print(v.seq)
-         v.len_seq  = len(v.seq) - 1
-    else:
-        v.len_seq = v.len_seqs[v.task_nr]
-        v.seq = v.sequences[v.task_nr][:v.len_seq]
-   
-    v.graph_type = v.graph_types[v.task_nr]
+
    
  
 def run_end():
@@ -150,7 +163,7 @@ def handle_poke(event):
         if v.from_timeout>1: 
             v.isProbe = get_next_state()
         else:
-            v.choice_poke, v.direction, v.seq_ix = v.poke_history[-2+v.from_timeout]
+            v.choice_poke, v.direction, v.seq_ix,_ = v.poke_history[-2+v.from_timeout]
             set_light()
 
 
@@ -168,7 +181,7 @@ def handle_poke(event):
 
     if event[-1] in v.state_str:  #check that event is an in-poke
         chosen_poke = int(event[-1]) - 1
-        print('FT: {}   ST{}'.format(v.from_timeout,v.seq_timeout))
+        print('REWS:{}, POKED: {}, PROBE: {} , TARGET: {},SEQ_IX: {}, DIR: {}'.format(v.n_rewards,chosen_poke,v.isProbe,v.choice_poke,v.seq_ix,v.direction))
         if v.choice_poke==chosen_poke:
             v.light_pokes += 1
 
@@ -183,8 +196,8 @@ def handle_poke(event):
                     v.isProbe = get_next_state()
             else:
                 print("HHI")
-                print(-2+v.from_timeout)
-                v.choice_poke, v.direction, v.seq_ix = v.poke_history[-2+v.from_timeout]
+                #print(-2+v.from_timeout)
+                v.choice_poke, v.direction, v.seq_ix,_ = v.poke_history[-2+v.from_timeout]
                 set_light()
         else:
             if v.timeout_dur:
@@ -192,7 +205,8 @@ def handle_poke(event):
                 if ((len(v.poke_history)>2) 
                     and (not v.isProbe) 
                     and (v.seq_timeout<v.max_seq_timeout)
-                    and (v.from_timeout>0)):
+                    and (v.from_timeout>0)
+                    and (not chosen_poke==v.poke_history[-2][0])):
 
                     goto_state('timeout')
                 
@@ -224,14 +238,17 @@ def timeout(event):
         hw.speaker.noise()
         v.from_timeout = 0
         v.seq_timeout += 1
+        v.isProbe = False
 
     if event=='timeout_timer':
         hw.speaker.off()
         goto_state('handle_poke')
+
+    
 def change_task(event):
 
     if event== 'entry':
-        print("change_task_start")
+        
         set_timer('change_task_timer', v.change_task_timeout*ms,output_event=True)
         if v.task_nr==0: 
             v.task_nr=1
@@ -239,19 +256,22 @@ def change_task(event):
             v.task_nr=0
 
         for pk in range(9):
-            if pk == v.choice_poke:
-                hw.poke_list[pk].LED.on()
-            else:
-                hw.poke_list[pk].LED.off()
+            hw.poke_list[pk].LED.off()
 
         if v.len_seqs is None:
             v.seq = v.sequences[v.task_nr]
             v.len_seq  = len(v.seq) - 1
         else:
-            v.len_seq = v.len_seq[v.task_nr]
-            v.seq = v.sequences[v.task_nr[:v.len_seq]]
-        v.graph_type = v.graph_types[v.task_nr]
-        
+            v.len_seq = v.len_seqs[v.task_nr]
+            v.seq = v.sequences[v.task_nr][:v.len_seq]
+            v.graph_type = v.graph_types[v.task_nr]
+            print("change_task_start")
+            print('task_number{}'.format(v.task_nr))
+            print('seq:{}'.format(v.seq))
+            print('graph_type:{}'.format(v.graph_type))
+
+
     if event=='change_task_timer':
         v.rewards_in_task = 0
+        v.poke_history = []
         goto_state('handle_poke')

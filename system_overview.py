@@ -226,8 +226,9 @@ class system_tab(QtGui.QWidget):
                         self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
                         #print(self.GUI.controllers)
                         print("CLOSED")
-
-                       
+                    #eval(exp_row['Subjects'].values[0])
+                    for subject in eval(self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Subjects'].values[0]):
+                        self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==subject,'in_system'] = False
                 #self.GUI.exp_df
             else:
                 pass

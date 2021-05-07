@@ -1,5 +1,10 @@
 1. Fix set variables thing
 2. In start new experiment allow variables to be set
-3. Fix login bug
 4. When restarting experiment. Ensure that there is no experiment running in that box. Allow also to restart it in a different box
 5. When updating checkboxes in the variables table need to include a check for what state the checkboxes are in at the time
+6. Remove mouse from experiment
+
+
+Done stuff
+
+3. Fix login bug [X]

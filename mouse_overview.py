@@ -122,9 +122,9 @@ class mouse_window(QtGui.QWidget):
                                     not (i['persistent'])
                                     and i['set'] )])
 
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(ms_rfid),'summary_variables'] = json.dumps(summary_variables_dict)
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(ms_rfid),'persistent_variables'] = json.dumps(persistent_variables_dict)
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(ms_rfid),'set_variables'] =json.dumps(set_variables_dict)
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==float(ms_rfid),'summary_variables'] = json.dumps(summary_variables_dict)
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==float(ms_rfid),'persistent_variables'] = json.dumps(persistent_variables_dict)
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==float(ms_rfid),'set_variables'] =json.dumps(set_variables_dict)
 
             self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
 
@@ -149,7 +149,7 @@ class mouse_window(QtGui.QWidget):
         self.variables_table.set_available_subjects(RFIDs)
         for sel_RFID in RFIDs:
 
-            mouseRow = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==int(sel_RFID)]
+            mouseRow = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==float(sel_RFID)]
             #print(mouseRow)
             mouseTask = mouseRow['Task'].values[0] + '.py'
 

@@ -80,7 +80,7 @@ def check_mouse_weights(user,all_mouse_csv,logger_start):
     warn = False
     now = datetime.now()
     for _,mouse_row in all_mouse_csv.iterrows():
-        if mouse_row['User']==user:
+        if mouse_row['User']==user and mouse_row['in_system']:
             try:
                 mouseID = mouse_row['Mouse_ID']
                 baseline = mouse_row['Start_weight']
