@@ -223,11 +223,11 @@ class mouse_window(QtGui.QWidget):
                 for ch_ in isChecked:
                     #if 
 
-                    fl = self.GUI.mouse_df.file_location
-                    ix_ = self.GUI.mouse_df.index[self.GUI.mouse_df['RFID']==ch_]
-
-                    self.GUI.mouse_df = self.GUI.mouse_df.drop(ix_)
-                    self.GUI.mouse_df.file_location = fl  #because the file location is not part of the class so when using drop this is removed
+                    #fl = self.GUI.mouse_df.file_location
+                    #ix_ = self.GUI.mouse_df.index[self.GUI.mouse_df['RFID']==ch_]
+                    self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ch_,'in_system'] = False
+                    #self.GUI.mouse_df = self.GUI.mouse_df.drop(ix_)
+                    #self.GUI.mouse_df.file_location = fl  #because the file location is not part of the class so when using drop this is removed
                     self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
 
                     self.list_of_mice.fill_table()

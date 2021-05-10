@@ -181,7 +181,7 @@ def handle_poke(event):
 
     if event[-1] in v.state_str:  #check that event is an in-poke
         chosen_poke = int(event[-1]) - 1
-        print('REWS:{}, POKED: {}, PROBE: {} , TARGET: {},SEQ_IX: {}, DIR: {}'.format(v.n_rewards,chosen_poke,v.isProbe,v.choice_poke,v.seq_ix,v.direction))
+        print('REWS:{}, REW_IN_SEQ:{}, POKED: {}, PROBE: {} , TARGET: {},SEQ_IX: {}, DIR: {}'.format(v.n_rewards,v.rewards_in_task,chosen_poke,v.isProbe,v.choice_poke,v.seq_ix,v.direction))
         if v.choice_poke==chosen_poke:
             v.light_pokes += 1
 
