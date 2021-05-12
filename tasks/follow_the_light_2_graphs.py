@@ -49,7 +49,7 @@ v.n_rewards = 0
 v.light_pokes = 0
 v.dark_pokes = 0
 v.first_entry = True
-v.rew_dur = 70
+v.rew_dur = 50
 v.get_free_rew = False
 
 

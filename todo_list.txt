@@ -1,10 +1,13 @@
-1. Fix set variables thing
 2. In start new experiment allow variables to be set
 4. When restarting experiment. Ensure that there is no experiment running in that box. Allow also to restart it in a different box
 5. When updating checkboxes in the variables table need to include a check for what state the checkboxes are in at the time
-6. Remove mouse from experiment
-
-
+7. Update all tables in refresh loop
+8. Allow custom updating of what is diplayed in the mouse view
+9. Allow custom updating of what is diplayed in the experiment view
+10. Allow custom updating of what is displayed in  print log.
+11. Add calibration settings to setup table and use these as default values
 Done stuff
 
 3. Fix login bug [X]
+6. Remove mouse from experiment [X]
+1. Fix set variables thing [X]

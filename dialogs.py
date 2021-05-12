@@ -154,9 +154,14 @@ class configure_box_dialog(QtGui.QDialog):
 
 
         self.calibration_weight = QtGui.QLineEdit("")
+        self.calibration_weight.setPlaceholderText("Enter calibration weight in g") 
         self.buttonCal = QtGui.QPushButton('callibrate', self)
         self.buttonCal.clicked.connect(self.callibrate)
 
+        self.min_session_time = QtGui.QLineEdit("")
+        self.min_session_time.setPlaceholderText("Enter min session time in s") 
+        self.button_mst = QtQgui.QPushButton("Set min session time ",self)
+        self.button_mst.clicked.connect(self.set_min_session_time)
 
 
 
@@ -173,10 +178,29 @@ class configure_box_dialog(QtGui.QDialog):
         layout.addWidget(self.calibration_weight)
         layout.addWidget(self.buttonCal)
         layout.addWidget(self.buttonDone)
+        layout.addWidget(self.min_session_time)
+        layout.addWidget(self.button_mst)
 
         layoutH.addLayout(layout2)
         layoutH.addLayout(layout)
         layoutH.addWidget(self.log_textbox)
+
+    def set_min_session_time(self):
+        mst = self.min_session_time.text()
+        try:
+            mst = float(mst)
+        except:
+            mst = False
+        
+        if mst:
+            str_ = 'set_min_session_time:'+str(mst)
+            self.ac.serial.write(str_.encode())
+
+            self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+            self.log_textbox.insertPlainText('Setting min session time to ' + str(mst*1000) +'ms\n')
+            self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+        else:
+            self.log_textbox.insertPlainText('Something went wrong')
 
     def load_ac_framework(self):
         self.log_textbox.insertPlainText('Loading access control framework...')

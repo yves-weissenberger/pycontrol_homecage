@@ -42,7 +42,7 @@ def check_loggers_running(user):
 
         #extended the time until warning message comes on to 5 minutes
         # for mice who linger in the training apparatus.
-        if (last_delta>300): warn = True
+        if (last_delta>600): warn = True
     return active_dict,warn
 
 def check_ac_status(user):

@@ -52,7 +52,9 @@ class handler():
         self.forced_delay = 500
         last_check = micros.counter()
         mean = lambda x: float(sum(x))/float(len(x))
-
+        MIN_SESSION_TIME_S = 0 #the minimum amount of time that a session must last
+        MIN_SESSION_TIME_MILLIS = MIN_SESSION_TIME_S*1000
+        
         state = 'allow_entry'
         ## This is the infinite loop
         #state = 'error_state'
@@ -160,6 +162,7 @@ class handler():
                                 com.write(build_msg('RFID:' + str(rfid)))
                                 getRFID = False
                                 state = 'enter_training_chamber'
+                                enter_training_time = pyb.millis() #put here to avoid problems with going to check_mouse_in_training state
                                 NEWSTATE = True; pyb.delay(self.forced_delay) 
 
 
@@ -185,8 +188,11 @@ class handler():
                     for mag in range(4):
                         if mag in [0,2,3]:
                             MAGs[mag].value(1)
-                        else:
-                            MAGs[mag].value(0)
+
+                            if (pyb.elapsed_millis(enter_training_time)<MIN_SESSION_TIME_MILLIS):
+                                MAGs[mag].value(0)
+                            else:
+                               MAGs[mag].value(0)
 
                     #if the mouse had opened the door to training chamber
                     if P_read_en2.value()==1:
@@ -343,6 +349,14 @@ class handler():
                         pyb.delay(10)
                         com.write(build_msg('calC:'+str(weight)))
 
+                    elif 'set_min_session_time' in training_data:
+                        try:
+                            mst = float(sent_data[21:])
+                        except:
+                            mst = 0
+                        MIN_SESSION_TIME_S = min([mst,600]) #do not let the minimum session time be more than 10 minutes (for_now)
+                        MIN_SESSION_TIME_MILLIS = MIN_SESSION_TIME_S*1000
+                        com.write(build_msg('MST:'+str(MIN_SESSION_TIME_MILLIS)))
                     elif sent_data=='weigh':
 
                         weight = AC_handler.loadcell.weigh()
