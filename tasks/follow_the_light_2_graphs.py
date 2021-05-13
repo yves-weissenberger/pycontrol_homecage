@@ -49,7 +49,7 @@ v.n_rewards = 0
 v.light_pokes = 0
 v.dark_pokes = 0
 v.first_entry = True
-v.rew_dur = 70
+v.rew_dur = 60
 v.get_free_rew = False
 
 
@@ -65,7 +65,7 @@ v.task_switch_p = 0.25
 v.rews_pre_task_switch = 300
 v.direction_switch_p = 0.1
 v.change_task_timeout = 10000
-v.probe_dur = 2000
+v.probe_dur = 4000
 v.timeout_dur = 1000
 v.len_seqs = [3,3]
 v.isProbe = False
