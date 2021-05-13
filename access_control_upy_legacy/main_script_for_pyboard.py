@@ -57,6 +57,7 @@ class handler():
         ## This is the infinite loop
         #state = 'error_state'
         has_send_error = False
+        millis_since_check_wait_close = None
         first_check = True  #first check is a variable that basically ensures that a mouse must be stuck for 2 sets of scale readings before an error state is raised
         try:
 
@@ -89,8 +90,6 @@ class handler():
                         NEWSTATE = False
 
 
-
-
                     if P_read_en1.value()==0:  #if entry door is closed again
 
                         ## This is an extra check step to try to help prevent the door from being unnecessarily closed
@@ -107,7 +106,17 @@ class handler():
                             NEWSTATE = True; pyb.delay(self.forced_delay)
                             last_check = micros.counter()
                         
+                    weight = AC_handler.loadcell.weigh()
+                    if weight>ONE_MOUSE:
+                        if millis_since_check_wait_close is None:
+                            millis_since_check_wait_close = pyb.millis()
+                        
+                        else:
+                            if pyb.elapsed_millis(millis_since_check_wait_close)>(300*1000):
+                                state = 'error_state'
 
+                    if weight<ONE_MOUSE:
+                        millis_since_check_wait_close = None
                 #in this state check that a mouse has entered the access control system and
                 #make sure that it is in fact only 1 mouse in the access control system
                 if state=='check_mouse':
