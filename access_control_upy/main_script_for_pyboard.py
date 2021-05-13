@@ -1,9 +1,9 @@
 import sys
 import pyb
 from pyb import Pin
-from access_control_upy.access_control_1_1 import Access_control_upy
+from access_control_upy.access_control_1_0 import Access_control_upy
 import time
-from pin_classes import signal_pin, magnet_pin
+from access_control_upy.pin_classes import signal_pin, magnet_pin
 
 
 
@@ -75,7 +75,7 @@ class handler():
         #state = 'error_state'
         has_send_error = False
         millis_since_check_wait_close = None
-        first_check = True  #first check is a variable that basically ensures that a mouse must be stuck for 2 sets of scale readings before an error state is raised
+        num_times_checked_for_error = 0  #first check is a variable that basically ensures that a mouse must be stuck for 2 sets of scale readings before an error state is raised
         try:
 
             while True:
@@ -93,10 +93,16 @@ class handler():
                             MAGs[mag].value(0)
 
                     #if the entry door is opened
-                    if P_read_en1.value():
+                    weight = AC_handler.loadcell.weigh()
+                    if weight>ONE_MOUSE:
                         state = 'wait_close'
                         NEWSTATE = True; pyb.delay(self.forced_delay)
                         last_check = micros.counter()
+                        MAGs[0].value(1)
+                    #if P_read_en1.value():
+                    #    state = 'wait_close'
+                    #    NEWSTATE = True; pyb.delay(self.forced_delay)
+                    #    last_check = micros.counter()
                         
                     
 
@@ -139,6 +145,7 @@ class handler():
                 if state=='check_mouse':
 
                     if NEWSTATE:
+                        millis_since_check_wait_close = None
                         com.write(build_msg('state:' + state))
                         NEWSTATE = False
 
@@ -215,7 +222,9 @@ class handler():
                             MAGs[mag].value(0)
 
                     #if the mouse had opened the door to training chamber
-                    if P_read_en2.value()==1:
+                    weight = AC_handler.loadcell.weigh(times=1)
+                    #if P_read_en2.value()==1:
+                    if weight<ONE_MOUSE:
                         state = 'check_mouse_in_training'
                         NEWSTATE = True; pyb.delay(self.forced_delay)
 
@@ -226,6 +235,8 @@ class handler():
                     if NEWSTATE:
                         com.write(build_msg('state:' + state))
                         NEWSTATE = False
+                        MAGs[1].value(1)
+
                     #if door entry to chamber is closed again
                     if P_read_en2.value()==0:
 
@@ -239,20 +250,23 @@ class handler():
                             state = 'enter_training_chamber'
                             NEWSTATE = True; pyb.delay(self.forced_delay)
 
+
                 if state=='mouse_training': #now the mouse is in the training apparatus
                     if NEWSTATE:
                         com.write(build_msg('state:' + state))
                         NEWSTATE = False
-
+                    
                     for mag in range(4):
                         if mag in [0,1,3]:
                             MAGs[mag].value(1)
                         else:
                             MAGs[mag].value(0)
-
-                    if P_read_ex1.value()==1:
+                    weight = AC_handler.loadcell.weigh()
+                    if weight>ONE_MOUSE:
+                    #if P_read_ex1.value()==1:
                         state = 'check_mouse_in_ac'
                         NEWSTATE = True; pyb.delay(self.forced_delay)
+                        MAGs[2].value(1)
 
                 if state=='check_mouse_in_ac':
                     if NEWSTATE:
@@ -293,14 +307,14 @@ class handler():
                         #mouse, then come back in 1s and check again. If the weight is still too high, go
                         #into an error state
                         if Wbase>ONE_MOUSE:
-                            CW = AC_handler.loadcell.weigh(times=10)
+                            CW = AC_handler.loadcell.weigh(times=2)
                             if float(CW)>ONE_MOUSE:
-                                if not first_check:
+                                if num_times_checked_for_error>30:
                                     state = 'error_state'
                                     com.write(build_msg('state:' + str(state)))
-                                first_check = False
+                                num_times_checked_for_error += 1
                         else:
-                            first_check = True
+                            num_times_checked_for_error = 0
                             self.baseline_read = self.baseline_alpha*Wbase + (1-self.baseline_alpha)*self.baseline_read
 
                 if state=='allow_exit':
@@ -318,10 +332,11 @@ class handler():
                         else:
                             MAGs[mag].value(0)
 
-
-                    if P_read_ex2.value()==1:   #if the door is opened
+                    if weight<ONE_MOUSE:
+                    #if P_read_ex2.value()==1:   #if the door is opened
                         state = 'check_exit'
                         NEWSTATE = True; pyb.delay(self.forced_delay)
+                        MAGs[3].value(1)
 
                 if state=='check_exit':
                     if NEWSTATE:

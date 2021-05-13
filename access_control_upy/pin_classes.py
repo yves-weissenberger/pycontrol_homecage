@@ -17,7 +17,7 @@ class signal_pin:
         self.state = 0
         self.check_every = check_every
     
-    def value(self):
+    def value(self,print_it=False):
         """ Returns true if the door is open. This convention is used for consistency with
             the previous access control code
         """
@@ -28,6 +28,8 @@ class signal_pin:
             value = self.pin.read()
             self.enable_pin_1.value(1)
             self.enable_pin_2.value(1)
+            if print_it:
+                print(value)
             self.state = (value > self.threshold)
             self._last_pin_check = pyb.millis()
 
@@ -43,17 +45,23 @@ class magnet_pin:
         self.highside = highside
         self.lowside=lowside
         self.demag_delay = demag_delay
+        self.has_demagged = False
 
     def value(self,set_value):
         
         if set_value==1:
             self.highside.value(1)
             self.lowside.value(0)
+            self.has_demagged = False
         elif set_value==0:
-            self.highside.value(0)
-            self.lowside.value(1)
-            pyb.delay(self.demag_delay)
-            self.lowside.value(0)
-        
+            if not self.has_demagged:
+                self.highside.value(0)
+                self.lowside.value(1)
+                pyb.delay(self.demag_delay)
+                self.lowside.value(0)
+                self.has_demagged = True
+            else:
+                self.highside.value(0)
+                self.lowside.value(0)      
 
     

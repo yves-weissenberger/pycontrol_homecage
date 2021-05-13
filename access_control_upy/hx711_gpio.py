@@ -12,7 +12,7 @@ class HX711:
 
         self.GAIN = 0
         self.OFFSET = 0
-        self.SCALE = 1
+        self.SCALE = 3500
 
         self.time_constant = 0.25
         self.filtered = 0
