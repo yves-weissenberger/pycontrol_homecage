@@ -130,13 +130,13 @@ class handler():
                             last_check = micros.counter()
                         
                     weight = AC_handler.loadcell.weigh()
-                    if weight>ONE_MOUSE:
-                        if millis_since_check_wait_close is None:
-                            millis_since_check_wait_close = pyb.millis()
-                        
-                        else:
-                            if pyb.elapsed_millis(millis_since_check_wait_close)>(300*1000):
-                                state = 'error_state'
+                    #if weight>ONE_MOUSE:
+                    #    if millis_since_check_wait_close is None:
+                    #        millis_since_check_wait_close = pyb.millis()
+                    #    
+                    #    else:
+                    #        if pyb.elapsed_millis(millis_since_check_wait_close)>(300*1000):
+                    #            state = 'error_state'
 
                     if weight<ONE_MOUSE:
                         millis_since_check_wait_close = None
