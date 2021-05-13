@@ -1,7 +1,7 @@
 import sys
 import pyb
 from pyb import Pin
-from access_control_upy.access_control_1_0 import Access_control_upy
+from access_control_upy.access_control_1_1 import Access_control_upy
 import time
 from pin_classes import signal_pin, magnet_pin
 

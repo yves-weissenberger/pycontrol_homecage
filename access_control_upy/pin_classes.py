@@ -36,7 +36,9 @@ class signal_pin:
 
 
 class magnet_pin:
-
+    """ Psuedo-subclass of an output pin that enables switching magnets on and off but
+        allowing for demagnetisation
+    """
     def __init__(self,highside,lowside,demag_delay=10):
         self.highside = highside
         self.lowside=lowside
