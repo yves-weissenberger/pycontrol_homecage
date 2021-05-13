@@ -52,7 +52,7 @@ class handler():
         self.forced_delay = 500
         last_check = micros.counter()
         mean = lambda x: float(sum(x))/float(len(x))
-        MIN_SESSION_TIME_S = 0 #the minimum amount of time that a session must last
+        MIN_SESSION_TIME_S = 600 #the minimum amount of time that a session must last
         MIN_SESSION_TIME_MILLIS = MIN_SESSION_TIME_S*1000
         
         state = 'allow_entry'
@@ -188,11 +188,8 @@ class handler():
                     for mag in range(4):
                         if mag in [0,2,3]:
                             MAGs[mag].value(1)
-
-                            if (pyb.elapsed_millis(enter_training_time)<MIN_SESSION_TIME_MILLIS):
-                                MAGs[mag].value(0)
-                            else:
-                               MAGs[mag].value(0)
+                        else:
+                            MAGs[mag].value(0)
 
                     #if the mouse had opened the door to training chamber
                     if P_read_en2.value()==1:
@@ -228,7 +225,10 @@ class handler():
                         if mag in [0,1,3]:
                             MAGs[mag].value(1)
                         else:
-                            MAGs[mag].value(0)
+                            if (pyb.elapsed_millis(enter_training_time)<MIN_SESSION_TIME_MILLIS):
+                                MAGs[mag].value(1)
+                            else:
+                                MAGs[mag].value(0)
 
                     if P_read_ex1.value()==1:
                         state = 'check_mouse_in_ac'
