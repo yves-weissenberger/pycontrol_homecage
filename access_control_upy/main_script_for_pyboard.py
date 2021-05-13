@@ -52,7 +52,7 @@ class handler():
         self.forced_delay = 500
         last_check = micros.counter()
         mean = lambda x: float(sum(x))/float(len(x))
-        MIN_SESSION_TIME_S = 600 #the minimum amount of time that a session must last
+        MIN_SESSION_TIME_S = 30 #the minimum amount of time that a session must last
         MIN_SESSION_TIME_MILLIS = MIN_SESSION_TIME_S*1000
         
         state = 'allow_entry'
@@ -349,7 +349,7 @@ class handler():
                         pyb.delay(10)
                         com.write(build_msg('calC:'+str(weight)))
 
-                    elif 'set_min_session_time' in training_data:
+                    elif 'set_min_session_time' in sent_data:
                         try:
                             mst = float(sent_data[21:])
                         except:

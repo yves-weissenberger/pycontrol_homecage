@@ -160,7 +160,7 @@ class configure_box_dialog(QtGui.QDialog):
 
         self.min_session_time = QtGui.QLineEdit("")
         self.min_session_time.setPlaceholderText("Enter min session time in s") 
-        self.button_mst = QtQgui.QPushButton("Set min session time ",self)
+        self.button_mst = QtGui.QPushButton("Set min session time ",self)
         self.button_mst.clicked.connect(self.set_min_session_time)
 
 

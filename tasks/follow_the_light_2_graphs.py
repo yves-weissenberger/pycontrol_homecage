@@ -65,7 +65,7 @@ v.task_switch_p = 0.25
 v.rews_pre_task_switch = 300
 v.direction_switch_p = 0.1
 v.change_task_timeout = 10000
-v.probe_dur = 2000
+v.probe_dur = 4000
 v.timeout_dur = 1000
 v.len_seqs = [3,3]
 v.isProbe = False
@@ -265,6 +265,8 @@ def change_task(event):
             v.len_seq = v.len_seqs[v.task_nr]
             v.seq = v.sequences[v.task_nr][:v.len_seq]
             v.graph_type = v.graph_types[v.task_nr]
+            v.seq_ix = 0
+            v.direction = 1
             print("change_task_start")
             print('task_number{}'.format(v.task_nr))
             print('seq:{}'.format(v.seq))
