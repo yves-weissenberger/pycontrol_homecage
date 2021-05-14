@@ -96,9 +96,10 @@ class handler():
                     weight = AC_handler.loadcell.weigh()
                     if weight>ONE_MOUSE:
                         state = 'wait_close'
-                        NEWSTATE = True; pyb.delay(self.forced_delay)
+                        NEWSTATE = True
                         last_check = micros.counter()
-                        MAGs[0].value(1)
+                        MAGs[0].value(1) 
+                        pyb.delay(self.forced_delay)
                     #if P_read_en1.value():
                     #    state = 'wait_close'
                     #    NEWSTATE = True; pyb.delay(self.forced_delay)
@@ -112,9 +113,9 @@ class handler():
                         com.write(build_msg('state:' + state))
                         NEWSTATE = False
 
-
+                
                     if P_read_en1.value()==0:  #if entry door is closed again
-
+                        com.write(build_msg('door0_closed:'+str(P_read_en1.measured_value)))
                         ## This is an extra check step to try to help prevent the door from being unnecessarily closed
                         weight = AC_handler.loadcell.weigh()
                         if weight<ONE_MOUSE:
@@ -128,7 +129,8 @@ class handler():
                             state = 'check_mouse'
                             NEWSTATE = True; pyb.delay(self.forced_delay)
                             last_check = micros.counter()
-                        
+                    else:
+                        com.write(build_msg('door0_open:'+str(P_read_en1.measured_value)))
                     weight = AC_handler.loadcell.weigh()
                     #if weight>ONE_MOUSE:
                     #    if millis_since_check_wait_close is None:
@@ -265,8 +267,9 @@ class handler():
                     if weight>ONE_MOUSE:
                     #if P_read_ex1.value()==1:
                         state = 'check_mouse_in_ac'
-                        NEWSTATE = True; pyb.delay(self.forced_delay)
+                        NEWSTATE = True
                         MAGs[2].value(1)
+                        pyb.delay(self.forced_delay)
 
                 if state=='check_mouse_in_ac':
                     if NEWSTATE:
@@ -335,8 +338,9 @@ class handler():
                     if weight<ONE_MOUSE:
                     #if P_read_ex2.value()==1:   #if the door is opened
                         state = 'check_exit'
-                        NEWSTATE = True; pyb.delay(self.forced_delay)
+                        NEWSTATE = True
                         MAGs[3].value(1)
+                        pyb.delay(self.forced_delay)
 
                 if state=='check_exit':
                     if NEWSTATE:

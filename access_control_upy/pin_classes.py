@@ -7,7 +7,7 @@ class signal_pin:
     """ Pseudo-subclass of pin that replicates its method but within the context of the
         surrounding hardware used for door sensing.
     """
-    def __init__(self,sense_pin,enable_pin_1,enable_pin_2,sense_delay=3000,threshold=2000,check_every=100):
+    def __init__(self,sense_pin,enable_pin_1,enable_pin_2,sense_delay=3000,threshold=1400,check_every=10):
         self.pin = sense_pin
         self.enable_pin_1 = enable_pin_1
         self.enable_pin_2 = enable_pin_2
@@ -16,24 +16,32 @@ class signal_pin:
         self._last_pin_check = pyb.millis()
         self.state = 0
         self.check_every = check_every
+        self.measured_value = 0
     
     def value(self,print_it=False):
         """ Returns true if the door is open. This convention is used for consistency with
             the previous access control code
         """
+        #value =
         if pyb.elapsed_millis(self._last_pin_check)>self.check_every:
             self.enable_pin_1.value(0)
             self.enable_pin_2.value(0)
             pyb.udelay(self.sense_delay)
-            value = self.pin.read()
+            self.measured_value = self.pin.read()
+            #self.value = value
             self.enable_pin_1.value(1)
             self.enable_pin_2.value(1)
             if print_it:
-                print(value)
-            self.state = (value > self.threshold)
+                print(self.measured_value)
+            self.state = (self.measured_value > self.threshold)
             self._last_pin_check = pyb.millis()
 
         return self.state
+
+    #def get_measured_value(self):
+    #    return
+
+    
 
 
 
