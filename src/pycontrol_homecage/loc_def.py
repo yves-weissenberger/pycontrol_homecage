@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-ROOT = r'./all_data_path'
+ROOT = r'../all_data_path'
 if not os.path.isdir(ROOT):
     os.mkdir(ROOT)
 

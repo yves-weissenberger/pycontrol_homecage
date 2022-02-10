@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: pycontrol-homecage
+Version: 0.1
+Summary: Fully automated behavioural experiments using pycontrol
+Author: Yves Weissenberger
+License: GPL-3
+Platform: linux
+Platform: osx
+Platform: win32
+Classifier: Programming Language :: Python :: 3 :: Only
+Requires-Python: >=3.6
+License-File: LICENSE
+
+UNKNOWN
+
