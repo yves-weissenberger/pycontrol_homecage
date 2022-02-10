@@ -1,12 +1,9 @@
-import numpy as np
-import pandas as pd
 from pyqtgraph.Qt import QtGui, QtCore
-from pyqtgraph import Qt
-from pyqtgraph import mkPen
-import pyqtgraph as pg
+# from pyqtgraph import Qt
+# from pyqtgraph import mkPen
+# import pyqtgraph as pg
 import sys, os, pickle, time
 import copy as cp
-import pandas as pd
 from functools import partial
 #imports for interacting with serial ports
 from serial.tools import list_ports
@@ -55,7 +52,6 @@ def custom_excepthook(type_, exception, traceback_,filepath):
 
 
 class Visualizator(QtGui.QMainWindow):
-
 
     def __init__(self):
         super().__init__()

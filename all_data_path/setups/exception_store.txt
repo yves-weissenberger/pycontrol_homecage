@@ -1,0 +1,26 @@
+----------------- 
+<class 'FileNotFoundError'>FileNotFoundError(2, 'No such file or directory')Traceback (most recent call last):
+  File "/Users/yves/Documents/Code/pyhomecage/GUI.py", line 194, in <module>
+    gui = Visualizator()
+  File "/Users/yves/Documents/Code/pyhomecage/GUI.py", line 90, in __init__
+    self.schedule_tab = scheduler(self)
+  File "/Users/yves/Documents/Code/pyhomecage/schedule_manager.py", line 57, in __init__
+    self.available_tasks = get_tasks(self.GUI.GUI_filepath)
+  File "/Users/yves/Documents/Code/pyhomecage/utils.py", line 156, in get_tasks
+    tasks =  [t.split('.')[0] for t in os.listdir(task_dir) if t[-3:] == '.py']
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/yves/Documents/Code/pyhomecage/tasks'
+2022-02-10-122305
+----------------- 
+<class 'IndexError'>IndexError('list index out of range')Traceback (most recent call last):
+  File "/Users/yves/Documents/Code/pyhomecage/dialogs.py", line 389, in send_code
+    sender_email,password = get_pyhomecage_email()
+  File "/Users/yves/Documents/Code/pyhomecage/utils.py", line 71, in get_pyhomecage_email
+    sender_email =  re.findall('"(.*)"',[l_ for l_ in lines_ if 'system_email' in l_][0])[0]
+IndexError: list index out of range
+2022-02-10-122337
+----------------- 
+<class 'KeyboardInterrupt'>KeyboardInterrupt()Traceback (most recent call last):
+  File "/Users/yves/Documents/Code/pyhomecage/GUI.py", line 130, in refresh
+    def refresh(self):
+KeyboardInterrupt
+2022-02-10-123039

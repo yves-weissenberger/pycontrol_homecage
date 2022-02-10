@@ -1,13 +1,10 @@
 from pyqtgraph.Qt import QtGui, QtCore
 from pyqtgraph import Qt
 from pyqtgraph import mkPen
-import pyqtgraph as pg
 import sys, os, pickle, time
 import copy as cp
 from datetime import datetime
 
-from serial.tools import list_ports
-from serial import SerialException, SerialTimeoutException
 
 
 ##### YW code imports
