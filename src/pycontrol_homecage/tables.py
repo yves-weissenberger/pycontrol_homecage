@@ -1,6 +1,7 @@
 import os
 import time
 from functools import partial
+from typing import List, Optional
 
 import numpy as np
 from pyqtgraph import Qt
@@ -24,7 +25,7 @@ from pycontrol_homecage.utils import (TableCheckbox, cbox_set_item, cbox_update_
 class variables_table(QtGui.QTableWidget):
     " Table that tracks what variables a mouse currently running in a task has"
 
-    def __init__(self,GUI,parent=None):
+    def __init__(self, GUI: QtGui.QMainWindow, parent=None):
         super(QtGui.QTableWidget, self).__init__(1,7, parent=parent)
         self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent','Summary','Set',''])
         self.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
@@ -38,7 +39,8 @@ class variables_table(QtGui.QTableWidget):
         self.available_variables = []
         self.assigned = {v_name:[] for v_name in self.variable_names} # Which subjects have values assigned for each variable.
         self.subject_variable_names = {}
-    def remove_variable(self, variable_n):
+
+    def remove_variable(self, variable_n: int) -> None:
         self.removeRow(variable_n)
         self.n_variables -= 1
         self.update_available()
@@ -53,7 +55,8 @@ class variables_table(QtGui.QTableWidget):
         #self.subject_variable_names = {}
         #self.variable_names = []
 
-    def add_variable(self, var_dict=None):
+    def add_variable(self, var_dict: dict=None) -> None:
+
         '''Add a row to the variables table.'''
         variable_cbox = QtGui.QComboBox()
         variable_cbox.activated.connect(self.update_available)
@@ -98,13 +101,13 @@ class variables_table(QtGui.QTableWidget):
         self.update_available()
         null_resize(self)
     
-    def persistent_changed(self,row,item):
+    def persistent_changed(self, row: int) -> None:
         """ A variables cannot be both persistent and set"""
         #print("updateing",row)
         self.cellWidget(row,5).setChecked(False)
         self.item(row,2).setText("auto")
 
-    def setVar_changed(self,row,item):
+    def setVar_changed(self,row: int) -> None:
         self.cellWidget(row,3).setChecked(False)
 
     def update_available(self, i=None):
@@ -150,10 +153,10 @@ class variables_table(QtGui.QTableWidget):
                         self.available_variables.remove(v_name)
                     cbox_update_options(self.cellWidget(v,1), self.available_subjects(v_name, s_name))
     
-    def set_available_subjects(self,subjects):
+    def set_available_subjects(self, subjects: List[str]):
         self.subjects_in_group = subjects
 
-    def set_variable_names(self,variable_names):
+    def set_variable_names(self, variable_names: List[str]):
         """ """
         if not self.variable_names:
             self.variable_names = variable_names
@@ -163,7 +166,7 @@ class variables_table(QtGui.QTableWidget):
             self.variable_names = list(set(self.variable_names))
 
 
-    def set_variable_names_by_subject(self,subject,variable_names):
+    def set_variable_names_by_subject(self,subject: str,variable_names: List[str]):
         """ Allow tracking of which subject has which variables available
             to them in principle
         """
@@ -209,8 +212,6 @@ class experiment_overview_table(QtGui.QTableWidget):
 
         self.select_nr = self.header_names.index("Select")
 
-
-
         self.fill_table()
 
 
@@ -249,21 +250,31 @@ class experiment_overview_table(QtGui.QTableWidget):
 #######################################################################
 class protocol_table(QtGui.QTableWidget):
 
-    def __init__(self, GUI, tab,nRows=None,parent=None):
+    def __init__(self, GUI, tab, nRows=None, parent=None):
 
         super(QtGui.QTableWidget, self).__init__(1,6, parent=parent)
-        self.header_names = ['Stage','Task','Tracked','Threshold(s)','Default(s)','Delete']
-        self.setHorizontalHeaderLabels(self.header_names)
-        self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
-        for i in range(len(self.header_names)-1):
-            self.horizontalHeader().setResizeMode(i, QtGui.QHeaderView.Stretch)
-
+        self.set_headers()
         if nRows:
             self.setRowCount(nRows)
             self.nRows = nRows
             #self.horizontalHeader().setSectionResizeMode(1)
         else:
             self.nRows = 1
+
+
+    def set_headers(self):
+
+        self.header_names = ['Stage','Task','Tracked','Threshold(s)','Default(s)','Delete']
+        self.setHorizontalHeaderLabels(self.header_names)
+        self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
+        self.set_resizemode_for_headers()
+
+    
+    def set_resizemode_for_headers(self):
+        for h_ix in range(len(self.header_names)-1):
+            self.horizontalHeader().setResizeMode(h_ix, QtGui.QHeaderView.Stretch)
+
+
 
     def fill_table(self,dat):
         " Here pass prot_dict"
@@ -502,7 +513,6 @@ class mouse_list_table(QtGui.QTableWidget):
         df = self.tab.df_mouse_tmp.loc[self.tab.df_mouse_tmp['Setup_ID'].isin(self.tab.CLT.selected_setups)]
         df.index = np.arange(len(df))
 
-
         df.reset_index(drop=True)
         self.setRowCount(len(df))
 
@@ -525,7 +535,7 @@ class mouse_list_table(QtGui.QTableWidget):
 class cageTable(QtGui.QTableWidget):
     """ This table contains information about all mice currently running in the
         system """
-    def __init__(self, GUI,tab=None):
+    def __init__(self, GUI, tab=None):
         super(QtGui.QTableWidget, self).__init__(1,12, parent=None)
         self.header_names = ['Select','Setup_ID','Connection','Experiment','Protocol','Mouse_training',
                              'COM','COM_AC', 'in_use','connected', 'User',
@@ -547,7 +557,7 @@ class cageTable(QtGui.QTableWidget):
 
         self.fill_table()
 
-    def fill_table(self):
+    def fill_table(self) -> None:
         self.clearContents()
         self.setRowCount(len(self.GUI.setup_df))
 
@@ -588,7 +598,6 @@ class cageTable(QtGui.QTableWidget):
     def connect(self):
 
         try:
-
             setup_id, com_,comAC_ = self.sender().name
 
             print_func = partial(print, flush=True)
@@ -627,7 +636,7 @@ class cageTable(QtGui.QTableWidget):
 
     def _fill_setup_df_row(self,send_name):
         " Just fill that row of the df"
-        setup_id,com_,comAC_ = send_name
+        _, com_, _ = send_name
         self.GUI.setup_df['connected'].loc[self.GUI.setup_df['COM']==com_] = True
         self.GUI.setup_df['in_use'].loc[self.GUI.setup_df['COM']==com_] = False
         self.GUI.setup_df['connected'].loc[self.GUI.setup_df['COM']==com_] = True
@@ -728,13 +737,13 @@ class MouseTable(QtGui.QTableWidget):
 
 
 
-    def update_task_combo(self,combo):
-            cTask = combo.currentText()
-            combo.clear()
-            combo.addItems([cTask] + get_tasks(self.GUI.GUI_filepath))
+    def update_task_combo(self, combo: QtGui.QComboBox) -> None:
+        cTask = combo.currentText()
+        combo.clear()
+        combo.addItems([cTask] + get_tasks(self.GUI.GUI_filepath))
 
 
-    def change_mouse_task(self,combo):
+    def change_mouse_task(self, combo: QtGui.QComboBox) -> None:
         """ Change task mouse is doing """
         rfid = combo.RFID
 

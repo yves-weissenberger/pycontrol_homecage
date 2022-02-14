@@ -5,13 +5,12 @@ from utils import get_users
 from datetime import date, timedelta
 from datetime import datetime
 import pandas as pd
-import json
 import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 
-from utils import get_users, get_user_dicts
+from pycontrol_homecage.utils import get_users, get_user_dicts
 
 lines_ = open(user_path,'r').readlines()
 users = get_users()

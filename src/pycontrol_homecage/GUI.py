@@ -6,7 +6,6 @@ from functools import partial
 from datetime import datetime
 import traceback
 
-from pycontrol_homecage import com
 from pycontrol_homecage.mouse_overview import mouse_window
 from pycontrol_homecage.setup_view_tab import setups_tab
 from pycontrol_homecage.schedule_manager import scheduler
@@ -118,7 +117,7 @@ class Visualizator(QtGui.QMainWindow):
         self.refresh()    # Refresh tasks and ports lists.
 
 
-    def refresh(self):
+    def refresh(self) -> None:
         #print(self.setup_window_tab.callibrate_dialog)
         for k,SC in self.controllers.items():
             SC.check_for_data()
@@ -132,7 +131,7 @@ class Visualizator(QtGui.QMainWindow):
         self.mouse_window_tab._refresh()
         self.schedule_tab._refresh()
 
-    def change_user(self):
+    def change_user(self) -> None:
         self.login.exec_()
         self.active_user = self.login.userID
         if self.active_user:
@@ -144,7 +143,8 @@ class Visualizator(QtGui.QMainWindow):
             self.system_tab.log_groupbox.setEnabled(True)
             self.system_tab.experiment_groupbox.setEnabled(True)
             self.experiment_tab.setEnabled(True)
-    def print_msg(self,msg,ac_pyc=None,setup_ID=None):
+    
+    def print_msg(self,msg,ac_pyc=None,setup_ID=None) -> None:
         self.system_tab.write_to_log(msg)
         if ac_pyc=='pyc':
             pass
@@ -152,7 +152,7 @@ class Visualizator(QtGui.QMainWindow):
             #self.system_tab.experiment_plot.
 
 
-    def add_user_(self):
+    def add_user_(self) -> None:
         self.add_user.exec_()
         self.login = login_dialog()
 

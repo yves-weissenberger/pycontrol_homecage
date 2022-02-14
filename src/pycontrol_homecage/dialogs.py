@@ -1,3 +1,4 @@
+import os
 from pyqtgraph.Qt import QtGui
 import string 
 import random
@@ -62,15 +63,18 @@ class calibrate_dialog(QtGui.QDialog):
         layoutH.addWidget(self.log_textbox)
 
 
-
-    def tare(self):
+    def tare(self) -> None:
+        """ Tell access control module to tare the scales"""
         self.ac.serial.write(b'tare')
 
-    def callibrate(self):
+
+    def callibrate(self) -> None:
+        """ Tell access control module to callibrate the scales"""
         cw = self.calibration_weight.text()
         str_ = 'calibrate:'+cw
         self.ac.serial.write(str_.encode())
 
+        # write to
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
         self.log_textbox.insertPlainText('Target calibration weight: ' + str(cw) +'g\n')
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
@@ -112,8 +116,6 @@ class configure_box_dialog(QtGui.QDialog):
         self.setup_id = setup_id
         self.GUI = GUI
         layoutH = QtGui.QHBoxLayout(self)
-
-
 
 
         self.load_framework_button = QtGui.QPushButton('Load Pycontrol \nframework', self)
@@ -177,6 +179,7 @@ class configure_box_dialog(QtGui.QDialog):
         layoutH.addWidget(self.log_textbox)
 
     def load_ac_framework(self):
+
         self.log_textbox.insertPlainText('Loading access control framework...')
         self.GUI.controllers[self.setup_id].AC.reset()
         self.GUI.controllers[self.setup_id].AC.load_framework()
@@ -308,7 +311,6 @@ class direct_pyboard_dialog(QtGui.QDialog):
         layoutH.addLayout(layout2)
         layoutH.addWidget(self.log_textbox)
 
-
     def start_stop(self):
         """ Button that allows you to start and stop task"""
 
@@ -322,8 +324,6 @@ class direct_pyboard_dialog(QtGui.QDialog):
         elif self.start_stop_button.text()=="Stop":
             self.PYC.stop_framework()
             self.start_stop_button.setText("Start")
-
-
 
 
     def _done(self):
@@ -404,6 +404,7 @@ class add_user_dialog(QtGui.QDialog):
             server.ehlo()  # Can be omitted
             server.login(sender_email, password)
             server.sendmail(sender_email, receiver_email, message)
+
 
     def handleLogin(self):
         self.users = get_users()
