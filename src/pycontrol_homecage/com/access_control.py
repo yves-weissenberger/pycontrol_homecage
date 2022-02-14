@@ -2,7 +2,7 @@ import os
 import re
 from serial import SerialException
 from .pyboard import Pyboard, PyboardError
-from config.paths import config_dir, accCtrl_dir, devices_dir, tasks_dir,framework_dir
+from pycontrol_homecage.config.paths import  accCtrl_dir, framework_dir
 from datetime import datetime
 
 class Access_control(Pyboard):

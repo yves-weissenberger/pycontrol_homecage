@@ -1,17 +1,11 @@
-from pyqtgraph.Qt import QtGui, QtCore
-from pyqtgraph import Qt
-from pyqtgraph import mkPen
-import sys, os, pickle, time
-import copy as cp
-from datetime import datetime
+from pyqtgraph.Qt import QtGui
 
 
 
 ##### YW code imports
-from dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog, direct_pyboard_dialog
-from tables import cageTable
-from com.data_logger import Data_logger
-from utils import find_setups
+from pycontrol_homecage.dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog, direct_pyboard_dialog
+from pycontrol_homecage.tables import cageTable
+from pycontrol_homecage.utils import find_setups
 
 
 

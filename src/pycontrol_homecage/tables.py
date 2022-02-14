@@ -1,8 +1,5 @@
 import os
-import pickle
-import re
 import time
-from datetime import datetime
 from functools import partial
 
 import numpy as np
@@ -10,14 +7,14 @@ from pyqtgraph import Qt
 from pyqtgraph.Qt import QtCore, QtGui
 from serial import SerialException
 
-from com.access_control import Access_control
+from pycontrol_homecage.com.access_control import Access_control
 ##### TA code imports
-from com.pycboard import PyboardError, Pycboard, _djb2_file
+from pycontrol_homecage.com.pycboard import PyboardError, Pycboard, _djb2_file
 #from com.data_logger import Data_logger
-from com.system_handler import system_controller
-from dialogs import calibrate_dialog
-from utils import (TableCheckbox, cbox_set_item, cbox_update_options,
-                   find_setups, get_tasks, null_resize)
+from pycontrol_homecage.com.system_handler import system_controller
+from pycontrol_homecage.dialogs import calibrate_dialog
+from pycontrol_homecage.utils import (TableCheckbox, cbox_set_item, cbox_update_options,
+                                        find_setups, get_tasks, null_resize)
 
 #######################################################################
 ####################      Experiment Table      #######################

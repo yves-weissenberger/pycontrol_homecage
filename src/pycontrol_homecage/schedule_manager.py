@@ -1,20 +1,15 @@
-import numpy as np
-from pyqtgraph.Qt import QtGui, QtCore
-from pyqtgraph import Qt
+from pyqtgraph.Qt import QtGui
 from pyqtgraph import mkPen
-import pyqtgraph as pg
-import sys, os, pickle, time
-import copy as cp
+import os
 import json
 
 
-from config.paths import config_dir, framework_dir, devices_dir, tasks_dir
+from pycontrol_homecage.config.paths import tasks_dir
 
 
-from utils import get_tasks
-from utils import get_variables_from_taskfile
-from loc_def import protocol_dir
-from tables import protocol_table
+from pycontrol_homecage.utils import get_variables_from_taskfile, get_tasks
+from pycontrol_homecage.loc_def import protocol_dir
+from pycontrol_homecage.tables import protocol_table
 
 class scheduler(QtGui.QWidget):
 

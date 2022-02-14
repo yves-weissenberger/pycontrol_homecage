@@ -1,16 +1,12 @@
 import json
 import os
-import re
-import sys
 import time
-import traceback
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
-from config.paths import config_dir, devices_dir, framework_dir, tasks_dir
-from loc_def import mice_dir, protocol_dir
-from utils import find_prev_base
+from pycontrol_homecage.config.paths import tasks_dir
+from pycontrol_homecage.loc_def import mice_dir, protocol_dir
+# from utils import find_prev_base
 
 from .data_logger import Data_logger
 

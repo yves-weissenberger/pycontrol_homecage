@@ -1,27 +1,20 @@
 from pyqtgraph.Qt import QtGui, QtCore
-# from pyqtgraph import Qt
-# from pyqtgraph import mkPen
-# import pyqtgraph as pg
-import sys, os, pickle, time
-import copy as cp
+
+import sys, os
 from functools import partial
 #imports for interacting with serial ports
-from serial.tools import list_ports
+from datetime import datetime
 import traceback
 
-import .com
-from .mouse_overview import mouse_window
-from setup_view_tab import setups_tab
-from schedule_manager import scheduler
-from system_overview import system_tab
-from dialogs import login_dialog, add_user_dialog
-from experiment_tab import experiment_tab
-from loc_def import all_paths, create_paths
-from new_experiment_dialog import new_experiment_dialog
-from utils import load_data_csv
-from tables import cageTable, experiment_overview_table
-from dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog
-from datetime import datetime
+from pycontrol_homecage import com
+from pycontrol_homecage.mouse_overview import mouse_window
+from pycontrol_homecage.setup_view_tab import setups_tab
+from pycontrol_homecage.schedule_manager import scheduler
+from pycontrol_homecage.system_overview import system_tab
+from pycontrol_homecage.experiment_tab import experiment_tab
+from pycontrol_homecage.loc_def import all_paths, create_paths
+from pycontrol_homecage.utils import load_data_csv
+from pycontrol_homecage.dialogs import login_dialog, add_user_dialog
 ## Here want to implement a GUI for managing the homecage datasets. Thoughts on how to structure it. I think natural way is to ]
 # create a central landing interface that presents and lvie updates some basic features of the behavior sufficient to tell you 
 #if you need up check in on a page and then detailed information about each cage in tabs. 

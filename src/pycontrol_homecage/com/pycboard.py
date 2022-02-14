@@ -1,10 +1,9 @@
 import os
-import sys
-import time
+
 from serial import SerialException
 from array import array
 from .pyboard import Pyboard, PyboardError, _djb2_file,_rm_dir_or_file, _reset_pyb_filesystem, _receive_file
-from config.paths import config_dir, framework_dir, devices_dir, tasks_dir
+from pycontrol_homecage.config.paths import config_dir, framework_dir, devices_dir, tasks_dir
 
 
 # ----------------------------------------------------------------------------------------

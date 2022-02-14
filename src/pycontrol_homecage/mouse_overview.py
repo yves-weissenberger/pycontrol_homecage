@@ -1,17 +1,13 @@
 import numpy as np
-from pyqtgraph.Qt import QtGui, QtCore
-from pyqtgraph import Qt
-from pyqtgraph import mkPen
-import sys, os, pickle, time
-import copy as cp
-from datetime import datetime
+from pyqtgraph.Qt import QtGui
+import os
 import pandas as pd
 import json
 
-from dialogs import are_you_sure_dialog, mouse_summary_dialog
-from tables import mouse_adder_table, MouseTable, variables_table
-from utils import get_variables_from_taskfile, get_variables_and_values_from_taskfile
-from loc_def import main_path
+from pycontrol_homecage.dialogs import are_you_sure_dialog, mouse_summary_dialog
+from pycontrol_homecage.tables import MouseTable, variables_table
+from pycontrol_homecage.utils import get_variables_and_values_from_taskfile
+from pycontrol_homecage.loc_def import main_path
 
 
 class mouse_window(QtGui.QWidget):

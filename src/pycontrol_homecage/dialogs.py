@@ -1,15 +1,13 @@
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtGui
 import string 
 import random
 import smtplib, ssl
 
 
 ## - package imports --
-from utils import get_users
-from loc_def import user_path
-from config.paths import *
-from utils import get_pyhomecage_email
-from utils import get_tasks
+from pycontrol_homecage.utils import get_users, get_pyhomecage_email, get_tasks
+from pycontrol_homecage.loc_def import user_path
+from pycontrol_homecage.config.paths import *
 
 
 

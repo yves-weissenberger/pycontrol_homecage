@@ -1,15 +1,11 @@
-import numpy as np
-from pyqtgraph.Qt import QtGui, QtCore
-from pyqtgraph import Qt
-from pyqtgraph import mkPen
-import pyqtgraph as pg
-import sys, os, pickle, time
+from pyqtgraph.Qt import QtGui
+import time
 import copy as cp
 
-from new_experiment_dialog import new_experiment_dialog
-from tables import cageTable, experiment_overview_table
+from pycontrol_homecage.new_experiment_menu import new_experiment_dialog
+from pycontrol_homecage.tables import cageTable, experiment_overview_table
 
-from plotting import Experiment_plot
+from pycontrol_homecage.plotting import Experiment_plot
 
 
 class system_tab(QtGui.QWidget):

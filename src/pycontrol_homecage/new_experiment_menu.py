@@ -1,24 +1,15 @@
-import numpy as np
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtGui
 from pyqtgraph import Qt
-from pyqtgraph import mkPen
-import pyqtgraph as pg
-import sys, os, pickle, time, re
-import copy as cp
+import os
+import time
 from datetime import datetime
 import pandas as pd
 
 
 #YW code
-from dialogs import are_you_sure_dialog
-from tables import mouse_adder_table, MouseTable
-from utils import get_tasks
-from com.data_logger import Data_logger
-from tables import mouse_list_table, cage_list_table, variables_table
-from loc_def import data_dir, mice_dir, protocol_dir
-#TA code
-from com.pycboard import Pycboard, PyboardError, _djb2_file
-from com.data_logger import Data_logger
+from pycontrol_homecage.utils import get_tasks
+from pycontrol_homecage.tables import mouse_list_table, cage_list_table, variables_table
+from pycontrol_homecage.loc_def import data_dir, mice_dir, protocol_dir
 
 class new_experiment_dialog(QtGui.QDialog):
 

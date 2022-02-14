@@ -1,13 +1,9 @@
-import numpy as np
-from pyqtgraph.Qt import QtGui, QtCore
-from pyqtgraph import Qt
-from pyqtgraph import mkPen
-import pyqtgraph as pg
-import sys, os, pickle, time
-import copy as cp
-from tables import cageTable, experiment_overview_table
+from pyqtgraph.Qt import QtGui
 
-from dialogs import are_you_sure_dialog
+
+from pycontrol_homecage.tables import experiment_overview_table
+from pycontrol_homecage.dialogs import are_you_sure_dialog
+
 #Ok in this tab want to get an overview of the experiments. The most important thing to
 #be able to do here in the first instance is to change the protocol being run.
 
