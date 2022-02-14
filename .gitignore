@@ -7,3 +7,5 @@
 data_backup.py
 pyhomecage_conf.py
 .tox*
+*egg-info*
+.coverage
