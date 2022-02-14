@@ -1,0 +1,1 @@
+![Tests](https://github.com/yves-weissenberger/pycontrol_homecage/actions/workflows/tests.yml/badge.svg)

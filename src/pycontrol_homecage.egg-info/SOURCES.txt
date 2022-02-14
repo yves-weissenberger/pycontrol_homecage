@@ -10,8 +10,9 @@ src/pycontrol_homecage/experiment_tab.py
 src/pycontrol_homecage/loc_def.py
 src/pycontrol_homecage/mouse_overview.py
 src/pycontrol_homecage/mouse_weight_reader.py
-src/pycontrol_homecage/new_experiment_dialog.py
+src/pycontrol_homecage/new_experiment_menu.py
 src/pycontrol_homecage/plotting.py
+src/pycontrol_homecage/py.typed
 src/pycontrol_homecage/schedule_manager.py
 src/pycontrol_homecage/security_daemon.py
 src/pycontrol_homecage/setup_view_tab.py
