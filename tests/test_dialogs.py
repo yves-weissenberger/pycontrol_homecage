@@ -19,4 +19,4 @@ def test_box_conn_dialog(qtbot):
 
 
 # if __name__ == "__main__":
-#     test_calibrate_dialog()
+#     test_calibrate_dialog()]
