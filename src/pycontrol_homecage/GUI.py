@@ -9,8 +9,8 @@ from functools import partial
 from serial.tools import list_ports
 import traceback
 
-
-from mouse_overview import mouse_window
+import .com
+from .mouse_overview import mouse_window
 from setup_view_tab import setups_tab
 from schedule_manager import scheduler
 from system_overview import system_tab
@@ -19,7 +19,6 @@ from experiment_tab import experiment_tab
 from loc_def import all_paths, create_paths
 from new_experiment_dialog import new_experiment_dialog
 from utils import load_data_csv
-import com
 from tables import cageTable, experiment_overview_table
 from dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog
 from datetime import datetime
@@ -38,8 +37,7 @@ def custom_excepthook(type_, exception, traceback_,filepath):
         for an email daemon
     """
     now = datetime.strftime(datetime.now(),'%Y-%m-%d-%H%M%S')
-    #print("NOOOOO")
-    #print(traceback.attrs())
+
     with open(filepath,'a') as f:
         f.write('----------------- \n')
         f.write(repr(type_))
