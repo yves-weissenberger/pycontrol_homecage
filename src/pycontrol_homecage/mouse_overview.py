@@ -12,39 +12,18 @@ from pycontrol_homecage.loc_def import main_path
 
 class mouse_window(QtGui.QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QtGui.QMainWindow=None):
 
         super(QtGui.QWidget, self).__init__(parent)
 
         self.GUI = self.parent()
 
-        self.remove_mouse_button = QtGui.QPushButton('Remove Mouse')
-        self.remove_mouse_button.clicked.connect(self.remove_mouse)
-        self.update_mouse_button = QtGui.QPushButton('Update Mouse')
+        self.init_buttons()
 
-        self.mouse_summary_button = QtGui.QPushButton('Get Mouse Summary')
-        self.mouse_summary_button.clicked.connect(self.get_summary)
+        self.set_button_layout()
 
-        self.mouse_manager_layout = QtGui.QHBoxLayout()
-        self.mouse_manager_layout.addWidget(self.remove_mouse_button)
-        self.mouse_manager_layout.addWidget(self.update_mouse_button)
-        self.mouse_manager_layout.addWidget(self.mouse_summary_button)
-
-
-        #Setups table
-        self.mouse_table_label = QtGui.QLabel()
-        self.mouse_table_label.setText("Mice in setup")
-
-        self.scrollable_mouse =  QtGui.QScrollArea()
-        self.scrollable_mouse.setWidgetResizable(True)
-        self.scrollable_mouse.horizontalScrollBar().setEnabled(False)
-
-
-
-
-        self.list_of_mice = MouseTable(self.GUI,self)
-        self.scrollable_mouse.setWidget(self.list_of_mice)
-
+        self.init_mouse_table()
+        
         # Buttons to control stuff
         self.Vlayout = QtGui.QVBoxLayout(self)
         self.Vlayout.addWidget(self.mouse_table_label)
@@ -72,10 +51,8 @@ class mouse_window(QtGui.QWidget):
         self.vars_update_button.clicked.connect(self.update_variables_table)
         self.show_all_vars_checkbox = QtGui.QCheckBox("Show all variables")
         self.show_all_vars_checkbox.setChecked(True)
-        #self.show_all_vars_checkboxself.stateChanged.connect(lambda: self.show_all_vars_checkboxself:
 
         self.vars_combo_sel.activated.connect(self.update_variables_filt)
-        #self.task_combo.currentIndexChanged.connect(self.picked_task)
         self.vars_hlayout1.addWidget(self.vars_combo)
         self.vars_hlayout1.addWidget(self.vars_combo_sel)
         self.vars_hlayout1.addWidget(self.show_all_vars_checkbox)
@@ -89,6 +66,34 @@ class mouse_window(QtGui.QWidget):
         self.Vlayout.addWidget(self.variables_box)  #THIS NEEDS TO GO. THIS WILL NEVER HAPPEN. CHANGE TO VARIABLES TABLE
 
 
+    def init_buttons(self) -> None:
+        self.remove_mouse_button = QtGui.QPushButton('Remove Mouse')
+        self.remove_mouse_button.clicked.connect(self.remove_mouse)
+        self.update_mouse_button = QtGui.QPushButton('Update Mouse')
+        self.mouse_summary_button = QtGui.QPushButton('Get Mouse Summary')
+        self.mouse_summary_button.clicked.connect(self.get_summary)
+
+    def set_button_layout(self) -> None:
+        self.mouse_manager_layout = QtGui.QHBoxLayout()
+        self.mouse_manager_layout.addWidget(self.remove_mouse_button)
+        self.mouse_manager_layout.addWidget(self.update_mouse_button)
+        self.mouse_manager_layout.addWidget(self.mouse_summary_button)
+
+    def init_mouse_table(self) -> None:
+        """Initialise a table that shows which mice are currently in the system
+        """
+        self.mouse_table_label = QtGui.QLabel()
+        self.mouse_table_label.setText("Mice in setup")
+
+        self.scrollable_mouse =  QtGui.QScrollArea()
+        self.scrollable_mouse.setWidgetResizable(True)
+        self.scrollable_mouse.horizontalScrollBar().setEnabled(False)
+        self.list_of_mice = MouseTable(self.GUI,self)
+        self.scrollable_mouse.setWidget(self.list_of_mice)
+
+
+    def init_mouse_variables_table(self) -> None:
+        return 
 
     def update_variables_table(self):
 
