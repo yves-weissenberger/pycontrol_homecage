@@ -1,7 +1,6 @@
 import smtplib, ssl
 import re
 from loc_def import user_path, all_paths
-from utils import get_users
 from datetime import date, timedelta
 from datetime import datetime
 import pandas as pd

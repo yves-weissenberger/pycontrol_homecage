@@ -8,7 +8,7 @@ import smtplib, ssl
 ## - package imports --
 from pycontrol_homecage.utils import get_users, get_pyhomecage_email, get_tasks
 from pycontrol_homecage.loc_def import user_path
-from pycontrol_homecage.config.paths import *
+from pycontrol_homecage.homecage_config.paths import *
 
 
 

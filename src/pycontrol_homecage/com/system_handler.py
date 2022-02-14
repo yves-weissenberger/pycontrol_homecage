@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 
 import pandas as pd
-from pycontrol_homecage.config.paths import tasks_dir
+from pycontrol_homecage.homecage_config.paths import tasks_dir
 from pycontrol_homecage.loc_def import mice_dir, protocol_dir
 # from utils import find_prev_base
 

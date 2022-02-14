@@ -3,7 +3,7 @@ from pyqtgraph.Qt import QtGui
 
 
 ##### YW code imports
-from pycontrol_homecage.dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, box_conn_dialog, direct_pyboard_dialog
+from pycontrol_homecage.dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, direct_pyboard_dialog
 from pycontrol_homecage.tables import cageTable
 from pycontrol_homecage.utils import find_setups
 

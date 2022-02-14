@@ -1,5 +1,4 @@
-import os
-from datetime import datetime
+
 from .data_logger import Data_logger
 
 class homecage_logger(Data_logger):

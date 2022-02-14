@@ -1,10 +1,9 @@
 from pyqtgraph.Qt import QtGui
-from pyqtgraph import mkPen
 import os
 import json
 
 
-from pycontrol_homecage.config.paths import tasks_dir
+from pycontrol_homecage.homecage_config.paths import tasks_dir
 
 
 from pycontrol_homecage.utils import get_variables_from_taskfile, get_tasks

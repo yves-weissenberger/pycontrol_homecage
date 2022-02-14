@@ -1,2 +1,0 @@
-from pycontrol_homecage.config import paths
-from pycontrol_homecage.config import gui_settings
