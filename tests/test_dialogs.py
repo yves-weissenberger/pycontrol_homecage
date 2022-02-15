@@ -1,6 +1,6 @@
 import time
 
-# import pytestqt
+import pytestqt
 
 from pycontrol_homecage.dialogs import calibrate_dialog, box_conn_dialog
 
@@ -10,12 +10,12 @@ from pycontrol_homecage.dialogs import calibrate_dialog, box_conn_dialog
 #     qtbot.addWidget(dialog)
 
 
-# def test_box_conn_dialog(qtbot):
+def test_box_conn_dialog(qtbot):
 
-#     dialog = box_conn_dialog()
-#     qtbot.addWidget(dialog)
-#     target = "You must be connected to the setup to update it"
-#     assert dialog.textbox.text()==target
+    dialog = box_conn_dialog()
+    qtbot.addWidget(dialog)
+    target = "You must be connected to the setup to update it"
+    assert dialog.textbox.text()==target
 
 def test_one():
     assert 1==1

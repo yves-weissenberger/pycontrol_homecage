@@ -55,39 +55,14 @@ class Visualizator(QtGui.QMainWindow):
         self.active_user = None
         self.task_df,self.exp_df,self.setup_df,self.mouse_df = load_data_csv()
 
-        self._store_paths()
+        self._add_paths_to_gui()
 
         self.setup_df['connected'] = False
 
-
-        self.tab_widget = QtGui.QTabWidget(self)
-
-
-
-        ################ Setup the tabs ##################
-        self.mouse_window_tab = mouse_window(self)
-        self.setup_window_tab = setups_tab(self)
-        self.schedule_tab = scheduler(self)
-        self.system_tab = system_tab(self)
-        self.experiment_tab = experiment_tab(self)
-
-        self.tab_widget.addTab(self.system_tab,'System Overview')
-        self.tab_widget.addTab(self.experiment_tab,'Experiments')
-        self.tab_widget.addTab(self.mouse_window_tab,'Mouse Overview')
-        self.tab_widget.addTab(self.setup_window_tab,'Setup Overview')
-        self.tab_widget.addTab(self.schedule_tab,'Task scheduler')
-
-        ##################################################
-
-        self.mouse_window_tab.setEnabled(False)
-        self.setup_window_tab.setEnabled(False)
-        self.schedule_tab.setEnabled(False)
-        self.system_tab.setup_groupbox.setEnabled(False)
-        self.system_tab.log_groupbox.setEnabled(False)
-        self.system_tab.experiment_groupbox.setEnabled(False)
-        #self.system_tab.
-        self.experiment_tab.setEnabled(False)
-        ################ Setup the tabs ##################
+        self._init_tabs()
+        self._add_tabs_to_widget()
+       
+        self._disable_gui_pre_login()
         
         self.login = login_dialog()
         self.add_user = add_user_dialog()
@@ -100,13 +75,41 @@ class Visualizator(QtGui.QMainWindow):
         self.setCentralWidget(self.tab_widget)
         self.show()
 
-        self.refresh_timer = QtCore.QTimer() # Timer to regularly call refresh() when not running.
+        self._init_timer()
+        self.refresh()    # Refresh tasks and ports lists.
+
+    def _init_tabs(self) -> None:
+        self.mouse_window_tab = mouse_window(self)
+        self.setup_window_tab = setups_tab(self)
+        self.schedule_tab = scheduler(self)
+        self.system_tab = system_tab(self)
+        self.experiment_tab = experiment_tab(self)
+
+    def _add_tabs_to_widget(self) -> None:
+        self.tab_widget = QtGui.QTabWidget(self)
+        self.tab_widget.addTab(self.system_tab,'System Overview')
+        self.tab_widget.addTab(self.experiment_tab,'Experiments')
+        self.tab_widget.addTab(self.mouse_window_tab,'Mouse Overview')
+        self.tab_widget.addTab(self.setup_window_tab,'Setup Overview')
+        self.tab_widget.addTab(self.schedule_tab,'Task scheduler')
+
+    def _disable_gui_pre_login(self) -> None:
+        self.mouse_window_tab.setEnabled(False)
+        self.setup_window_tab.setEnabled(False)
+        self.schedule_tab.setEnabled(False)
+        self.system_tab.setup_groupbox.setEnabled(False)
+        self.system_tab.log_groupbox.setEnabled(False)
+        self.system_tab.experiment_groupbox.setEnabled(False)
+        self.experiment_tab.setEnabled(False)
+
+    def _init_timer(self) -> None:
+        # Timer to regularly call refresh() when not running.
+        self.refresh_timer = QtCore.QTimer() 
         self.refresh_timer.timeout.connect(self.refresh)
         self.refresh_timer.start(100)
 
-        self.refresh()    # Refresh tasks and ports lists.
 
-    def _store_paths(self) -> None:
+    def _add_paths_to_gui(self) -> None:
         ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
 
         self.paths = {'ROOT': ROOT,

@@ -1,4 +1,4 @@
-from typing import Tuple, List, Optional
+from typing import List, Optional
 
 import pandas as pd
 from pyqtgraph.Qt import QtGui
@@ -7,8 +7,6 @@ from pyqtgraph.Qt import QtGui
 from pycontrol_homecage.tables import experiment_overview_table
 from pycontrol_homecage.dialogs import are_you_sure_dialog
 
-#Ok in this tab want to get an overview of the experiments. The most important thing to
-#be able to do here in the first instance is to change the protocol being run.
 
 class experiment_tab(QtGui.QWidget):
 
@@ -133,6 +131,9 @@ class experiment_tab(QtGui.QWidget):
             # this is what is checked in the new experiment dialog
             self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup, 'in_use'] = experiment is not None  
             self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+
+    def _refresh(self):
+        pass
 
 
     def _get_checks(self,table):

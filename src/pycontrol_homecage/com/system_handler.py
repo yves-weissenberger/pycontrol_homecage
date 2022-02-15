@@ -44,22 +44,23 @@ class system_controller(Data_logger):
                            'task': None,
                            'data_path': None}
 
-    def add_AC(self,ac):
+    def add_AC(self, ac) -> None:
 
         self.AC = ac
         self.has_AC = True
         
-        if self.has_PYC:
-            self.active = True
+        self._check_active()
 
-    def add_PYC(self,pyc):
+    def add_PYC(self, pyc) -> None:
 
         self.PYC = pyc
         self.has_PYC = True
 
-        if self.has_AC:
-            self.active = True
+        self._check_active()
 
+    def check_active(self) -> None:
+        if (self.has_AC and self.has_PYC):
+            self.active = True
 
     def disconnect(self):
         """ This needs to be done for when we have multiple setups """
@@ -71,7 +72,6 @@ class system_controller(Data_logger):
     def check_for_data(self):
         " check whether either AC or the PYC board have data to deliver "
         if self.active:
-
             self.AC.process_data()
             self.PYC.process_data()  #process data
 
