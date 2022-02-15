@@ -72,7 +72,7 @@ class calibrate_dialog(QtGui.QDialog):
     def callibrate(self) -> None:
         """ Tell access control module to callibrate the scales"""
         cw = self.calibration_weight.text()
-        str_ = 'calibrate:'+cw
+        str_ = 'calibrate:' + cw
         self.ac.serial.write(str_.encode())
 
         # write to
@@ -80,10 +80,10 @@ class calibrate_dialog(QtGui.QDialog):
         self.log_textbox.insertPlainText('Target calibration weight: ' + str(cw) +'g\n')
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
 
-    def weigh(self):
+    def weigh(self) -> None:
         self.ac.serial.write(b'weigh')
 
-    def _done(self):
+    def _done(self) -> None:
         self.ac.GUI.setup_window_tab.callibrate_dialog = None  #sorry
         self.accept()
 

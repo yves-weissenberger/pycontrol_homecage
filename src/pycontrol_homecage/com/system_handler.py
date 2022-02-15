@@ -2,6 +2,7 @@ import json
 import os
 import time
 from datetime import datetime
+from queue import Queue
 
 import pandas as pd
 from pycontrol_homecage.homecage_config.paths import tasks_dir
@@ -35,6 +36,11 @@ class system_controller(Data_logger):
         self.data_dir = GUI.paths['data_dir']
         self.data_file = None
 
+        self.print_queue = Queue()
+
+
+
+    def _reset_mouse_data(self) -> None:
         #dict to store data about mice as they are going through
         #the access control system
         self.mouse_data = {'weight': None,
@@ -48,14 +54,12 @@ class system_controller(Data_logger):
 
         self.AC = ac
         self.has_AC = True
-        
         self._check_active()
 
     def add_PYC(self, pyc) -> None:
 
         self.PYC = pyc
         self.has_PYC = True
-
         self._check_active()
 
     def check_active(self) -> None:
@@ -118,38 +122,33 @@ class system_controller(Data_logger):
                 self.GUI.print_msg(msg,ac_pyc='ac')
 
 
+    def _handle_error_state(self)->None:
+        self.PYC.stop_framework()
+        time.sleep(.05)
+        self.PYC.process_data()
+        self.close_files()
 
-
-    def process_ac_state(self,state,now):
+    def process_ac_state(self, state:str, now: str) -> None:
         """ Here do more global updates of stuff based on state """
 
         self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'AC_state'] = state
 
         if state=='error_state':
-            self.PYC.stop_framework()
-            time.sleep(.05)
-            self.PYC.process_data()
-            self.close_files()
+            self._handle_error_state()
 
+        #in this state, allow entry to the access control
         if state=='allow_entry':
+            self._reset_mouse_data()
 
-            self.mouse_data = {'weight': None,
-                               'RFID': None,
-                               'entry_time': None,
-                               'exit_time': None,
-                               'task': None,
-                               'data_path': None}
-
-            
-
-
+        # first entry in this state is when the mouse first enters
+        # the apparatus and 
         elif state=='mouse_training':
-
-            if self.data_file is None:
-                #The purpose of this if statement is to guard against
-                #cases where the state changes to check_mouse_in_ac
-                #then decides to back into training chamber so state
-                #changes back to 'mouse_training'
+            
+            # This guards the state changing to to check_mouse_in_ac (i.e. when the mouse starts to leave)
+            # but then then decides to back into training chamber so state changes back to 'mouse_training'
+            mouse_just_entered = self.data_file is None
+            if mouse_just_entered:
+                
 
                 mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
 
@@ -158,27 +157,10 @@ class system_controller(Data_logger):
                 isAssigned = mouse_row['is_assigned'].values[0]
 
                 if isAssigned:
-            
+
+                    # if the current protocol is simply to run a task do so
                     if 'task' in prot:
-                        # if the current protocol is simply to run a task do so
-                        task = mouse_row['Task'].values[0]
-                        self.GUI.print_msg("Uploading: " + str(task) ,ac_pyc='pyc')
-
-                        self.PYC.setup_state_machine(sm_name=task)
-
-
-                        if not pd.isnull(mouse_row['summary_variables'].values):
-                            summary_variables = eval(mouse_row['summary_variables'].values[0])
-                        if not pd.isnull(mouse_row['set_variables'].values):
-                            set_variables = eval(mouse_row['set_variables'].values[0])
-                            if set_variables:
-                                for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
-                        if not pd.isnull(mouse_row['persistent_variables'].values):
-                            persistent_variables = eval(mouse_row['persistent_variables'].values[0])
-                            if persistent_variables:
-                                for k,v in persistent_variables.items(): 
-                                    if v!='auto':
-                                        self.PYC.set_variable(k[2:],eval(v))
+                       self.run_mouse_task(mouse_info=mouse_row)
 
                     else:
                         # If running a real protocol, handle (potential) update of protocol.
@@ -254,8 +236,26 @@ class system_controller(Data_logger):
                 self.PYC.stop_framework()
                 time.sleep(.05)
                 self.PYC.process_data()
-
                 self.close_files()
+
+    def run_mouse_task(self, mouse_info: pd.Series)->None:
+        task = mouse_info['Task'].values[0]
+        self.GUI.print_msg("Uploading: " + str(task), ac_pyc='pyc')
+
+        self.PYC.setup_state_machine(sm_name=task)
+
+        if not pd.isnull(mouse_info['set_variables'].values):
+            set_variables = eval(mouse_info['set_variables'].values[0])
+            if set_variables:
+                for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+        
+        if not pd.isnull(mouse_info['persistent_variables'].values):
+            persistent_variables = eval(mouse_info['persistent_variables'].values[0])
+            if persistent_variables:
+                for k,v in persistent_variables.items(): 
+                    if v!='auto':
+                        self.PYC.set_variable(k[2:],eval(v))
+
 
     def open_data_file_(self,RFID,now):
 

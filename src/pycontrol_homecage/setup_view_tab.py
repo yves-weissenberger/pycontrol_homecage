@@ -86,8 +86,6 @@ class setups_tab(QtGui.QWidget):
         self.scrollable_cage.horizontalScrollBar().setEnabled(False)
 
 
-
-
         self.list_of_setups = cageTable(self.GUI,self)
         self.scrollable_cage.setWidget(self.list_of_setups)
 
@@ -126,7 +124,6 @@ class setups_tab(QtGui.QWidget):
             checked_setup_id = self.list_of_setups.item(checked_row,setup_col).text()
             for k,G in self.GUI.controllers.items():
                 if k==checked_setup_id:
-                    #print("YA")
                     self.configure_box_dialog = direct_pyboard_dialog(k,self.GUI)
                     self.configure_box_dialog.exec_()
 

@@ -14,18 +14,25 @@ class Access_control(Pyboard):
         self.serial_port = serial_port
         self.print = print_func        # Function used for print statements.
         self.data_logger = data_logger
+        self._init_variables()
+
+        self.GUI = GUI
+        
+        self._init_logger()
+        self.init_serial_connection()
+
+    def _init_variables(self) -> None:
+        
         self.prev_read = None
         self.rfid = None
         self.weight = None
         self.status = {'serial': None, 
                        'framework': None, 
-                       'usb_mode': None}
-        self.GUI = GUI
-
-        self._init_logger()
-        self.init_serial_connection()
+                       'usb_mode': None
+                       }
         
     def _init_logger(self) -> None:
+
         name_ = self.GUI.setup_df.loc[self.GUI.setup_df['COM_AC']==self.serial_port, 'Setup_ID'].values[0]
         now = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
         self.logger_dir = self.GUI.paths['AC_logger_dir']
