@@ -89,9 +89,8 @@ class mouse_window(QtGui.QWidget):
         self.list_of_mice = MouseTable(self.GUI, self)
         self.scrollable_mouse.setWidget(self.list_of_mice)
 
-
     def init_mouse_variables_table(self) -> None:
-        return 
+        return None
 
     def update_variables_table(self):
 

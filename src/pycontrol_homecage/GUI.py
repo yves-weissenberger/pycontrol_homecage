@@ -45,14 +45,9 @@ class Visualizator(QtGui.QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.connected_boards = []
-        self.connected_access_controls = []
-        self.controllers = {}
         self.GUI_filepath = os.path.dirname(os.path.abspath(__file__))
         self.app = None  # Overwritten with QtGui.QApplication instance in main.
         self.active_user = None
-
-        self._add_paths_to_gui()
 
         database.setup_df['connected'] = False
 
@@ -104,21 +99,9 @@ class Visualizator(QtGui.QMainWindow):
         self.refresh_timer.timeout.connect(self.refresh)
         self.refresh_timer.start(100)
 
-    def _add_paths_to_gui(self) -> None:
-        ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = all_paths
-
-        self.paths = {'ROOT': ROOT,
-                      'task_dir': task_dir,
-                      'experiment_dir': experiment_dir,
-                      'setup_dir': setup_dir,
-                      'mice_dir': mice_dir,
-                      'data_dir': data_dir,
-                      'AC_logger_dir': AC_logger_dir,
-                      'protocol_dir': protocol_dir}
-
     def refresh(self) -> None:
         # print(self.setup_window_tab.callibrate_dialog)
-        for k, SC in self.controllers.items():
+        for k, SC in database.controllers.items():
             SC.check_for_data()
 
             if self.system_tab.plot_isactive:

@@ -7,7 +7,6 @@ from pycontrol_homecage.utils import find_setups
 import pycontrol_homecage.db as database
 
 
-
 class setups_tab(QtGui.QWidget):
 
     def __init__(self, parent=None):

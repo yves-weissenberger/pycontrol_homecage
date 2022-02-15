@@ -15,7 +15,6 @@ class system_tab(QtGui.QWidget):
         self.GUI = self.parent()
         self.plot_isactive = False
 
-
         # ------------------------------ #
         # ----------- Users ------------ #
         # ------------------------------ #
@@ -44,11 +43,11 @@ class system_tab(QtGui.QWidget):
         # ------------------------------ #
 
 
-        #Experiments Table
+        # Experiments Table
         self.experiment_groupbox = QtGui.QGroupBox("Experiments")
-        self.scrollable_experiments =  QtGui.QScrollArea()
+        self.scrollable_experiments = QtGui.QScrollArea()
         self.scrollable_experiments.setWidgetResizable(True)
-        self.list_of_experiments = experiment_overview_table(GUI=self.GUI,only_active=True)
+        self.list_of_experiments = experiment_overview_table(GUI=self.GUI, only_active=True)
         self.scrollable_experiments.setWidget(self.list_of_experiments)
 
         # Buttons to control stuff
@@ -162,35 +161,31 @@ class system_tab(QtGui.QWidget):
 
             experiment = {'subjects': {},
                           'sm_infos': {},
-                          'handlers':{} }
+                          'handlers': {}
+                          }
             # check which mice are training right now
-            for kk,row in database.setup_df.iterrows():
-                if row['Mouse_training']!='none':
+            for _, row in database.setup_df.iterrows():
+                if row['Mouse_training'] != 'none':
                     # k = str(len(experiment['subjects']))
                     experiment['subjects'][row['Setup_ID']] = row['Mouse_training']
-                    handler_ = [setup for k,setup in self.GUI.controllers.items() if k == row['Setup_ID']][0]
+                    handler_ = [setup for k, setup in database.controllers.items() if k == row['Setup_ID']][0]
                     experiment['sm_infos'][row['Setup_ID']] = handler_.PYC.sm_info
                     experiment['handlers'][row['Setup_ID']] = handler_
-
 
             self.experiment_plot.setup_experiment(experiment)
 
             self.experiment_plot.set_state_machines(experiment)
 
-            for ix_,hKey in enumerate(sorted(experiment['handlers'].keys())):
+            for ix_, hKey in enumerate(sorted(experiment['handlers'].keys())):
                 experiment['handlers'][hKey].data_consumers = [self.experiment_plot.subject_plots[ix_]]
 
             self.experiment_plot.show()
             self.experiment_plot.start_experiment()
             self.plot_isactive = True
 
-
     def start_new_experiment(self):
-
         self.new_experiment_config = new_experiment_dialog(self.GUI)
         self.new_experiment_config.exec_()
-
-
 
     def end_experiment(self):
         #print("END")
@@ -202,9 +197,9 @@ class system_tab(QtGui.QWidget):
                 for setup in database.exp_df.loc[database.exp_df['Name'] == expName,'Setups'].values:
                     setup = eval(setup)[0]
 
-                    if self.GUI.controllers.items():  #if there are any controllers
+                    if database.controllers.items():  #if there are any controllers
                         print(expName)
-                        handler_ = [setup_ for k,setup_ in self.GUI.controllers.items() if k==setup][0]
+                        handler_ = [setup_ for k, setup_ in database.controllers.items() if k == setup][0]
                         
                         handler_.PYC.stop_framework()
                         time.sleep(.05)
@@ -236,15 +231,13 @@ class system_tab(QtGui.QWidget):
             if type(msg) == str:
                 if 'Wbase' not in msg:
                     self.log_textbox.moveCursor(QtGui.QTextCursor.End)
-                    self.log_textbox.insertPlainText(msg +'\n')
+                    self.log_textbox.insertPlainText(msg + '\n')
                     self.log_textbox.moveCursor(QtGui.QTextCursor.End)
-            elif type(msg)==list:
+            elif type(msg) == list:
                 for msg_ in msg:
-                    #print(msg_)
-                    #print(msg_)
                     if 'Wbase' not in msg:
                         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
-                        self.log_textbox.insertPlainText(str(msg_) +'\n')
+                        self.log_textbox.insertPlainText(str(msg_) + '\n')
                         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
         else:
             pass
@@ -252,17 +245,13 @@ class system_tab(QtGui.QWidget):
     def _refresh(self):
         pass
 
-#A class implementing experiments tables
+
+# A class implementing experiments tables
 class ExperimentsTable(QtGui.QTableWidget):
     def __init__(self, parent=None):
-        super(QtGui.QTableWidget, self).__init__(1,3, parent=parent)
+        super(QtGui.QTableWidget, self).__init__(1, 3, parent=parent)
         self.setHorizontalHeaderLabels(['Experiment', 'User', ''])
         self.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
         self.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
         self.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.ResizeToContents)
         self.verticalHeader().setVisible(False)
-
-
-
-
-#class

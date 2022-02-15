@@ -10,6 +10,7 @@ from pycontrol_homecage.utils import get_variables_from_taskfile, get_tasks
 from pycontrol_homecage.loc_def import protocol_dir
 from pycontrol_homecage.tables import protocol_table
 
+
 class scheduler(QtGui.QWidget):
 
     " In this tab create schedules for tasks "
@@ -27,7 +28,6 @@ class scheduler(QtGui.QWidget):
         #add stage to protocol
         self.ATP = QtGui.QGroupBox("Add stage to protocol")
 
-
         self.protocol_namer = QtGui.QLineEdit("")
         self.protocol_namer_button = QtGui.QPushButton("Set protocol name")
         self.protocol_namer_button.clicked.connect(self.set_protocol_name)
@@ -41,8 +41,7 @@ class scheduler(QtGui.QWidget):
         self.add_stage_button = QtGui.QPushButton("Add task stage")
         self.add_stage_button.clicked.connect(self.add_stage)
 
-
-        self.task_combo  = QtGui.QComboBox()
+        self.task_combo = QtGui.QComboBox()
 
         self.task_set_button = QtGui.QPushButton("Set")
         self.task_set_button.clicked.connect(self.set_stage_task)

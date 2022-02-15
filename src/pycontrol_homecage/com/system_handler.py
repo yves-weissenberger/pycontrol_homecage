@@ -7,6 +7,8 @@ from queue import Queue
 import pandas as pd
 from pycontrol_homecage.homecage_config.paths import tasks_dir
 from pycontrol_homecage.loc_def import mice_dir, protocol_dir
+import pycontrol_homecage.db as database
+
 # from utils import find_prev_base
 
 from .data_logger import Data_logger
@@ -100,9 +102,9 @@ class system_controller(Data_logger):
         """
         now = datetime.now().strftime('%Y-%m-%d-%H%M%S')
 
-        exp_running_now = self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port]['Experiment'].values
+        exp_running_now = database.setup_df.loc[database.setup_df['COM'] == self.PYC.serial_port]['Experiment'].values
 
-        if exp_running_now!='none': # YW 11/02/21 NOT SURE WHY THIS CHECK IS HERE
+        if exp_running_now != 'none':  # YW 11/02/21 NOT SURE WHY THIS CHECK IS HERE
             for msg in new_data:
                 self.GUI.print_msg(msg)
 
@@ -115,32 +117,31 @@ class system_controller(Data_logger):
                         self.mouse_data['RFID'] = int(msg.strip('RFID:'))
                     if 'weight' in msg:
                         self.mouse_data['weight'] = float(msg.strip('weight:'))
-                        
 
         else:
+
             for msg in new_data:
-                self.GUI.print_msg(msg,ac_pyc='ac')
+                self.GUI.print_msg(msg, ac_pyc='ac')
 
-
-    def _handle_error_state(self)->None:
+    def _handle_error_state(self) -> None:
         self.PYC.stop_framework()
         time.sleep(.05)
         self.PYC.process_data()
         self.close_files()
 
-    def process_ac_state(self, state:str, now: str) -> None:
+    def process_ac_state(self, state: str, now: str) -> None:
         """ Here do more global updates of stuff based on state """
 
-        self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'AC_state'] = state
+        database.setup_df.loc[database.setup_df['COM']==self.PYC.serial_port,'AC_state'] = state
 
-        if state=='error_state':
+        if state == 'error_state':
             self._handle_error_state()
 
-        if state=='allow_entry':
+        if state == 'allow_entry':
             self._reset_mouse_data()
 
         # first entry in this state is when the mouse first enters the apparatus
-        elif state=='mouse_training':
+        elif state == 'mouse_training':
             
             # This guards the state changing to to check_mouse_in_ac (i.e. when the mouse starts to leave)
             # but then then decides to back into training chamber so state changes back to 'mouse_training'
@@ -149,7 +150,7 @@ class system_controller(Data_logger):
                 
 
                 # need an exception here for cases where RFID is incorrectly typed in
-                mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
+                mouse_row = database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID']]
 
                 mouse_ID = mouse_row['Mouse_ID'].values[0]
                 prot = mouse_row['Protocol'].values[0]
@@ -159,33 +160,27 @@ class system_controller(Data_logger):
 
                     # if the current protocol is a task do so.
                     if 'task' in prot:
-                       task = self.run_mouse_task(mouse_info=mouse_row)
+                        task = self.run_mouse_task(mouse_info=mouse_row)
                     else:
                         task = self.run_mouse_protocol(mouse_info=mouse_row)
 
                     self.mouse_data['entry_time'] = now
                     self.mouse_data['task'] = task
 
-
-
-
                     self.open_data_file_(mouse_info=mouse_row, now=now)
-
 
                     self.PYC.start_framework()
 
-
-                    self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Current_weight'] = self.mouse_data['weight']
-                    self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = True
-                    self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = mouse_ID
+                    database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'Current_weight'] = self.mouse_data['weight']
+                    database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = True
+                    database.setup_df.loc[database.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = mouse_ID
 
                     self.GUI.setup_window_tab.list_of_setups.fill_table()
                     self.GUI.system_tab.list_of_setups.fill_table()
 
 
-        elif state=='allow_exit':
+        elif state == 'allow_exit':
             self.mouse_data['exit_time'] = datetime.now().strftime('%Y-%m-%d-%H%M%S')
-            #self.GUI.mouse_df
 
             if self.data_file:
                 self.PYC.stop_framework()
@@ -242,8 +237,8 @@ class system_controller(Data_logger):
 
         task = mouse_prot[str(stage)]['task']
 
-        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Task'] = task
-        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Stage'] = stage
+        database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'Task'] = task
+        database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'Stage'] = stage
 
         self.PYC.setup_state_machine(sm_name=task)
 
@@ -300,19 +295,19 @@ class system_controller(Data_logger):
                 v_ = self.PYC.get_variables()
                 self.data_file.writelines("Variables")
                 self.data_file.writelines(repr(v_))
-                if not self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].isnull().values.any():
-                    persistent_variables = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
+                if not database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].isnull().values.any():
+                    persistent_variables = eval(database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
                 else:
                     persistent_variables = {}
                 for k,v__ in v_.items():
                     k = 'v.' + k
                     if k in persistent_variables.keys():
                         persistent_variables[k] = v__
-                self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'] = json.dumps(persistent_variables) #ignore this line
+                database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'] = json.dumps(persistent_variables) #ignore this line
             except Exception as e:
                 print(e)
-                if not (self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables']).isnull().values.any():
-                    v_ = eval(self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
+                if not (database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables']).isnull().values.any():
+                    v_ = eval(database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
                 self.PYC.reset()
                 RUN_ERROR = True
 
@@ -321,21 +316,21 @@ class system_controller(Data_logger):
 
             self.data_file = None
             self.file_path = None
-            if 'RUN_ERROR' not in self.GUI.mouse_df.columns:
-                self.GUI.mouse_df.insert(len(self.GUI.mouse_df.columns),'RUN_ERROR',pd.Series(),True) 
+            if 'RUN_ERROR' not in database.mouse_df.columns:
+                database.mouse_df.insert(len(database.mouse_df.columns),'RUN_ERROR',pd.Series(),True) 
 
-            mouse_fl = self.GUI.mouse_df.file_location
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'RUN_ERROR'] = RUN_ERROR
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = False
-            self.GUI.mouse_df =  self.GUI.mouse_df.loc[:, ~ self.GUI.mouse_df.columns.str.contains('^Unnamed')]
-            self.GUI.mouse_df.file_location = mouse_fl 
-            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+            mouse_fl = database.mouse_df.file_location
+            database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'RUN_ERROR'] = RUN_ERROR
+            database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = False
+            database.mouse_df =  database.mouse_df.loc[:, ~ database.mouse_df.columns.str.contains('^Unnamed')]
+            database.mouse_df.file_location = mouse_fl 
+            database.mouse_df.to_csv(database.mouse_df.file_location)
 
-            setup_fl = self.GUI.setup_df.file_location
-            self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = ''
-            self.GUI.setup_df =  self.GUI.setup_df.loc[:, ~ self.GUI.setup_df.columns.str.contains('^Unnamed')]
-            self.GUI.setup_df.file_location = setup_fl
-            self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+            setup_fl = database.setup_df.file_location
+            database.setup_df.loc[database.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = ''
+            database.setup_df =  database.setup_df.loc[:, ~ database.setup_df.columns.str.contains('^Unnamed')]
+            database.setup_df.file_location = setup_fl
+            database.setup_df.to_csv(database.setup_df.file_location)
 
         for analog_file in self.analog_files.values():
             if analog_file:
@@ -351,7 +346,7 @@ class system_controller(Data_logger):
             
         """
 
-        mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
+        mouse_row = database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID']]
         mouse_ID = mouse_row['Mouse_ID'].values[0]
 
         logPth = os.path.join(mice_dir,mouse_ID+'.csv')

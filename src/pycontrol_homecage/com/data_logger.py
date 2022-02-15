@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 
+
 class Data_logger():
     '''Class for logging data from a pyControl setup to disk'''
 

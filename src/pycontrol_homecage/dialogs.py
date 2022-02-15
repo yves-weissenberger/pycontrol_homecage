@@ -1,15 +1,13 @@
 import os
 from pyqtgraph.Qt import QtGui
-import string 
 import random
-import smtplib, ssl
+import smtplib
+import ssl
 
-
-## - package imports --
 from pycontrol_homecage.utils import get_users, get_pyhomecage_email, get_tasks
 from pycontrol_homecage.loc_def import user_path
 from pycontrol_homecage.homecage_config.paths import *
-
+import pycontrol_homecage.db as database
 
 
 class calibrate_dialog(QtGui.QDialog):
@@ -23,7 +21,7 @@ class calibrate_dialog(QtGui.QDialog):
         self.ac = ac
         self.reject = self._done
 
-        self.setGeometry(10, 30, 400, 200) # Left, top, width, height.
+        self.setGeometry(10, 30, 400, 200)  # Left, top, width, height.
 
         self._setup_buttons()
         self._setup_calibration_weight_lineedit()
@@ -42,14 +40,12 @@ class calibrate_dialog(QtGui.QDialog):
         self.buttonCal = QtGui.QPushButton('callibrate', self)
         self.buttonCal.clicked.connect(self.callibrate)
 
-
     def _setup_calibration_weight_lineedit(self)->None:
 
         self.calibration_weight = QtGui.QLineEdit("")
         self.log_textbox = QtGui.QTextEdit()
         self.log_textbox.setFont(QtGui.QFont('Courier', 9))
         self.log_textbox.setReadOnly(True)
-
 
     def _setup_layout(self) -> None:
         layout = QtGui.QVBoxLayout()
@@ -140,7 +136,7 @@ class configure_box_dialog(QtGui.QDialog):
         layout2.addWidget(self.load_ac_framework_button)
 
 
-        self.ac = self.GUI.controllers[self.setup_id].AC
+        self.ac = database.controllers[self.setup_id].AC
         self.reject = self._done
 
 
@@ -184,17 +180,17 @@ class configure_box_dialog(QtGui.QDialog):
     def load_ac_framework(self):
 
         self.log_textbox.insertPlainText('Loading access control framework...')
-        self.GUI.controllers[self.setup_id].AC.reset()
-        self.GUI.controllers[self.setup_id].AC.load_framework()
+        database.controllers[self.setup_id].AC.reset()
+        database.controllers[self.setup_id].AC.load_framework()
         self.log_textbox.insertPlainText('done!')
     def load_framework(self):
         self.log_textbox.insertPlainText('Loading framework...')
-        self.GUI.controllers[self.setup_id].PYC.load_framework()
+        database.controllers[self.setup_id].PYC.load_framework()
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
         self.log_textbox.insertPlainText('done!')
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)  
     def disable_flashdrive(self):
-        self.GUI.controllers[self.setup_id].PYC.disable_flashdrive()
+        database.controllers[self.setup_id].PYC.disable_flashdrive()
 
     def load_hardware_definition(self):
         hwd_path = QtGui.QFileDialog.getOpenFileName(self, 'Select hardware definition:',
@@ -204,7 +200,7 @@ class configure_box_dialog(QtGui.QDialog):
         self.log_textbox.insertPlainText('uploading hardware definition...')
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
 
-        self.GUI.controllers[self.setup_id].PYC.load_hardware_definition(hwd_path)
+        database.controllers[self.setup_id].PYC.load_hardware_definition(hwd_path)
         self.log_textbox.insertPlainText('done!')
         #setup.load_hardware_definition(hwd_path)
 
@@ -282,12 +278,12 @@ class direct_pyboard_dialog(QtGui.QDialog):
         layoutH = QtGui.QHBoxLayout(self)
 
         #
-        self.PYC = self.GUI.controllers[self.setup_id].PYC
-        if not self.GUI.controllers[self.setup_id].data_consumers:
-            self.GUI.controllers[self.setup_id].data_consumers = [self]
+        self.PYC = database.controllers[self.setup_id].PYC
+        if not database.controllers[self.setup_id].data_consumers:
+            database.controllers[self.setup_id].data_consumers = [self]
         else:
-            self.GUI.controllers[self.setup_id].data_consumers.append(self)
-        self.GUI.controllers[self.setup_id]
+            database.controllers[self.setup_id].data_consumers.append(self)
+        database.controllers[self.setup_id]
         self.reject = self._done
 
 
@@ -330,7 +326,7 @@ class direct_pyboard_dialog(QtGui.QDialog):
 
 
     def _done(self):
-        del self.GUI.controllers[self.setup_id].data_consumers[-1]  #remove this dialog from the data consumers of the system handler
+        del database.controllers[self.setup_id].data_consumers[-1]  #remove this dialog from the data consumers of the system handler
         if self.onClose_chechbox.isChecked():
             self.PYC.stop_framework()  #stop the framework
         self.accept()   #close the dialog

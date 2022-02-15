@@ -1,9 +1,13 @@
 import os
 import re
+from datetime import datetime
+
 from serial import SerialException
 from .pyboard import Pyboard, PyboardError
-from pycontrol_homecage.homecage_config.paths import  accCtrl_dir, framework_dir
-from datetime import datetime
+
+from pycontrol_homecage.homecage_config.paths import accCtrl_dir, framework_dir
+import pycontrol_homecage.db as database
+
 
 class Access_control(Pyboard):
     # Class that runs on the main computer to provide an API for inferfacting with
@@ -17,43 +21,43 @@ class Access_control(Pyboard):
         self._init_variables()
 
         self.GUI = GUI
-        
+
         self._init_logger()
         self.init_serial_connection()
 
     def _init_variables(self) -> None:
-        
+
         self.prev_read = None
         self.rfid = None
         self.weight = None
-        self.status = {'serial': None, 
-                       'framework': None, 
+        self.status = {'serial': None,
+                       'framework': None,
                        'usb_mode': None
                        }
-        
+
     def _init_logger(self) -> None:
 
-        name_ = self.GUI.setup_df.loc[self.GUI.setup_df['COM_AC']==self.serial_port, 'Setup_ID'].values[0]
+        name_ = database.setup_df.loc[database.setup_df['COM_AC'] == self.serial_port, 'Setup_ID'].values[0]
         now = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
-        self.logger_dir = self.GUI.paths['AC_logger_dir']
-        self.logger_path = os.path.join(self.logger_dir,name_ + '_' + now + '.txt')
+        self.logger_dir = database.paths['AC_logger_dir']
+        self.logger_path = os.path.join(self.logger_dir, name_ + '_' + now + '.txt')
 
-        self.GUI.setup_df.loc[self.GUI.setup_df['COM_AC']==self.serial_port, 'logger_path'] = self.logger_path
-        self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+        database.setup_df.loc[database.setup_df['COM_AC'] == self.serial_port, 'logger_path'] = self.logger_path
+        database.setup_df.to_csv(database.setup_df.file_location)
 
-        with open(self.logger_path,'w') as f:
+        with open(self.logger_path, 'w') as f:
             f.write("Start"+'\n')
             f.write(now+'\n')
 
     def init_serial_connection(self) -> None:
-        try:    
+        try:
             super().__init__(self.serial_port, baudrate=115200)
             self.status['serial'] = True
-            self.reset() # Soft resets pyboard.
+            self.reset()  # Soft resets pyboard.
             self.unique_ID = eval(self.eval('pyb.unique_id()').decode())
             v_tuple = eval(
                             self.eval("sys.implementation.version if hasattr(sys, 'implementation') else (0,0,0)"
-                                ).decode()
+                                      ).decode()
                             )
             self.micropython_version = float('{}.{}{}'.format(*v_tuple))
         except SerialException as e:
@@ -99,26 +103,23 @@ class Access_control(Pyboard):
 
         if self.data_logger.GUI is not None:
 
-                if self.serial.inWaiting()>0:
-                    #read the input if something is coming
-                    read = str(self.serial.read(self.serial.inWaiting()))
-                    #print(read)
+            if self.serial.inWaiting() > 0:
 
+                read = str(self.serial.read(self.serial.inWaiting()))
 
-                    messages = re.findall('start_(.*?)_end',read)
-                    for msg in messages:
-                        with open(self.logger_path,'a') as f:
-                            f.write(msg+'_'+datetime.now().strftime('-%Y-%m-%d-%H%M%S')+'\n')
+                messages = re.findall('start_(.*?)_end', read)
+                for msg in messages:
+                    with open(self.logger_path, 'a') as f:
+                        f.write(msg+'_'+datetime.now().strftime('-%Y-%m-%d-%H%M%S')+'\n')
 
+                for msg in messages:
+                    #This is a horrible information flow. The point is simply to print into the calibrate dialog
+                    if 'cal' in msg:
 
-                    for msg in messages:
-                        #This is a horrible information flow. The point is simply to print into the calibrate dialog
-                        if 'cal' in msg:
-
-                            if self.GUI.setup_window_tab.callibrate_dialog:
-                                self.GUI.setup_window_tab.callibrate_dialog.print_msg(msg)
-                            if self.GUI.setup_window_tab.configure_box_dialog:
-                                self.GUI.setup_window_tab.configure_box_dialog.print_msg(msg)
+                        if self.GUI.setup_window_tab.callibrate_dialog:
+                            self.GUI.setup_window_tab.callibrate_dialog.print_msg(msg)
+                        if self.GUI.setup_window_tab.configure_box_dialog:
+                            self.GUI.setup_window_tab.configure_box_dialog.print_msg(msg)
 
                     self.data_logger.process_data_AC(messages)
 

@@ -258,20 +258,16 @@ class protocol_table(QtGui.QTableWidget):
         else:
             self.nRows = 1
 
-
     def set_headers(self):
 
         self.header_names = ['Stage','Task','Tracked','Threshold(s)','Default(s)','Delete']
         self.setHorizontalHeaderLabels(self.header_names)
         self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
         self.set_resizemode_for_headers()
-
     
     def set_resizemode_for_headers(self):
         for h_ix in range(len(self.header_names)-1):
             self.horizontalHeader().setResizeMode(h_ix, QtGui.QHeaderView.Stretch)
-
-
 
     def fill_table(self,dat):
         " Here pass prot_dict"
@@ -617,7 +613,7 @@ class cageTable(QtGui.QTableWidget):
 
             send_name = self.sender().name
             self._fill_setup_df_row(send_name)
-            self.GUI.controllers[setup_id] = SC
+            database.controllers[setup_id] = SC
             time.sleep(0.05)
             self.tab.callibrate_dialog = calibrate_dialog(ac=ac)
             self.tab.callibrate_dialog.exec_()

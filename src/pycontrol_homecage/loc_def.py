@@ -14,7 +14,7 @@ mice_dir = os.path.join(ROOT, 'mice')
 protocol_dir = os.path.join(ROOT, 'prot')
 
 
-user_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), 'users.txt')
+user_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'users.txt')
 main_path = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -29,38 +29,37 @@ def create_paths(all_paths):
         create_empty_csv(ctr, pth)
 
 
-#Experiment defines the overall experiment that is being run with these mice
-#Protocol defines the current protocol, within a given experiment that is beign use
-#User defines what user is currently using this setup
-#
-def create_empty_csv(index,pth):
+# Experiment defines the overall experiment that is being run with these mice
+# Protocol defines the current protocol, within a given experiment that is beign use
+# User defines what user is currently using this setup
+def create_empty_csv(index: int, pth: str):
 
     fp = None
-    #set variables for tasks, what to store about them
-    if index==0:
-        df = pd.DataFrame(columns=['Name','User_added'])
-        fp = os.path.join(pth,'tasks.csv')
+    # set variables for tasks, what to store about them
+    if index == 0:
+        df = pd.DataFrame(columns=['Name', 'User_added'])
+        fp = os.path.join(pth, 'tasks.csv')
 
+    # set variables for experiments what to store about them
+    elif index == 1:
+        df = pd.DataFrame(columns=['Name', 'Setups', 'Subjects', 'n_subjects', 'User', 'Protocol', 'Active', 'Persistent_variables'])
+        fp = os.path.join(pth, 'experiments.csv')
 
-    #set variables for experiments what to store about them
-    elif index==1:
-        df = pd.DataFrame(columns=['Name','Setups','Subjects','n_subjects','User','Protocol','Active','Persistent_variables'])
-        fp = os.path.join(pth,'experiments.csv')
+    # set variables for setups what to store about them
+    elif index == 2:
+        df = pd.DataFrame(columns=['Setup_ID', 'COM', 'COM_AC', 'in_use', 'connected', 'User',
+                                   'Experiment', 'Protocol', 'Mouse_training', 'AC_state', 'Door_Mag', 'Door_Sensor', 'n_mice',
+                                   'mice_in_setup', 'logger_path'])
+        fp = os.path.join(pth, 'setups.csv')
 
-    #set variables for setups what to store about them
-    elif index==2:
-        df = pd.DataFrame(columns=['Setup_ID','COM','COM_AC','in_use','connected','User',
-                                   'Experiment','Protocol','Mouse_training','AC_state','Door_Mag','Door_Sensor','n_mice',
-                                   'mice_in_setup','logger_path'])
-        fp = os.path.join(pth,'setups.csv')
-
-    #set variables for mice what to store about them
-    elif index==3:
-        df = pd.DataFrame(columns=['Mouse_ID','RFID','Sex','Age','Experiment',
-                                   'Protocol','Stage','Task','User','Start_date','Current_weight',
-                                   'Start_weight','is_training','is_assigned',
-                                   'training_log','Setup_ID','in_system','summary_variables','persistent_variables','set_variables'])
-        fp = os.path.join(pth,'mice.csv')
+    # set variables for mice what to store about them
+    elif index == 3:
+        df = pd.DataFrame(columns=['Mouse_ID', 'RFID', 'Sex', 'Age', 'Experiment',
+                                   'Protocol', 'Stage', 'Task', 'User', 'Start_date', 'Current_weight',
+                                   'Start_weight', 'is_training', 'is_assigned',
+                                   'training_log', 'Setup_ID', 'in_system', 'summary_variables', 'persistent_variables',
+                                   'set_variables'])
+        fp = os.path.join(pth, 'mice.csv')
 
     if (fp is not None) and (not os.path.isfile(fp)):
-        df.to_csv(fp,index=False)
+        df.to_csv(fp, index=False)

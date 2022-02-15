@@ -9,6 +9,7 @@ from pyqtgraph.Qt import QtGui
 from pycontrol_homecage.utils import get_tasks
 from pycontrol_homecage.tables import mouse_list_table, cage_list_table, variables_table
 from pycontrol_homecage.loc_def import data_dir, mice_dir, protocol_dir
+import pycontrol_homecage.db as database
 
 
 class new_experiment_dialog(QtGui.QDialog):
@@ -20,9 +21,9 @@ class new_experiment_dialog(QtGui.QDialog):
         self.setGeometry(100, 30, 1300, 600)  # Left, top, width, height.
 
         self.df_setup_tmp = pd.DataFrame(columns=['COM','COM_AC','Setup_ID',
-                                             'in_use','connected','User','Experiment',
-                                             'Protocol','Mouse_training','Door','n_mice'
-                                             ]
+                                                'in_use','connected','User','Experiment',
+                                                'Protocol','Mouse_training','Door','n_mice'
+                                                ]
                                         )
 
         self.df_mouse_tmp = pd.DataFrame(columns=['Mouse_ID','RFID','Sex','Age','Experiment',
@@ -95,7 +96,7 @@ class new_experiment_dialog(QtGui.QDialog):
         self.cat_layout = QtGui.QHBoxLayout()
 
         self.setup_combo = QtGui.QComboBox()
-        self.available_setups = [rw['Setup_ID'] for kk,rw in self.GUI.setup_df.iterrows() if rw['connected'] 
+        self.available_setups = [rw['Setup_ID'] for kk,rw in database.setup_df.iterrows() if rw['connected'] 
                                                                                         and not rw['in_use']]
         self.setup_combo.addItems(['Select Setup'] + self.available_setups)
         self.setup_combo.currentTextChanged.connect(self.on_scb_changed)
@@ -347,12 +348,12 @@ class new_experiment_dialog(QtGui.QDialog):
             self.df_setup_tmp.loc[entry_nr]['Setup_ID'] = COM#str(time.time())#COM  #TESTCODE
             self.df_setup_tmp.loc[entry_nr]['Experiment'] = self.set_experiment_name
             self.df_setup_tmp.loc[entry_nr]['Protocol'] = self.set_protocol
-            #print(111,self.GUI.setup_df['COM']==COM,self.GUI.setup_df['COM'])
-            #print(self.GUI.setup_df.loc[self.GUI.setup_df['COM']==COM])
+            #print(111,database.setup_df['COM']==COM,database.setup_df['COM'])
+            #print(database.setup_df.loc[database.setup_df['COM']==COM])
 
-            for col_name in self.GUI.setup_df.columns:
+            for col_name in database.setup_df.columns:
                 if col_name not in ['Setup_ID','Experiment','Protocol']:
-                    val_ = self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==COM,col_name]
+                    val_ = database.setup_df.loc[database.setup_df['Setup_ID']==COM,col_name]
 
                     self.df_setup_tmp.loc[entry_nr][col_name] =  val_.values[0]
 
@@ -390,52 +391,52 @@ class new_experiment_dialog(QtGui.QDialog):
                 if not os.path.isdir(mouse_exp_task_path):
                     os.mkdir(mouse_exp_task_path)
 
-                entry_nr = len(self.GUI.mouse_df)
+                entry_nr = len(database.mouse_df)
 
-                self.GUI.mouse_df.append(pd.Series(), ignore_index=True)
-                #self.GUI.mouse_df.loc[entry_nr]
-                for col in self.GUI.mouse_df.columns:
+                database.mouse_df.append(pd.Series(), ignore_index=True)
+                #database.mouse_df.loc[entry_nr]
+                for col in database.mouse_df.columns:
                     #conv_col_ix = self.mouse_df_tmp.col     #convereted column index 
                     if col in self.df_mouse_tmp.columns:
-                        self.GUI.mouse_df.loc[entry_nr,col] = row[col]
+                        database.mouse_df.loc[entry_nr,col] = row[col]
 
                 self._create_mouse_exp_log(row['Mouse_ID'])
 
 
 
-            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+            database.mouse_df.to_csv(database.mouse_df.file_location)
             self.GUI.mouse_window_tab.list_of_mice.fill_table()
 
 
             #update experiment information
-            entry_nr = len(self.GUI.exp_df)
-            self.GUI.exp_df.append(pd.Series(), ignore_index=True)
-            self.GUI.exp_df.loc[entry_nr,'Name'] = self.set_experiment_name
-            self.GUI.exp_df.loc[entry_nr,'Setups'] = repr(self.df_setup_tmp['Setup_ID'].tolist())
-            self.GUI.exp_df.loc[entry_nr,'User'] = self.GUI.active_user
-            self.GUI.exp_df.loc[entry_nr,'Protocol'] = self.set_protocol
-            self.GUI.exp_df.loc[entry_nr,'Subjects'] = repr(self.df_mouse_tmp['Mouse_ID'].tolist())
-            self.GUI.exp_df.loc[entry_nr,'n_subjects'] = len(self.df_mouse_tmp['Mouse_ID'].values)
-            self.GUI.exp_df.loc[entry_nr,'Active'] = True
+            entry_nr = len(database.exp_df)
+            database.exp_df.append(pd.Series(), ignore_index=True)
+            database.exp_df.loc[entry_nr, 'Name'] = self.set_experiment_name
+            database.exp_df.loc[entry_nr, 'Setups'] = repr(self.df_setup_tmp['Setup_ID'].tolist())
+            database.exp_df.loc[entry_nr, 'User'] = self.GUI.active_user
+            database.exp_df.loc[entry_nr, 'Protocol'] = self.set_protocol
+            database.exp_df.loc[entry_nr, 'Subjects'] = repr(self.df_mouse_tmp['Mouse_ID'].tolist())
+            database.exp_df.loc[entry_nr, 'n_subjects'] = len(self.df_mouse_tmp['Mouse_ID'].values)
+            database.exp_df.loc[entry_nr, 'Active'] = True
 
             for stup in self.df_setup_tmp['Setup_ID'].values:
 
-                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'User'] = self.GUI.active_user
+                database.setup_df.loc[database.setup_df['Setup_ID']==stup,'User'] = self.GUI.active_user
 
-                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'in_use'] = 'Y'
+                database.setup_df.loc[database.setup_df['Setup_ID']==stup,'in_use'] = 'Y'
 
 
-                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'Experiment'] = self.set_experiment_name
-                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'AC_state'] = 'allow_entry'
-                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'Door_Mag'] = '0111'
-                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'Door_Sensor'] = '1111'
-                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'Protocol'] = self.set_protocol
+                database.setup_df.loc[database.setup_df['Setup_ID']==stup,'Experiment'] = self.set_experiment_name
+                database.setup_df.loc[database.setup_df['Setup_ID']==stup,'AC_state'] = 'allow_entry'
+                database.setup_df.loc[database.setup_df['Setup_ID']==stup,'Door_Mag'] = '0111'
+                database.setup_df.loc[database.setup_df['Setup_ID']==stup,'Door_Sensor'] = '1111'
+                database.setup_df.loc[database.setup_df['Setup_ID']==stup,'Protocol'] = self.set_protocol
 
                 mices_ = self.df_mouse_tmp['Mouse_ID'].loc[self.df_mouse_tmp['Setup_ID']==stup].values
-                self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==stup,'mice_in_setup'] = str(mices_)[1:-1]
+                database.setup_df.loc[database.setup_df['Setup_ID']==stup,'mice_in_setup'] = str(mices_)[1:-1]
 
-            self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
-            self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+            database.exp_df.to_csv(database.exp_df.file_location)
+            database.setup_df.to_csv(database.setup_df.file_location)
             self.GUI.setup_window_tab.list_of_setups.fill_table()
             self.GUI.system_tab.list_of_setups.fill_table()
             self.GUI.system_tab.list_of_experiments.fill_table()
