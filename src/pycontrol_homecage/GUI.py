@@ -14,8 +14,8 @@ from pycontrol_homecage.schedule_manager import scheduler
 from pycontrol_homecage.system_overview import system_tab
 from pycontrol_homecage.experiment_tab import experiment_tab
 from pycontrol_homecage.loc_def import all_paths, create_paths
-from pycontrol_homecage.utils import load_data_csv
 from pycontrol_homecage.dialogs import login_dialog, add_user_dialog
+import pycontrol_homecage.db as database
 # Here want to implement a GUI for managing the homecage datasets. Thoughts on how to structure it. I think natural way is to ]
 # create a central landing interface that presents and lvie updates some basic features of the behavior sufficient to tell you
 # if you need up check in on a page and then detailed information about each cage in tabs.
@@ -51,11 +51,10 @@ class Visualizator(QtGui.QMainWindow):
         self.GUI_filepath = os.path.dirname(os.path.abspath(__file__))
         self.app = None  # Overwritten with QtGui.QApplication instance in main.
         self.active_user = None
-        self.task_df, self.exp_df, self.setup_df, self.mouse_df = load_data_csv()
 
         self._add_paths_to_gui()
 
-        self.setup_df['connected'] = False
+        database.setup_df['connected'] = False
 
         self._init_tabs()
         self._add_tabs_to_widget()

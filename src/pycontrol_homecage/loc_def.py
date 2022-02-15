@@ -5,28 +5,28 @@ ROOT = r'../all_data_path'
 if not os.path.isdir(ROOT):
     os.mkdir(ROOT)
 
-data_dir = os.path.join(ROOT,'data')
-task_dir = os.path.join(ROOT,'tasks')
-setup_dir = os.path.join(ROOT,'setups')
-AC_logger_dir = os.path.join(setup_dir,'loggers')
-experiment_dir = os.path.join(ROOT,'experiments')
-mice_dir = os.path.join(ROOT,'mice')
-protocol_dir = os.path.join(ROOT,'prot')
+data_dir = os.path.join(ROOT, 'data')
+task_dir = os.path.join(ROOT, 'tasks')
+setup_dir = os.path.join(ROOT, 'setups')
+AC_logger_dir = os.path.join(setup_dir, 'loggers')
+experiment_dir = os.path.join(ROOT, 'experiments')
+mice_dir = os.path.join(ROOT, 'mice')
+protocol_dir = os.path.join(ROOT, 'prot')
 
 
-user_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)),'users.txt')
+user_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), 'users.txt')
 main_path = os.path.dirname(os.path.abspath(__file__))
 
 
-all_paths = [ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir]
+all_paths = [ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir]
 
 
 def create_paths(all_paths):
 
-    for ctr,pth in enumerate(all_paths[1:]):
+    for ctr, pth in enumerate(all_paths[1:]):
         if not os.path.isdir(pth):
             os.mkdir(pth)
-        create_empty_csv(ctr,pth)
+        create_empty_csv(ctr, pth)
 
 
 #Experiment defines the overall experiment that is being run with these mice

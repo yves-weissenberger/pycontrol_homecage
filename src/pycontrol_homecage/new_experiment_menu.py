@@ -21,16 +21,18 @@ class new_experiment_dialog(QtGui.QDialog):
 
         self.df_setup_tmp = pd.DataFrame(columns=['COM','COM_AC','Setup_ID',
                                              'in_use','connected','User','Experiment',
-                                             'Protocol','Mouse_training','Door','n_mice'])
+                                             'Protocol','Mouse_training','Door','n_mice'
+                                             ]
+                                        )
 
         self.df_mouse_tmp = pd.DataFrame(columns=['Mouse_ID','RFID','Sex','Age','Experiment',
                                              'Protocol','Stage','Task','User','Start_date','Current_weight',
                                              'Start_weight','is_training','is_assigned',
-                                             'training_log','Setup_ID','in_system'])
+                                             'training_log','Setup_ID','in_system'
+                                             ]
+                                        )
 
 
-
-        #print(self.GUI.setup_df)
         self.used_setups = []
         self.used_mice = []
         self.global_task = True
@@ -81,14 +83,14 @@ class new_experiment_dialog(QtGui.QDialog):
 
 
 
-        ## Column to add setups to the experiment
+        # Column to add setups to the experiment
         self.setup_groupbox = QtGui.QGroupBox('Setups')
 
         self.setups_column = QtGui.QVBoxLayout()
 
-        #populate this column
+        # populate this column
 
-        #Controls for adding a setup to an experiment
+        # Controls for adding a setup to an experiment
         self.CAT = QtGui.QGroupBox('Add Setup')#cage_setup_table(GUI=self.GUI,exp_dialog=self)
         self.cat_layout = QtGui.QHBoxLayout()
 

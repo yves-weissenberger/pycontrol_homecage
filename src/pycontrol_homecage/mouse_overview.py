@@ -8,11 +8,12 @@ from pycontrol_homecage.dialogs import are_you_sure_dialog, mouse_summary_dialog
 from pycontrol_homecage.tables import MouseTable, variables_table
 from pycontrol_homecage.utils import get_variables_and_values_from_taskfile
 from pycontrol_homecage.loc_def import main_path
+import pycontrol_homecage.db as database
 
 
 class mouse_window(QtGui.QWidget):
 
-    def __init__(self, parent: QtGui.QMainWindow=None):
+    def __init__(self, parent: QtGui.QMainWindow = None):
 
         super(QtGui.QWidget, self).__init__(parent)
 
@@ -35,7 +36,7 @@ class mouse_window(QtGui.QWidget):
 
         #### Deal with variables of the tasks
         self.variables_table = variables_table(GUI=self.GUI)
-        self.filter_categories = ['Experiment','User','Mouse_ID','RFID']
+        self.filter_categories = ['Experiment', 'User', 'Mouse_ID', 'RFID']
         self.variables_box = QtGui.QGroupBox('Variables')
         self.vars_hlayout1 = QtGui.QHBoxLayout(self)
         self.vars_vlayout1 = QtGui.QVBoxLayout(self)
@@ -61,10 +62,7 @@ class mouse_window(QtGui.QWidget):
         self.vars_vlayout1.addWidget(self.variables_table)
 
         self.variables_box.setLayout(self.vars_vlayout1)
-
-
         self.Vlayout.addWidget(self.variables_box)  #THIS NEEDS TO GO. THIS WILL NEVER HAPPEN. CHANGE TO VARIABLES TABLE
-
 
     def init_buttons(self) -> None:
         self.remove_mouse_button = QtGui.QPushButton('Remove Mouse')
@@ -88,7 +86,7 @@ class mouse_window(QtGui.QWidget):
         self.scrollable_mouse =  QtGui.QScrollArea()
         self.scrollable_mouse.setWidgetResizable(True)
         self.scrollable_mouse.horizontalScrollBar().setEnabled(False)
-        self.list_of_mice = MouseTable(self.GUI,self)
+        self.list_of_mice = MouseTable(self.GUI, self)
         self.scrollable_mouse.setWidget(self.list_of_mice)
 
 
@@ -122,11 +120,11 @@ class mouse_window(QtGui.QWidget):
                                     not (i['persistent'])
                                     and i['set'] )])
 
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==float(ms_rfid), 'summary_variables'] = json.dumps(summary_variables_dict)
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==float(ms_rfid), 'persistent_variables'] = json.dumps(persistent_variables_dict)
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==float(ms_rfid), 'set_variables'] = json.dumps(set_variables_dict)
+            database.mouse_df.loc[database.mouse_df['RFID']==float(ms_rfid), 'summary_variables'] = json.dumps(summary_variables_dict)
+            database.mouse_df.loc[database.mouse_df['RFID']==float(ms_rfid), 'persistent_variables'] = json.dumps(persistent_variables_dict)
+            database.mouse_df.loc[database.mouse_df['RFID']==float(ms_rfid), 'set_variables'] = json.dumps(set_variables_dict)
 
-            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+            database.mouse_df.to_csv(database.mouse_df.file_location)
 
 
 
@@ -138,18 +136,18 @@ class mouse_window(QtGui.QWidget):
             RFIDs = [str(self.vars_combo_sel.currentText())]
 
         elif filtby=='Mouse_ID':
-            ID = self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==self.vars_combo_sel.currentText(),'RFID'].values
+            ID = database.mouse_df.loc[database.mouse_df['Mouse_ID']==self.vars_combo_sel.currentText(),'RFID'].values
             RFIDs = [str(i) for i in ID]
             #self.variables_table.set_available_subjects(RFIDs)
         elif filtby=='Experiment':
             #OK THIS IS MORE COMPLICATED BECAUSE DIFFERENT MICE IN THE SAME EXPERIMENT MIGHT HAVE DIFFERENT VARIABLES
-            RFIDs = list(set([str(i) for i in self.GUI.mouse_df.loc[self.GUI.mouse_df['Experiment']==self.vars_combo_sel.currentText(),'RFID'].values]))
+            RFIDs = list(set([str(i) for i in database.mouse_df.loc[database.mouse_df['Experiment']==self.vars_combo_sel.currentText(),'RFID'].values]))
             #print(RFIDs)
 
         self.variables_table.set_available_subjects(RFIDs)
         for sel_RFID in RFIDs:
 
-            mouseRow = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==float(sel_RFID)]
+            mouseRow = database.mouse_df.loc[database.mouse_df['RFID']==float(sel_RFID)]
             #print(mouseRow)
             mouseTask = mouseRow['Task'].values[0] + '.py'
 
@@ -199,10 +197,10 @@ class mouse_window(QtGui.QWidget):
         self.vars_combo_sel.clear()
         if filtby in ('Mouse_ID','RFID'):
             self.vars_combo_sel.clear()
-            dat = self.GUI.mouse_df[filtby]
+            dat = database.mouse_df[filtby]
             self.vars_combo_sel.addItems(['Select'] + [str(i) for i in dat.values])
         elif filtby=='Experiment':
-            dat = list(set(self.GUI.mouse_df[filtby].values))
+            dat = list(set(database.mouse_df[filtby].values))
             self.vars_combo_sel.addItems(['Select'] + [str(i) for i in dat])
             
 
@@ -223,12 +221,12 @@ class mouse_window(QtGui.QWidget):
                 for ch_ in isChecked:
                     #if 
 
-                    #fl = self.GUI.mouse_df.file_location
-                    #ix_ = self.GUI.mouse_df.index[self.GUI.mouse_df['RFID']==ch_]
-                    self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==ch_,'in_system'] = False
-                    #self.GUI.mouse_df = self.GUI.mouse_df.drop(ix_)
-                    #self.GUI.mouse_df.file_location = fl  #because the file location is not part of the class so when using drop this is removed
-                    self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+                    #fl = database.mouse_df.file_location
+                    #ix_ = database.mouse_df.index[database.mouse_df['RFID']==ch_]
+                    database.mouse_df.loc[database.mouse_df['RFID']==ch_,'in_system'] = False
+                    #database.mouse_df = database.mouse_df.drop(ix_)
+                    #database.mouse_df.file_location = fl  #because the file location is not part of the class so when using drop this is removed
+                    database.mouse_df.to_csv(database.mouse_df.file_location)
 
                     self.list_of_mice.fill_table()
         else:

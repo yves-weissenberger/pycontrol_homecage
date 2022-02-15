@@ -1,11 +1,10 @@
 from pyqtgraph.Qt import QtGui
 import time
-import copy as cp
 
 from pycontrol_homecage.new_experiment_menu import new_experiment_dialog
 from pycontrol_homecage.tables import cageTable, experiment_overview_table
-
 from pycontrol_homecage.plotting import Experiment_plot
+import pycontrol_homecage.db as database
 
 
 class system_tab(QtGui.QWidget):
@@ -157,19 +156,19 @@ class system_tab(QtGui.QWidget):
     def activate_plot(self):
         " start plotting incoming data from an experiment"
 
-        if len(self.GUI.exp_df)>0: #check first if an experiment is running
+        if len(database.exp_df)>0: #check first if an experiment is running
 
             self.experiment_plot = Experiment_plot()
 
             experiment = {'subjects': {},
                           'sm_infos': {},
                           'handlers':{} }
-            #check which mice are training right now
-            for kk,row in self.GUI.setup_df.iterrows():
+            # check which mice are training right now
+            for kk,row in database.setup_df.iterrows():
                 if row['Mouse_training']!='none':
-                    #k = str(len(experiment['subjects']))
+                    # k = str(len(experiment['subjects']))
                     experiment['subjects'][row['Setup_ID']] = row['Mouse_training']
-                    handler_ = [setup for k,setup in self.GUI.controllers.items() if k==row['Setup_ID']][0]
+                    handler_ = [setup for k,setup in self.GUI.controllers.items() if k == row['Setup_ID']][0]
                     experiment['sm_infos'][row['Setup_ID']] = handler_.PYC.sm_info
                     experiment['handlers'][row['Setup_ID']] = handler_
 
@@ -194,14 +193,13 @@ class system_tab(QtGui.QWidget):
 
 
     def end_experiment(self):
-        #if False:
         #print("END")
         for rowN in range(self.list_of_experiments.rowCount()):
 
-            if self.list_of_experiments.item(rowN,0).checkState()==2:
-                #print("FOUND")
-                expName = self.list_of_experiments.item(rowN,self.list_of_experiments.header_names.index('Name')).text()
-                for setup in self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Setups'].values:
+            if self.list_of_experiments.item(rowN, 0).checkState() == 2:
+                # print("FOUND")
+                expName = self.list_of_experiments.item(rowN, self.list_of_experiments.header_names.index('Name')).text()
+                for setup in database.exp_df.loc[database.exp_df['Name'] == expName,'Setups'].values:
                     setup = eval(setup)[0]
 
                     if self.GUI.controllers.items():  #if there are any controllers
@@ -213,33 +211,29 @@ class system_tab(QtGui.QWidget):
                         handler_.PYC.process_data()
                         handler_.close_files()
                         handler_.PYC.reset()
-                        #handler_.PYC.close()
-                        #handler_.AC.close()
-                        #del self.GUI.controllers[setup]
-                        self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Active'] = False
-                        self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'] = None
-                        self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
-                        self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
-                        #print(self.GUI.controllers)
+
+                        database.exp_df.loc[database.exp_df['Name'] == expName, 'Active'] = False
+                        database.setup_df.loc[database.setup_df['Setup_ID'] == setup, 'Experiment'] = None
+                        database.setup_df.to_csv(database.setup_df.file_location)
+                        database.exp_df.to_csv(database.exp_df.file_location)
+
                         print("CLOSED")
-                    #eval(exp_row['Subjects'].values[0])
-                    for subject in eval(self.GUI.exp_df.loc[self.GUI.exp_df['Name']==expName,'Subjects'].values[0]):
-                        self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==subject,'in_system'] = False
-                #self.GUI.exp_df
+
+                    for subject in eval(database.exp_df.loc[database.exp_df['Name'] == expName, 'Subjects'].values[0]):
+                        database.mouse_df.loc[database.mouse_df['Mouse_ID'] == subject, 'in_system'] = False
+
             else:
                 pass
-        #print(self.list_of_experiments.only_active)
+
         self.list_of_experiments.fill_table()
-        #print(self.GUI.experiment_tab.list_of_experiments.only_active)
+
         self.GUI.experiment_tab.list_of_experiments.fill_table()
         self.GUI.setup_window_tab.list_of_setups.fill_table()
 
-        #pass
-
-    def write_to_log(self,msg,from_sys=None):
+    def write_to_log(self, msg, from_sys=None):
 
         if self.log_active.isChecked():
-            if type(msg)==str:
+            if type(msg) == str:
                 if 'Wbase' not in msg:
                     self.log_textbox.moveCursor(QtGui.QTextCursor.End)
                     self.log_textbox.insertPlainText(msg +'\n')

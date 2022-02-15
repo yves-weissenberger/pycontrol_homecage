@@ -11,11 +11,12 @@ from serial import SerialException
 from pycontrol_homecage.com.access_control import Access_control
 ##### TA code imports
 from pycontrol_homecage.com.pycboard import PyboardError, Pycboard, _djb2_file
-#from com.data_logger import Data_logger
+# from com.data_logger import Data_logger
 from pycontrol_homecage.com.system_handler import system_controller
 from pycontrol_homecage.dialogs import calibrate_dialog
 from pycontrol_homecage.utils import (TableCheckbox, cbox_set_item, cbox_update_options,
                                         find_setups, get_tasks, null_resize)
+import pycontrol_homecage.db as database
 
 #######################################################################
 ####################      Experiment Table      #######################
@@ -26,7 +27,7 @@ class variables_table(QtGui.QTableWidget):
     " Table that tracks what variables a mouse currently running in a task has"
 
     def __init__(self, GUI: QtGui.QMainWindow, parent=None):
-        super(QtGui.QTableWidget, self).__init__(1,7, parent=parent)
+        super(QtGui.QTableWidget, self).__init__(1, 7, parent=parent)
         self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent','Summary','Set',''])
         self.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
         self.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.Stretch)
@@ -214,40 +215,36 @@ class experiment_overview_table(QtGui.QTableWidget):
 
         self.fill_table()
 
-
     def fill_table(self):
-        #print(self.GUI.setup_df)
+
         self.clearContents()
         if self.only_active:
-            self.setRowCount(sum(self.GUI.exp_df['Active']))
+            self.setRowCount(sum(database.exp_df['Active']))
         else:
-            self.setRowCount(len(self.GUI.exp_df))
+            self.setRowCount(len(database.exp_df))
 
         self.buttons = []
         row_index = 0
-        for _, row in self.GUI.exp_df.iterrows():    
+        for _, row in database.exp_df.iterrows():    
             if ((not self.only_active) or (self.only_active and row['Active'])):
                 for col_index in range(self.columnCount()):
-                    #print(index,col,row[col])
+
                     try:
                         cHeader = self.header_names[col_index]
-                        #print(cHeader,row)
-                        self.setItem(row_index,col_index,Qt.QtWidgets.QTableWidgetItem(str(row[cHeader])))
+
+                        self.setItem(row_index, col_index, Qt.QtWidgets.QTableWidgetItem(str(row[cHeader])))
                     except KeyError:
                         pass
-                
-
-            
 
                 chkBoxItem = QtGui.QTableWidgetItem()
                 chkBoxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-                chkBoxItem.setCheckState(QtCore.Qt.Unchecked)   
-                self.setItem(row_index,self.select_nr,chkBoxItem)
+                chkBoxItem.setCheckState(QtCore.Qt.Unchecked)
+                self.setItem(row_index, self.select_nr, chkBoxItem)
                 row_index += 1
 
-#######################################################################
-###############      For setting up a new protocol      ###############
-#######################################################################
+# ######################################################################
+# ##############      For setting up a new protocol      ###############
+# ######################################################################
 class protocol_table(QtGui.QTableWidget):
 
     def __init__(self, GUI, tab, nRows=None, parent=None):
@@ -559,10 +556,10 @@ class cageTable(QtGui.QTableWidget):
 
     def fill_table(self) -> None:
         self.clearContents()
-        self.setRowCount(len(self.GUI.setup_df))
+        self.setRowCount(len(database.setup_df))
 
         self.buttons = []
-        for row_index, row in self.GUI.setup_df.iterrows():    
+        for row_index, row in database.setup_df.iterrows():    
 
             for col_index in range(self.columnCount()):
 
@@ -637,10 +634,10 @@ class cageTable(QtGui.QTableWidget):
     def _fill_setup_df_row(self,send_name):
         " Just fill that row of the df"
         _, com_, _ = send_name
-        self.GUI.setup_df['connected'].loc[self.GUI.setup_df['COM']==com_] = True
-        self.GUI.setup_df['in_use'].loc[self.GUI.setup_df['COM']==com_] = False
-        self.GUI.setup_df['connected'].loc[self.GUI.setup_df['COM']==com_] = True
-        self.GUI.setup_df['n_mice'].loc[self.GUI.setup_df['COM']==com_] = 0
+        database.setup_df['connected'].loc[database.setup_df['COM']==com_] = True
+        database.setup_df['in_use'].loc[database.setup_df['COM']==com_] = False
+        database.setup_df['connected'].loc[database.setup_df['COM']==com_] = True
+        database.setup_df['n_mice'].loc[database.setup_df['COM']==com_] = 0
 
 
 
@@ -700,13 +697,13 @@ class MouseTable(QtGui.QTableWidget):
         self.fill_table()
         self.loaded = True
     def fill_table(self):
-        #print(self.GUI.mouse_df)
+        #print(database.mouse_df)
         #self.setRowCount(0)
-        self.setRowCount(len(self.GUI.mouse_df))
-        df_cols = self.GUI.mouse_df.columns
+        self.setRowCount(len(database.mouse_df))
+        df_cols = database.mouse_df.columns
 
         #print(df_cols)
-        for row_index, row in self.GUI.mouse_df.iterrows():    
+        for row_index, row in database.mouse_df.iterrows():    
 
             for col_index in range(self.columnCount()-1):  
                 col_name = df_cols[col_index]
@@ -717,7 +714,7 @@ class MouseTable(QtGui.QTableWidget):
                         task_combo.activated.connect(partial(self.update_task_combo,task_combo))
                         task_combo.installEventFilter(self)
                         task_combo.RFID = row['RFID']
-                        cTask = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==row['RFID'],'Task'].values[0]
+                        cTask = database.mouse_df.loc[database.mouse_df['RFID']==row['RFID'],'Task'].values[0]
                         task_combo.addItems([cTask] + get_tasks(self.GUI.GUI_filepath))
 
                         self.setCellWidget(row_index,table_col_ix,task_combo)
@@ -750,8 +747,8 @@ class MouseTable(QtGui.QTableWidget):
         #if self.loaded:  #workaround (sorry)
 
         #print('UPDATED TASK VIA TABLE')
-        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==rfid,'Task'] = combo.currentText()  #need to update the table of the individual mouses training record as well??
-        self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+        database.mouse_df.loc[database.mouse_df['RFID']==rfid,'Task'] = combo.currentText()  #need to update the table of the individual mouses training record as well??
+        database.mouse_df.to_csv(database.mouse_df.file_location)
 
 
 

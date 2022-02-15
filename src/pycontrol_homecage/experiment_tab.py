@@ -6,6 +6,7 @@ from pyqtgraph.Qt import QtGui
 
 from pycontrol_homecage.tables import experiment_overview_table
 from pycontrol_homecage.dialogs import are_you_sure_dialog
+import pycontrol_homecage.db as database
 
 
 class experiment_tab(QtGui.QWidget):
@@ -48,7 +49,7 @@ class experiment_tab(QtGui.QWidget):
             sure = are_you_sure_dialog()
             sure.exec_()
             if sure.GO:
-                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name'] == selected_experiment]
+                exp_row = database.exp_df.loc[database.exp_df.exp_df['Name'] == selected_experiment]
 
                 self._update_experiment_status(selected_experiment, True)
 
@@ -70,7 +71,7 @@ class experiment_tab(QtGui.QWidget):
             sure = are_you_sure_dialog()
             sure.exec_()
             if sure.GO:
-                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name'] == selected_experiment]
+                exp_row = database.exp_df.loc[database.exp_df['Name'] == selected_experiment]
                 self._update_experiment_status(selected_experiment, False)
 
                 mice_in_experiment = self._get_mice_in_experiment(exp_row)
@@ -82,7 +83,7 @@ class experiment_tab(QtGui.QWidget):
             self._reset_tables()
 
     def _update_experiment_status(self, experiment_name: str, status: bool) -> None:
-        self.GUI.exp_df.loc[self.GUI.exp_df['Name'] == experiment_name, 'Active'] = status
+        database.exp_df.loc[database.exp_df['Name'] == experiment_name, 'Active'] = status
 
     def _get_mice_in_experiment(self, exp_row: pd.Series) -> List[str]:
         return eval(exp_row['Subjects'].values[0])
@@ -116,16 +117,16 @@ class experiment_tab(QtGui.QWidget):
 
         for mouse in mice_in_exp:
 
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID'] == mouse, 'is_assigned'] = assigned
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID'] == mouse, 'in_system'] = assigned
-            self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
+            database.mouse_df.loc[database.mouse_df['Mouse_ID'] == mouse, 'is_assigned'] = assigned
+            database.mouse_df.loc[database.mouse_df['Mouse_ID'] == mouse, 'in_system'] = assigned
+            database.mouse_df.to_csv(database.mouse_df.file_location)
 
     def _update_setups(self, setups_in_exp, experiment=None):
         for setup in setups_in_exp:
-            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID'] == setup, 'Experiment'] = experiment
+            database.setup_df.loc[database.setup_df['Setup_ID'] == setup, 'Experiment'] = experiment
             # this is what is checked in the new experiment dialog
-            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID'] == setup, 'in_use'] = experiment is not None
-            self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
+            database.setup_df.loc[database.setup_df['Setup_ID'] == setup, 'in_use'] = experiment is not None
+            database.setup_df.to_csv(database.setup_df.file_location)
 
     def _refresh(self):
         pass

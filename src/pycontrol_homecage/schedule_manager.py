@@ -69,15 +69,13 @@ class scheduler(QtGui.QWidget):
         self.threshV_combo.setEnabled(False)
         self.threshV_value = QtGui.QLineEdit()
 
-
-        ## Default value stuff
+        # Default value stuff
         self.defaultV_label = QtGui.QLabel("Default value")
         self.defaultV_combo = QtGui.QComboBox()
         self.defaultV_add = QtGui.QPushButton("Add")
         self.defaultV_value = QtGui.QLineEdit()
 
         self.defaultV_combo.setEnabled(False)
-
 
         self.Hlayout1 = QtGui.QHBoxLayout()
         self.Hlayout2 = QtGui.QHBoxLayout()
@@ -114,21 +112,19 @@ class scheduler(QtGui.QWidget):
 
         self.ATP.setLayout(self.Vlayout_add)
 
-
-
-        self.protocol_table = protocol_table(GUI=self.GUI,tab=self)
+        self.protocol_table = protocol_table(GUI=self.GUI, tab=self)
 
         self.dummy_overview = QtGui.QGroupBox('Current Stage Overview')
         self.dummy_layout = QtGui.QVBoxLayout()
-        self.protocol_table_dummy = protocol_table(GUI=self.GUI,tab=self,nRows=1)
+        self.protocol_table_dummy = protocol_table(GUI=self.GUI, tab=self, nRows=1)
         self.dummy_layout.addWidget(self.protocol_table_dummy)
         self.dummy_overview.setLayout(self.dummy_layout)
 
         self.Vlayout = QtGui.QVBoxLayout(self)
 
-        self.Vlayout.addWidget(self.ATP,4)
-        self.Vlayout.addWidget(self.dummy_overview,1)
-        self.Vlayout.addWidget(self.protocol_table,10)
+        self.Vlayout.addWidget(self.ATP, 4)
+        self.Vlayout.addWidget(self.dummy_overview, 1)
+        self.Vlayout.addWidget(self.protocol_table, 10)
 
         self.save_clear_layout = QtGui.QHBoxLayout()
         self.save_clear_layout.addWidget(self.clear_button)

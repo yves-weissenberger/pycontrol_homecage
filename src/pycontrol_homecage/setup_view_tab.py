@@ -1,11 +1,10 @@
 from pyqtgraph.Qt import QtGui
 
 
-
-##### YW code imports
 from pycontrol_homecage.dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, direct_pyboard_dialog
 from pycontrol_homecage.tables import cageTable
 from pycontrol_homecage.utils import find_setups
+import pycontrol_homecage.db as database
 
 
 
@@ -163,40 +162,40 @@ class setups_tab(QtGui.QWidget):
 
 
     def add_cage(self):
-        #print(self.GUI.setup_df)
+        #print(database.setup_df)
 
-        entry_nr = len(self.GUI.setup_df)
+        entry_nr = len(database.setup_df)
 
         #add a check to see that something about the cage has been filled in
         if not (self.cat_combo_box.currentIndex()==0 or self.setup_name.text() is None):
 
             #first fill row with NA
-            self.GUI.setup_df.loc[entry_nr] = ['none']*len(self.GUI.setup_df.columns)
+            database.setup_df.loc[entry_nr] = ['none']*len(database.setup_df.columns)
 
             #get and set the USB port key
             COM = self.cat_combo_box.itemText(self.cat_combo_box.currentIndex())
-            self.GUI.setup_df.loc[entry_nr,'COM'] = COM
+            database.setup_df.loc[entry_nr,'COM'] = COM
 
             COM_AC = self.cact_combo_box.itemText(self.cact_combo_box.currentIndex())
-            self.GUI.setup_df.loc[entry_nr,'COM_AC'] = COM_AC
+            database.setup_df.loc[entry_nr,'COM_AC'] = COM_AC
 
 
             #get the name of the setup
-            self.GUI.setup_df.loc[entry_nr,'Setup_ID'] = self.setup_name.text()
+            database.setup_df.loc[entry_nr,'Setup_ID'] = self.setup_name.text()
 
 
         self.list_of_setups.fill_table()
         self.GUI.system_tab.list_of_setups.fill_table()
 
-        self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
-        #print(self.GUI.setup_df)
+        database.setup_df.to_csv(database.setup_df.file_location)
+        #print(database.setup_df)
 
 
 
     def _refresh(self):
         """ find which training seutps are available """
         ports = find_setups(self.GUI)
-        ports = [i for i in ports if i not in (self.GUI.setup_df['COM'].tolist() + self.GUI.setup_df['COM_AC'].tolist())]   
+        ports = [i for i in ports if i not in (database.setup_df['COM'].tolist() + database.setup_df['COM_AC'].tolist())]   
 
         prev = ['Select Training Setup'] + list(ports)
 
@@ -206,7 +205,7 @@ class setups_tab(QtGui.QWidget):
             print(new_prop_cat,prev)
             self.cat_combo_box.clear()
             self.cact_combo_box.clear()
-            tmp = [i for i in ports if i not in (self.GUI.setup_df['COM'].tolist() + self.GUI.setup_df['COM_AC'].tolist())]   
+            tmp = [i for i in ports if i not in (database.setup_df['COM'].tolist() + database.setup_df['COM_AC'].tolist())]   
             self.cat_combo_box.addItems(['Select Training Setup'] + list(tmp))
             self.cact_combo_box.addItems(['Select Access Control'] + list(tmp))
 
@@ -225,10 +224,10 @@ class setups_tab(QtGui.QWidget):
             sure = are_you_sure_dialog()
             sure.exec_()
             if sure.GO:
-                fl = self.GUI.setup_df.file_location
+                fl = database.setup_df.file_location
 
-                self.GUI.setup_df = self.GUI.setup_df.drop(self.GUI.setup_df.index[isChecked])
-                self.GUI.setup_df.file_location = fl
+                database.setup_df = database.setup_df.drop(database.setup_df.index[isChecked])
+                database.setup_df.file_location = fl
 
                 self.list_of_setups.fill_table()
                 self.GUI.system_tab.list_of_setups.fill_table()
