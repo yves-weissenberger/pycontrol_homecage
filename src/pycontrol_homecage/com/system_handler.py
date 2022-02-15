@@ -47,8 +47,8 @@ class system_controller(Data_logger):
                            'RFID': None,
                            'entry_time': None,
                            'exit_time': None,
-                           'task': None,
-                           'data_path': None}
+                           'task': None
+                           }
 
     def add_AC(self, ac) -> None:
 
@@ -136,12 +136,10 @@ class system_controller(Data_logger):
         if state=='error_state':
             self._handle_error_state()
 
-        #in this state, allow entry to the access control
         if state=='allow_entry':
             self._reset_mouse_data()
 
-        # first entry in this state is when the mouse first enters
-        # the apparatus and 
+        # first entry in this state is when the mouse first enters the apparatus
         elif state=='mouse_training':
             
             # This guards the state changing to to check_mouse_in_ac (i.e. when the mouse starts to leave)
@@ -150,63 +148,20 @@ class system_controller(Data_logger):
             if mouse_just_entered:
                 
 
+                # need an exception here for cases where RFID is incorrectly typed in
                 mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
 
                 mouse_ID = mouse_row['Mouse_ID'].values[0]
                 prot = mouse_row['Protocol'].values[0]
-                isAssigned = mouse_row['is_assigned'].values[0]
 
-                if isAssigned:
+                # if a task has been assigned to this mouse
+                if mouse_row['is_assigned'].values[0]:
 
-                    # if the current protocol is simply to run a task do so
+                    # if the current protocol is a task do so.
                     if 'task' in prot:
-                       self.run_mouse_task(mouse_info=mouse_row)
-
+                       task = self.run_mouse_task(mouse_info=mouse_row)
                     else:
-                        # If running a real protocol, handle (potential) update of protocol.
-                        newStage = False
-                        stage = mouse_row['Stage'].values[0]
-                        with open(os.path.join(protocol_dir,prot),'r') as f:
-                            mouse_prot = json.loads(f.read())
-
-                        #read last stage of training
-                        logPth = os.path.join(mice_dir,mouse_ID+'.csv')
-                        df_mouseLog = pd.read_csv(logPth)
-
-                        if len(df_mouseLog)>0:
-
-                            df_mouseLog = df_mouseLog.iloc[-1]
-
-
-                            v_ = eval(df_mouseLog['Variables'])
-
-                            #handle moving to next stage
-                            if mouse_prot[str(stage)]['threshV']:
-
-                                for k,thresh in mouse_prot[str(stage)]['threshV']:
-                                    print(float(v_[k]),float(thresh),float(v_[k])>=float(thresh))
-                                    if float(v_[k])>=float(thresh):
-                                        newStage = True
-                                        stage += 1
-
-
-                        task = mouse_prot[str(stage)]['task']
-
-                        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Task'] = task
-                        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Stage'] = stage
-
-                        self.PYC.setup_state_machine(sm_name=task)
-
-                        #handle setting varibles
-
-                        for k,defV in mouse_prot[str(stage)]['defaultV']:
-                            self.PYC.set_variable(k,float(defV))
-
-                        if len(df_mouseLog)>0:
-                            if not newStage:
-                                for k in mouse_prot[str(stage)]['trackV']:
-                                    self.PYC.set_variable(k,float(v_[k]))
-
+                        task = self.run_mouse_protocol(mouse_info=mouse_row)
 
                     self.mouse_data['entry_time'] = now
                     self.mouse_data['task'] = task
@@ -214,7 +169,7 @@ class system_controller(Data_logger):
 
 
 
-                    self.open_data_file_(self.mouse_data['RFID'],now)
+                    self.open_data_file_(mouse_info=mouse_row, now)
 
 
                     self.PYC.start_framework()
@@ -238,7 +193,7 @@ class system_controller(Data_logger):
                 self.PYC.process_data()
                 self.close_files()
 
-    def run_mouse_task(self, mouse_info: pd.Series)->None:
+    def run_mouse_task(self, mouse_info: pd.Series)->str:
         task = mouse_info['Task'].values[0]
         self.GUI.print_msg("Uploading: " + str(task), ac_pyc='pyc')
 
@@ -257,30 +212,66 @@ class system_controller(Data_logger):
                         self.PYC.set_variable(k[2:],eval(v))
 
 
-    def open_data_file_(self,RFID,now):
+    def run_mouse_protocol(self, mouse_info: pd.Series)->str:
+        # If running a real protocol, handle (potential) update of protocol.
+        newStage = False
+        stage = mouse_info['Stage'].values[0]
+        with open(os.path.join(protocol_dir,prot),'r') as f:
+            mouse_prot = json.loads(f.read())
+
+        #read last stage of training
+        logPth = os.path.join(mice_dir,mouse_ID+'.csv')
+        df_mouseLog = pd.read_csv(logPth)
+
+        if len(df_mouseLog)>0:
+
+            df_mouseLog = df_mouseLog.iloc[-1]
+
+
+            v_ = eval(df_mouseLog['Variables'])
+
+            #handle moving to next stage
+            if mouse_prot[str(stage)]['threshV']:
+
+                for k,thresh in mouse_prot[str(stage)]['threshV']:
+                    print(float(v_[k]),float(thresh),float(v_[k])>=float(thresh))
+                    if float(v_[k])>=float(thresh):
+                        newStage = True
+                        stage += 1
+
+
+        task = mouse_prot[str(stage)]['task']
+
+        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Task'] = task
+        self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID'],'Stage'] = stage
+
+        self.PYC.setup_state_machine(sm_name=task)
+
+        #handle setting varibles
+
+        for k,defV in mouse_prot[str(stage)]['defaultV']:
+            self.PYC.set_variable(k,float(defV))
+
+        if len(df_mouseLog)>0:
+            if not newStage:
+                for k in mouse_prot[str(stage)]['trackV']:
+                    self.PYC.set_variable(k,float(v_[k]))
+        return task
+
+    def open_data_file_(self, mouse_info: pd.Series, now: str) -> None:
 
         """ Overwrite method of data logger class """
-        mouse_row = self.GUI.mouse_df.loc[self.GUI.mouse_df['RFID']==self.mouse_data['RFID']]
-        mouse_ID = mouse_row['Mouse_ID'].values[0]
-        exp =  mouse_row['Experiment'].values[0]
-        prot = mouse_row['Protocol'].values[0]
-        task = mouse_row['Task'].values[0]
-
-        #pth_ = os.path.join(data_dir,mouse_ID)
+        mouse_ID = mouse_info['Mouse_ID'].values[0]
+        exp =  mouse_info['Experiment'].values[0]
+        prot = mouse_info['Protocol'].values[0]
+        task = mouse_info['Task'].values[0]
 
 
         file_name = '_'.join([mouse_ID,exp,task,now]) + '.txt'
+        fullpath_to_datafile = os.path.join(self.data_dir,exp,mouse_ID,prot,file_name)
+        self._save_taskFile_run() # save a copy of the taskfile that was run
 
-        pth_ = os.path.join(self.data_dir,exp,mouse_ID,prot,file_name)
-        self.mouse_data['data_path'] = pth_
-
-        with open(os.path.join(tasks_dir,task+'.py'),'r') as f_:
-            dat_ = f_.readlines()
-
-            f_backup = open(pth_[:-3] + '_taskFile.txt','w')
-            f_backup.writelines(dat_)
-
-        self.data_file = open(pth_, 'w', newline = '\n')
+        self.data_file = open(fullpath_to_datafile, 'w', newline = '\n')
 
         self.data_file.write('I Experiment name  : {}\n'.format(exp))
         self.data_file.write('I Task name : {}\n'.format(self.sm_info['name']))
@@ -288,6 +279,15 @@ class system_controller(Data_logger):
         self.data_file.write('I Start date : ' + now + '\n\n')
         self.data_file.write('S {}\n\n'.format(self.sm_info['states']))
         self.data_file.write('E {}\n\n'.format(self.sm_info['events']))
+
+    def _save_taskFile_run(self, fullpath_to_datafile:str, task:str)->None:
+        # read the task file uploaded to pyboard
+        with open(os.path.join(tasks_dir,task+'.py'),'r') as f_:
+            dat_ = f_.readlines()
+
+            # save it to a new file
+            with open(fullpath_to_datafile[:-4] + '_taskFile.txt','w') as f_backup:
+                f_backup.writelines(dat_)
 
 
     def close_files(self):
