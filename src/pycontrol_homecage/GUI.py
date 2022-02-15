@@ -1,10 +1,12 @@
-from pyqtgraph.Qt import QtGui, QtCore
-
-import sys, os
+import sys
+import os
 from functools import partial
-#imports for interacting with serial ports
+# imports for interacting with serial ports
 from datetime import datetime
 import traceback
+
+from pyqtgraph.Qt import QtGui, QtCore
+
 
 from pycontrol_homecage.mouse_overview import mouse_window
 from pycontrol_homecage.setup_view_tab import setups_tab
@@ -14,31 +16,28 @@ from pycontrol_homecage.experiment_tab import experiment_tab
 from pycontrol_homecage.loc_def import all_paths, create_paths
 from pycontrol_homecage.utils import load_data_csv
 from pycontrol_homecage.dialogs import login_dialog, add_user_dialog
-## Here want to implement a GUI for managing the homecage datasets. Thoughts on how to structure it. I think natural way is to ]
-# create a central landing interface that presents and lvie updates some basic features of the behavior sufficient to tell you 
-#if you need up check in on a page and then detailed information about each cage in tabs. 
+# Here want to implement a GUI for managing the homecage datasets. Thoughts on how to structure it. I think natural way is to ]
+# create a central landing interface that presents and lvie updates some basic features of the behavior sufficient to tell you
+# if you need up check in on a page and then detailed information about each cage in tabs.
 
-#The other thing that would be a real asset is if you could set custom scripts to run such that those would be updated.
-#Should the overview be by mouse or by cage?
-
+# The other thing that would be a real asset is if you could set custom scripts to run such that those would be updated.
+# Should the overview be by mouse or by cage?
 
 sys._excepthook = sys.excepthook
-def custom_excepthook(type_, exception, traceback_,filepath):
+def custom_excepthook(type_, exception, traceback_, filepath):
     """ This is supposed to be a custom exception hook that prints
-        exceptions to a file so that they can then be used as alerts 
+        exceptions to a file so that they can then be used as alerts
         for an email daemon
     """
-    now = datetime.strftime(datetime.now(),'%Y-%m-%d-%H%M%S')
+    now = datetime.strftime(datetime.now(), '%Y-%m-%d-%H%M%S')
 
-    with open(filepath,'a') as f:
+    with open(filepath, 'a') as f:
         f.write('----------------- \n')
         f.write(repr(type_))
         f.write(repr(exception))
-        traceback.print_exception(type_, exception, traceback_,file=f)
+        traceback.print_exception(type_, exception, traceback_, file=f)
         f.write(now + '\n')
     sys._excepthook(type_, exception, traceback)
-
-    
 
 
 class Visualizator(QtGui.QMainWindow):
@@ -46,14 +45,13 @@ class Visualizator(QtGui.QMainWindow):
     def __init__(self):
         super().__init__()
 
-        #1+s
         self.connected_boards = []
         self.connected_access_controls = []
         self.controllers = {}
         self.GUI_filepath = os.path.dirname(os.path.abspath(__file__))
-        self.app = None # Overwritten with QtGui.QApplication instance in main.
+        self.app = None  # Overwritten with QtGui.QApplication instance in main.
         self.active_user = None
-        self.task_df,self.exp_df,self.setup_df,self.mouse_df = load_data_csv()
+        self.task_df, self.exp_df, self.setup_df, self.mouse_df = load_data_csv()
 
         self._add_paths_to_gui()
 
@@ -61,9 +59,8 @@ class Visualizator(QtGui.QMainWindow):
 
         self._init_tabs()
         self._add_tabs_to_widget()
-       
         self._disable_gui_pre_login()
-        
+
         self.login = login_dialog()
         self.add_user = add_user_dialog()
 
@@ -71,7 +68,7 @@ class Visualizator(QtGui.QMainWindow):
         self.system_tab.add_user_button.clicked.connect(self.add_user_)
         self.system_tab.logout_button.clicked.connect(self.logout_user)
 
-        self.setGeometry(10, 30, 700, 800) # Left, top, width, height.
+        self.setGeometry(10, 30, 700, 800)   # Left, top, width, height.
         self.setCentralWidget(self.tab_widget)
         self.show()
 
@@ -87,11 +84,11 @@ class Visualizator(QtGui.QMainWindow):
 
     def _add_tabs_to_widget(self) -> None:
         self.tab_widget = QtGui.QTabWidget(self)
-        self.tab_widget.addTab(self.system_tab,'System Overview')
-        self.tab_widget.addTab(self.experiment_tab,'Experiments')
-        self.tab_widget.addTab(self.mouse_window_tab,'Mouse Overview')
-        self.tab_widget.addTab(self.setup_window_tab,'Setup Overview')
-        self.tab_widget.addTab(self.schedule_tab,'Task scheduler')
+        self.tab_widget.addTab(self.system_tab, 'System Overview')
+        self.tab_widget.addTab(self.experiment_tab, 'Experiments')
+        self.tab_widget.addTab(self.mouse_window_tab, 'Mouse Overview')
+        self.tab_widget.addTab(self.setup_window_tab, 'Setup Overview')
+        self.tab_widget.addTab(self.schedule_tab, 'Task scheduler')
 
     def _disable_gui_pre_login(self) -> None:
         self.mouse_window_tab.setEnabled(False)
@@ -104,13 +101,12 @@ class Visualizator(QtGui.QMainWindow):
 
     def _init_timer(self) -> None:
         # Timer to regularly call refresh() when not running.
-        self.refresh_timer = QtCore.QTimer() 
+        self.refresh_timer = QtCore.QTimer()
         self.refresh_timer.timeout.connect(self.refresh)
         self.refresh_timer.start(100)
 
-
     def _add_paths_to_gui(self) -> None:
-        ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
+        ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = all_paths
 
         self.paths = {'ROOT': ROOT,
                       'task_dir': task_dir,
@@ -121,10 +117,9 @@ class Visualizator(QtGui.QMainWindow):
                       'AC_logger_dir': AC_logger_dir,
                       'protocol_dir': protocol_dir}
 
-
     def refresh(self) -> None:
-        #print(self.setup_window_tab.callibrate_dialog)
-        for k,SC in self.controllers.items():
+        # print(self.setup_window_tab.callibrate_dialog)
+        for k, SC in self.controllers.items():
             SC.check_for_data()
 
             if self.system_tab.plot_isactive:
@@ -148,14 +143,12 @@ class Visualizator(QtGui.QMainWindow):
             self.system_tab.log_groupbox.setEnabled(True)
             self.system_tab.experiment_groupbox.setEnabled(True)
             self.experiment_tab.setEnabled(True)
-    
-    def print_msg(self,msg,ac_pyc=None,setup_ID=None) -> None:
-        self.system_tab.write_to_log(msg)
-        if ac_pyc=='pyc':
-            pass
-            #if
-            #self.system_tab.experiment_plot.
 
+    def print_msg(self, msg: str, ac_pyc: str = None, setup_ID=None) -> None:
+        self.system_tab.write_to_log(msg)
+
+        if ac_pyc == 'pyc':
+            pass
 
     def add_user_(self) -> None:
         self.add_user.exec_()
@@ -172,21 +165,18 @@ class Visualizator(QtGui.QMainWindow):
         self.system_tab.experiment_groupbox.setEnabled(False)
         self.system_tab.user_groupbox.setEnabled(True)
         self.experiment_tab.setEnabled(False)
-##########################################################
-#####################     Main    ########################
-##########################################################
 
 
 if __name__ == "__main__":
 
     create_paths(all_paths)
     pths__ = all_paths
-    ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = pths__
-    exception_path = os.path.join(setup_dir,'exception_store.txt')
-    except_hook = partial(custom_excepthook,filepath=exception_path)
+    ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = pths__
+    exception_path = os.path.join(setup_dir, 'exception_store.txt')
+    except_hook = partial(custom_excepthook, filepath=exception_path)
     sys.excepthook = except_hook
-    
+
     app = QtGui.QApplication(sys.argv)
     gui = Visualizator()
-    gui.app = app # To allow app functions to be called from GUI.
+    gui.app = app   # To allow app functions to be called from GUI.
     sys.exit(app.exec_())

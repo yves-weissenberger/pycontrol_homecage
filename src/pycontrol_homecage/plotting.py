@@ -6,11 +6,13 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 
 from pycontrol_homecage.homecage_config.gui_settings import (analog_history_dur, event_history_len,
-                                 state_history_len)
+                                                             state_history_len
+                                                             )
 
 # ----------------------------------------------------------------------------------------
-# Task_plot 
+# Task_plot
 # ----------------------------------------------------------------------------------------
+
 
 class Task_plot(QtGui.QWidget):
     ''' Widget for plotting the states, events and analog inputs output by a state machine.'''
@@ -34,9 +36,9 @@ class Task_plot(QtGui.QWidget):
         # create layout
 
         self.vertical_layout = QtGui.QVBoxLayout()
-        self.vertical_layout.addWidget(self.states_plot.axis,1)
-        self.vertical_layout.addWidget(self.events_plot.axis,1)
-        self.vertical_layout.addWidget(self.analog_plot.axis,1)
+        self.vertical_layout.addWidget(self.states_plot.axis, 1)
+        self.vertical_layout.addWidget(self.events_plot.axis, 1)
+        self.vertical_layout.addWidget(self.analog_plot.axis, 1)
         self.setLayout(self.vertical_layout)
 
     def set_state_machine(self, sm_info):

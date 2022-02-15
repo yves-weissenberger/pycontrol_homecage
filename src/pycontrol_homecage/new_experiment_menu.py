@@ -1,23 +1,23 @@
-from pyqtgraph.Qt import QtGui
-from pyqtgraph import Qt
 import os
 import time
 from datetime import datetime
+
 import pandas as pd
+from pyqtgraph import Qt
+from pyqtgraph.Qt import QtGui
 
-
-#YW code
 from pycontrol_homecage.utils import get_tasks
 from pycontrol_homecage.tables import mouse_list_table, cage_list_table, variables_table
 from pycontrol_homecage.loc_def import data_dir, mice_dir, protocol_dir
 
+
 class new_experiment_dialog(QtGui.QDialog):
 
-    def __init__(self,GUI, parent=None):
+    def __init__(self, GUI, parent=None):
         super(new_experiment_dialog, self).__init__(parent)
 
         self.GUI = GUI
-        self.setGeometry(100, 30, 1300, 600) # Left, top, width, height.
+        self.setGeometry(100, 30, 1300, 600)  # Left, top, width, height.
 
         self.df_setup_tmp = pd.DataFrame(columns=['COM','COM_AC','Setup_ID',
                                              'in_use','connected','User','Experiment',
@@ -36,9 +36,7 @@ class new_experiment_dialog(QtGui.QDialog):
         self.global_task = True
         self.running_protocol = False
 
-
         self.left_column = QtGui.QVBoxLayout()
-
 
         #### Data related to experiment
         self.exp_name_groupbox = QtGui.QGroupBox('Status')
@@ -220,12 +218,10 @@ class new_experiment_dialog(QtGui.QDialog):
         self.mat_layout.addLayout(self.matL1)
         self.mat_layout.addLayout(self.matL2)
         self.MAT.setLayout(self.mat_layout)
-        #self.MAT.setEnabled(False)
-
 
         self.MICE = QtGui.QGroupBox('Mouse Overview')
         self.mice_column = QtGui.QVBoxLayout()
-        self.MLT = mouse_list_table(GUI=self.GUI,tab=self)
+        self.MLT = mouse_list_table(GUI=self.GUI, tab=self)
 
         self.mice_column.addWidget(self.MAT)
         self.mice_column.addWidget(self.MLT)
@@ -250,20 +246,15 @@ class new_experiment_dialog(QtGui.QDialog):
         self.right_column.addWidget(self.MICE)
         self.right_column.addWidget(self.runGroup)
 
-
         self.all_columns = QtGui.QHBoxLayout()
         self.all_columns.addLayout(self.left_column)
         self.all_columns.addLayout(self.right_column)
-
-
-
 
         self.vLayout = QtGui.QVBoxLayout(self)
         self.vLayout.addLayout(self.name_layout)
         self.vLayout.addLayout(self.all_columns)
 
         self.MICE.setEnabled(False)
-
 
     def _enable_prot_sel(self):
 
@@ -288,11 +279,11 @@ class new_experiment_dialog(QtGui.QDialog):
         self.df_mouse_tmp.loc[entry_nr]['Age'] = self.age.text()
         self.df_mouse_tmp.loc[entry_nr]['Experiment'] = self.set_experiment_name
 
-        if self.running_protocol: #if you are going to run a whole protocol
+        if self.running_protocol:  # if you are going to run a whole protocol
             self.df_mouse_tmp.loc[entry_nr]['Protocol'] = self.mouse_prot.currentText()
             self.df_mouse_tmp.loc[entry_nr]['Task'] = 'NA'
             self.df_mouse_tmp.loc[entry_nr]['Stage'] = 0
-        else: #if you are just running a task
+        else:  # if you are just running a task
             self.df_mouse_tmp.loc[entry_nr]['Task'] = self.mouse_prot.currentText()
             self.df_mouse_tmp.loc[entry_nr]['Protocol'] = str(time.time()).replace('.','') + '_task'
             self.df_mouse_tmp.loc[entry_nr]['Stage'] = 'NA'
