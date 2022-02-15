@@ -1,5 +1,6 @@
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
+import pandas as pd
 from pyqtgraph.Qt import QtGui
 
 
@@ -40,62 +41,64 @@ class experiment_tab(QtGui.QWidget):
         self.Vlayout.addLayout(self.Hlayout)
         self.Vlayout.addWidget(self.list_of_experiments)
 
-    def _refresh(self):
-        pass
 
-    def restart_experiment(self):
+    def restart_experiment(self) -> None:
         """ Restart an experiment that is currently active that was running before """
         
-        isChecked, checked_ids = self._get_experiment_check_status()
+        selected_experiment = self._get_experiment_check_status()
 
-        if len(isChecked)==1:
+        if selected_experiment:
             sure = are_you_sure_dialog()
             sure.exec_()
             if sure.GO:
-                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0]]
-                experiment_name = exp_row['Name'].values[0]
-                self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = True
-                #self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
-                mice_in_experiment = eval(exp_row['Subjects'].values[0])
-                setups = eval(exp_row['Setups'].values[0].replace(' ',','))
-                ###add check here to ensure setups are not double booked
+                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==selected_experiment]
 
-                self._update_mice(mice_in_exp=mice_in_experiment,assigned=True)
-                self._update_setups(setups_in_exp=setups,experiment=experiment_name)
-                self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
-                self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
+                self._update_experiment_status(selected_experiment, True)
 
-                self.GUI.system_tab.list_of_experiments.fill_table()
-                self.GUI.system_tab.list_of_setups.fill_table()
+                mice_in_experiment = self._get_mice_in_experiment(exp_row)
+                setups = self._get_setups_in_experiment(exp_row)
 
-                self.GUI.experiment_tab.list_of_experiments.fill_table()
-                self.GUI.mouse_window_tab.list_of_mice.fill_table()
-                self.GUI.setup_window_tab.list_of_setups.fill_table()
-                print("DONE")
+                self._update_mice(mice_in_exp=mice_in_experiment, assigned=True)
+                self._update_setups(setups_in_exp=setups, experiment=selected_experiment)
+
+                self._reset_tables()
         else:
             pass
-            
+    
     def stop_experiment(self):
 
-        isChecked, checked_ids = self._get_experiment_check_status()
+        selected_experiment = self._get_experiment_check_status()
 
         # cannot abort multiple experiments simultaneously 
-        if len(isChecked)==1:
+        if selected_experiment:
 
             sure = are_you_sure_dialog()
             sure.exec_()
             if sure.GO:
-                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0]]
-                self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = False
-                mice_in_experiment = eval(exp_row['Subjects'].values[0])
-                setups = eval(exp_row['Setups'].values[0])
+                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==selected_experiment]
+                self._update_experiment_status(selected_experiment, False)
+
+                mice_in_experiment = self._get_mice_in_experiment(exp_row)
+                setups = self._get_setups_in_experiment(exp_row)
 
                 self._update_mice(mice_in_exp=mice_in_experiment)
                 self._update_setups(setups_in_exp=setups, experiment=None)
 
             self._reset_tables()
 
-    def _get_experiment_check_status(self) -> Tuple[List[bool], List[str]]:
+
+    def _update_experiment_status(self, experiment_name: str, status: bool) -> None:
+        self.GUI.exp_df.loc[self.GUI.exp_df['Name']==experiment_name, 'Active'] = status
+
+    def _get_mice_in_experiment(self, exp_row: pd.Series) -> List[str]:
+        return eval(exp_row['Subjects'].values[0])
+
+    def _get_setups_in_experiment(self, exp_row: pd.Series) -> List[str]:
+        # setups = eval(exp_row['Setups'].values[0].replace(' ',',')) this may be better
+        return eval(exp_row['Setups'].values[0])
+
+
+    def _get_experiment_check_status(self) -> Optional[str]:
         isChecked = []
         checked_ids =[]
         name_col = self.list_of_experiments.header_names.index("Name")
@@ -105,8 +108,8 @@ class experiment_tab(QtGui.QWidget):
             if checked:
                 checked_ids.append(self.list_of_experiments.item(row,name_col).text())
                 isChecked.append(checked)
-        return isChecked, checked_ids
-
+            
+        return checked_ids[0] if checked_ids else None
 
     def _reset_tables(self):
         self.GUI.system_tab.list_of_experiments.fill_table()
@@ -120,16 +123,15 @@ class experiment_tab(QtGui.QWidget):
 
         for mouse in mice_in_exp:
 
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==mouse,'is_assigned'] = assigned
-            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==mouse,'in_system'] = assigned
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==mouse, 'is_assigned'] = assigned
+            self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==mouse, 'in_system'] = assigned
             self.GUI.mouse_df.to_csv(self.GUI.mouse_df.file_location)
 
     def _update_setups(self,setups_in_exp,experiment=None):
         for setup in setups_in_exp:
-            #print(setup)
-            #print(self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'])
-            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'Experiment'] = experiment
-            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup,'in_use'] = experiment is not None  #this is what is checked in the new experiment dialog
+            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup, 'Experiment'] = experiment
+            # this is what is checked in the new experiment dialog
+            self.GUI.setup_df.loc[self.GUI.setup_df['Setup_ID']==setup, 'in_use'] = experiment is not None  
             self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
 
 

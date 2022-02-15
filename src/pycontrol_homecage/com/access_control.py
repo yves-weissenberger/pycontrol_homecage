@@ -9,7 +9,7 @@ class Access_control(Pyboard):
     # Class that runs on the main computer to provide an API for inferfacting with
     # the access control module
 
-    def __init__(self, serial_port, print_func=print, baudrate=115200,data_logger=None,GUI=None):
+    def __init__(self, serial_port, print_func=print, baudrate=115200, data_logger=None, GUI=None):
 
         self.serial_port = serial_port
         self.print = print_func        # Function used for print statements.
@@ -22,15 +22,14 @@ class Access_control(Pyboard):
                        'usb_mode': None}
         self.GUI = GUI
 
-        name_ = self.GUI.setup_df.loc[self.GUI.setup_df['COM_AC']==self.serial_port,'Setup_ID'].values[0]
+        name_ = self.GUI.setup_df.loc[self.GUI.setup_df['COM_AC']==self.serial_port, 'Setup_ID'].values[0]
         #print(name_)
         now = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
         self.logger_dir = GUI.paths['AC_logger_dir']
         self.logger_path = os.path.join(self.logger_dir,name_ + '_' + now + '.txt')
 
-        self.GUI.setup_df.loc[self.GUI.setup_df['COM_AC']==self.serial_port,'logger_path'] = self.logger_path
+        self.GUI.setup_df.loc[self.GUI.setup_df['COM_AC']==self.serial_port, 'logger_path'] = self.logger_path
         self.GUI.setup_df.to_csv(self.GUI.setup_df.file_location)
-        #self.GUI.setup_df
 
         with open(self.logger_path,'w') as f:
             f.write("Start"+'\n')
@@ -55,11 +54,10 @@ class Access_control(Pyboard):
 
     def load_framework(self, framework_dir=framework_dir,accCtrl_dir=accCtrl_dir):
         '''Copy the pyControl framework folder to the board.'''
-        #print(framework_dir)
+
         self.print('\nTransfering access control framework to pyboard.', end='')
-        #self.transfer_folder(framework_dir, file_type='py', show_progress=True)  #upload pycontrol framework
+
         self.transfer_folder(accCtrl_dir, file_type='py', show_progress=True)    #upload access control framework
-        #self.transfer_folder(devices_dir  , file_type='py', show_progress=True)
         self.transfer_file(os.path.join(accCtrl_dir,'main_script_for_pyboard.py'),'main.py')
 
         try:
@@ -92,7 +90,6 @@ class Access_control(Pyboard):
 
         #df_ = self.data_logger.GUI.setup_df
         if self.data_logger.GUI is not None:
-                #print('!!!!!!!!!')
 
                 if self.serial.inWaiting()>0:
                     #read the input if something is coming
