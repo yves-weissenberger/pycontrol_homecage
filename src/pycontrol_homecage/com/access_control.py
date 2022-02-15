@@ -117,36 +117,6 @@ class Access_control(Pyboard):
 
                     self.data_logger.process_data_AC(messages)
 
-
-
-    def _handle_lock_update(self,msg):
-        "LEGACY Stupid helper function to convert the state of door magnets to human readable string"
-        msg2 = msg.strip('lock:')
-        door_state = ''
-
-        if msg2[0]=='0':
-            door_state = door_state + 'En1_closed'
-        else:
-            door_state = door_state + 'En1_open'
-
-        if msg2[1]=='0':
-            door_state = door_state + 'En2_closed'
-        else:
-            door_state = door_state + 'En2_open'
-
-
-        if msg2[2]=='0':
-            door_state = door_state + 'Ex1_closed'
-        else:
-            door_state = door_state + 'Ex1_open'
-
-        if msg2[3]=='0':
-            door_state = door_state + 'Ex2_closed'
-        else:
-            door_state = door_state + 'Ex2_open'
-
-        return door_state
-
     def loadcell_tare(self):
         self.exec('access_control.loadcell.tare()')
 

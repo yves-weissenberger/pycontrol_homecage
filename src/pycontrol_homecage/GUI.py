@@ -55,17 +55,7 @@ class Visualizator(QtGui.QMainWindow):
         self.active_user = None
         self.task_df,self.exp_df,self.setup_df,self.mouse_df = load_data_csv()
 
-        
-        ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
-
-        self.paths = {'ROOT': ROOT,
-                      'task_dir': task_dir,
-                      'experiment_dir': experiment_dir,
-                      'setup_dir': setup_dir,
-                      'mice_dir': mice_dir,
-                      'data_dir': data_dir,
-                      'AC_logger_dir': AC_logger_dir,
-                      'protocol_dir': protocol_dir}
+        self._store_paths()
 
         self.setup_df['connected'] = False
 
@@ -115,6 +105,18 @@ class Visualizator(QtGui.QMainWindow):
         self.refresh_timer.start(100)
 
         self.refresh()    # Refresh tasks and ports lists.
+
+    def _store_paths(self) -> None:
+        ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
+
+        self.paths = {'ROOT': ROOT,
+                      'task_dir': task_dir,
+                      'experiment_dir': experiment_dir,
+                      'setup_dir': setup_dir,
+                      'mice_dir': mice_dir,
+                      'data_dir': data_dir,
+                      'AC_logger_dir': AC_logger_dir,
+                      'protocol_dir': protocol_dir}
 
 
     def refresh(self) -> None:

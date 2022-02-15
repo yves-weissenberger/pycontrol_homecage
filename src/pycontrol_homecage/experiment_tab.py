@@ -18,7 +18,7 @@ class experiment_tab(QtGui.QWidget):
 
         self._setup_buttons()
         self._set_button_layout()
-        self.list_of_experiments = experiment_overview_table(GUI=self.GUI,only_active=False)
+        self.list_of_experiments = experiment_overview_table(GUI=self.GUI, only_active=False)
 
         self._set_global_layout()
 
@@ -74,7 +74,6 @@ class experiment_tab(QtGui.QWidget):
                 print("DONE")
         else:
             pass
-
             
     def stop_experiment(self):
 
