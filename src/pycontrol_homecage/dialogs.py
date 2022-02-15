@@ -23,9 +23,16 @@ class calibrate_dialog(QtGui.QDialog):
         self.ac = ac
         self.reject = self._done
 
-
         self.setGeometry(10, 30, 400, 200) # Left, top, width, height.
 
+        self._setup_buttons()
+        self._setup_calibration_weight_lineedit()
+        self._setup_layout()
+
+
+
+
+    def _setup_buttons(self) -> None:
         self.buttonDone = QtGui.QPushButton('Done')
         self.buttonDone.clicked.connect(self._done)
 
@@ -35,22 +42,20 @@ class calibrate_dialog(QtGui.QDialog):
         self.buttonWeigh = QtGui.QPushButton('Weigh', self)
         self.buttonWeigh.clicked.connect(self.weigh)
 
-
-        self.calibration_weight = QtGui.QLineEdit("")
         self.buttonCal = QtGui.QPushButton('callibrate', self)
         self.buttonCal.clicked.connect(self.callibrate)
 
 
+    def _setup_calibration_weight_lineedit(self)->None:
 
-
+        self.calibration_weight = QtGui.QLineEdit("")
         self.log_textbox = QtGui.QTextEdit()
         self.log_textbox.setFont(QtGui.QFont('Courier', 9))
         self.log_textbox.setReadOnly(True)
 
 
-
+    def _setup_layout(self) -> None:
         layout = QtGui.QVBoxLayout()
-
         layout.addWidget(self.buttonWeigh)
         layout.addWidget(self.buttonTare)
         layout.addWidget(self.calibration_weight)
@@ -61,7 +66,6 @@ class calibrate_dialog(QtGui.QDialog):
 
         layoutH.addLayout(layout)
         layoutH.addWidget(self.log_textbox)
-
 
     def tare(self) -> None:
         """ Tell access control module to tare the scales"""
@@ -100,6 +104,7 @@ class calibrate_dialog(QtGui.QDialog):
 
 
 class box_conn_dialog(QtGui.QDialog):
+    
     def __init__(self,parent=None):
         super(box_conn_dialog,self).__init__(parent)
         self.textbox = QtGui.QLineEdit(self)
@@ -110,6 +115,7 @@ class box_conn_dialog(QtGui.QDialog):
 
 class configure_box_dialog(QtGui.QDialog):
     """ Dialog window that allows you to upload harware definitions etc """ 
+
     def __init__(self,setup_id,GUI,parent=None):
         super(configure_box_dialog,self).__init__(parent)
         self.setGeometry(10, 30, 500, 200) # Left, top, width, height.

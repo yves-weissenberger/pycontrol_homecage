@@ -1,3 +1,5 @@
+from typing import Tuple, List
+
 from pyqtgraph.Qt import QtGui
 
 
@@ -14,20 +16,26 @@ class experiment_tab(QtGui.QWidget):
 
         self.GUI = self.parent()
 
-        self.Hlayout = QtGui.QHBoxLayout()
+        self._setup_buttons()
+        self._set_button_layout()
+        self.list_of_experiments = experiment_overview_table(GUI=self.GUI,only_active=False)
+
+        self._set_global_layout()
+
+    def _setup_buttons(self) -> None:
         self.new_experiment_button = QtGui.QPushButton('Start new Experiment')
         self.restart_experiment_button = QtGui.QPushButton('Restart Experiment')
         self.restart_experiment_button.clicked.connect(self.restart_experiment)
         self.stop_experiment_button = QtGui.QPushButton('Stop Experiment')
         self.stop_experiment_button.clicked.connect(self.stop_experiment)
+
+    def _set_button_layout(self) -> None:
+        self.Hlayout = QtGui.QHBoxLayout()
         self.Hlayout.addWidget(self.new_experiment_button)
         self.Hlayout.addWidget(self.restart_experiment_button)
         self.Hlayout.addWidget(self.stop_experiment_button)
 
-        self.list_of_experiments = experiment_overview_table(GUI=self.GUI,only_active=False)
-
-
-
+    def _set_global_layout(self) -> None:
         self.Vlayout = QtGui.QVBoxLayout(self)
         self.Vlayout.addLayout(self.Hlayout)
         self.Vlayout.addWidget(self.list_of_experiments)
@@ -37,15 +45,8 @@ class experiment_tab(QtGui.QWidget):
 
     def restart_experiment(self):
         """ Restart an experiment that is currently active that was running before """
-        isChecked = []
-        checked_ids =[]
-        name_col = self.list_of_experiments.header_names.index("Name")
-
-        for row in range(self.list_of_experiments.rowCount()):
-            checked = self.list_of_experiments.item(row,0).checkState()==2
-            if checked:
-                checked_ids.append(self.list_of_experiments.item(row,name_col).text())
-                isChecked.append(checked)
+        
+        isChecked, checked_ids = self._get_experiment_check_status()
 
         if len(isChecked)==1:
             sure = are_you_sure_dialog()
@@ -76,10 +77,26 @@ class experiment_tab(QtGui.QWidget):
 
             
     def stop_experiment(self):
-        #update the relevant mouse tables
-        #update the experiment table
-        #update the setups table
-        print("STOP")
+
+        isChecked, checked_ids = self._get_experiment_check_status()
+
+        # cannot abort multiple experiments simultaneously 
+        if len(isChecked)==1:
+
+            sure = are_you_sure_dialog()
+            sure.exec_()
+            if sure.GO:
+                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0]]
+                self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = False
+                mice_in_experiment = eval(exp_row['Subjects'].values[0])
+                setups = eval(exp_row['Setups'].values[0])
+
+                self._update_mice(mice_in_exp=mice_in_experiment)
+                self._update_setups(setups_in_exp=setups, experiment=None)
+
+            self._reset_tables()
+
+    def _get_experiment_check_status(self) -> Tuple[List[bool], List[str]]:
         isChecked = []
         checked_ids =[]
         name_col = self.list_of_experiments.header_names.index("Name")
@@ -89,37 +106,19 @@ class experiment_tab(QtGui.QWidget):
             if checked:
                 checked_ids.append(self.list_of_experiments.item(row,name_col).text())
                 isChecked.append(checked)
-        print(isChecked)
-        if len(isChecked)==1:
-            print("2222")
-            sure = are_you_sure_dialog()
-            sure.exec_()
-            if sure.GO:
-                exp_row = self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0]]
-                self.GUI.exp_df.loc[self.GUI.exp_df['Name']==checked_ids[0],'Active'] = False
-                #self.GUI.exp_df.to_csv(self.GUI.exp_df.file_location)
-                mice_in_experiment = eval(exp_row['Subjects'].values[0])
-                setups = eval(exp_row['Setups'].values[0])
+        return isChecked, checked_ids
 
-                self._update_mice(mice_in_exp=mice_in_experiment)
-                self._update_setups(setups_in_exp=setups,experiment=None)
 
-            #print(self.GUI.exp_df)
-            #print(self.GUI.setup_df['in_use'])
+    def _reset_tables(self):
+        self.GUI.system_tab.list_of_experiments.fill_table()
+        self.GUI.system_tab.list_of_setups.fill_table()
 
-            self.GUI.system_tab.list_of_experiments.fill_table()
-            self.GUI.system_tab.list_of_setups.fill_table()
+        self.GUI.experiment_tab.list_of_experiments.fill_table()
+        self.GUI.mouse_window_tab.list_of_mice.fill_table()
+        self.GUI.setup_window_tab.list_of_setups.fill_table()
 
-            self.GUI.experiment_tab.list_of_experiments.fill_table()
-            self.GUI.mouse_window_tab.list_of_mice.fill_table()
-            self.GUI.setup_window_tab.list_of_setups.fill_table()
-            
-        else:
-            pass
-
-        pass
-    
     def _update_mice(self,mice_in_exp,assigned=False):
+
         for mouse in mice_in_exp:
 
             self.GUI.mouse_df.loc[self.GUI.mouse_df['Mouse_ID']==mouse,'is_assigned'] = assigned
