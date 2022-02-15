@@ -9,7 +9,7 @@ class Access_control(Pyboard):
     # Class that runs on the main computer to provide an API for inferfacting with
     # the access control module
 
-    def __init__(self, serial_port, print_func=print, baudrate=115200, data_logger=None, GUI=None):
+    def __init__(self, serial_port, print_func=print, data_logger=None, GUI=None):
 
         self.serial_port = serial_port
         self.print = print_func        # Function used for print statements.
@@ -22,10 +22,13 @@ class Access_control(Pyboard):
                        'usb_mode': None}
         self.GUI = GUI
 
+        self._init_logger()
+        self.init_serial_connection()
+        
+    def _init_logger(self) -> None:
         name_ = self.GUI.setup_df.loc[self.GUI.setup_df['COM_AC']==self.serial_port, 'Setup_ID'].values[0]
-        #print(name_)
         now = datetime.now().strftime('-%Y-%m-%d-%H%M%S')
-        self.logger_dir = GUI.paths['AC_logger_dir']
+        self.logger_dir = self.GUI.paths['AC_logger_dir']
         self.logger_path = os.path.join(self.logger_dir,name_ + '_' + now + '.txt')
 
         self.GUI.setup_df.loc[self.GUI.setup_df['COM_AC']==self.serial_port, 'logger_path'] = self.logger_path
@@ -35,24 +38,24 @@ class Access_control(Pyboard):
             f.write("Start"+'\n')
             f.write(now+'\n')
 
-
+    def init_serial_connection(self) -> None:
         try:    
             super().__init__(self.serial_port, baudrate=115200)
             self.status['serial'] = True
             self.reset() # Soft resets pyboard.
             self.unique_ID = eval(self.eval('pyb.unique_id()').decode())
-            v_tuple = eval(self.eval(
-            "sys.implementation.version if hasattr(sys, 'implementation') else (0,0,0)").decode())
+            v_tuple = eval(
+                            self.eval("sys.implementation.version if hasattr(sys, 'implementation') else (0,0,0)"
+                                ).decode()
+                            )
             self.micropython_version = float('{}.{}{}'.format(*v_tuple))
-
         except SerialException as e:
             print('Could not connect to pyboard')
             self.status['serial'] = False
-
             raise(e)
 
 
-    def load_framework(self, framework_dir=framework_dir,accCtrl_dir=accCtrl_dir):
+    def load_framework(self, framework_dir: str=framework_dir, accCtrl_dir: str=accCtrl_dir) -> None:
         '''Copy the pyControl framework folder to the board.'''
 
         self.print('\nTransfering access control framework to pyboard.', end='')
@@ -78,7 +81,6 @@ class Access_control(Pyboard):
             raise(e)
         #self.exec('run()')
         print("OK")
-        return 
 
 
     def process_data(self):
@@ -88,7 +90,6 @@ class Access_control(Pyboard):
 
         #requires GUI, or other object with access to dataframes to be here
 
-        #df_ = self.data_logger.GUI.setup_df
         if self.data_logger.GUI is not None:
 
                 if self.serial.inWaiting()>0:
@@ -106,7 +107,7 @@ class Access_control(Pyboard):
                     for msg in messages:
                         #This is a horrible information flow. The point is simply to print into the calibrate dialog
                         if 'cal' in msg:
-                            #print(msg)
+
                             if self.GUI.setup_window_tab.callibrate_dialog:
                                 self.GUI.setup_window_tab.callibrate_dialog.print_msg(msg)
                             if self.GUI.setup_window_tab.configure_box_dialog:

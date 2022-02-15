@@ -29,9 +29,6 @@ class calibrate_dialog(QtGui.QDialog):
         self._setup_calibration_weight_lineedit()
         self._setup_layout()
 
-
-
-
     def _setup_buttons(self) -> None:
         self.buttonDone = QtGui.QPushButton('Done')
         self.buttonDone.clicked.connect(self._done)
@@ -104,7 +101,7 @@ class calibrate_dialog(QtGui.QDialog):
 
 
 class box_conn_dialog(QtGui.QDialog):
-    
+
     def __init__(self,parent=None):
         super(box_conn_dialog,self).__init__(parent)
         self.textbox = QtGui.QLineEdit(self)

@@ -1,10 +1,12 @@
-import pandas as pd
+from typing import List, Tuple, Optional
 import os
 import re
+
+import pandas as pd
 import numpy as np
 from pyqtgraph.Qt import QtGui, QtCore
-
 from serial.tools import list_ports
+
 
 from pycontrol_homecage.loc_def import user_path, all_paths
 
@@ -49,7 +51,7 @@ def cbox_update_options(cbox, options):
     cbox.addItems(available)
     cbox.setCurrentIndex(i)
 
-def cbox_set_item(cbox, item_name, insert=False):
+def cbox_set_item(cbox, item_name, insert=False) -> bool:
     '''Set the selected item in a combobox to the name provided.  If name is
     not in item list returns False if insert is False or inserts item if insert 
     is True.'''
@@ -66,21 +68,21 @@ def cbox_set_item(cbox, item_name, insert=False):
             return False
 # ----------------------------------------------------------------------------------
 
-def get_pyhomecage_email():
+def get_pyhomecage_email() -> Tuple[str, str]:
     lines_ = open(user_path,'r').readlines()
     sender_email =  re.findall('"(.*)"',[l_ for l_ in lines_ if 'system_email' in l_][0])[0]
-    #print([l_ for l_ in lines_ if 'password' in l_])
     password = re.findall('"(.*)"',[l_ for l_ in lines_ if 'password' in l_][0])[0]
 
     return sender_email, password
-def find_setups(GUI):
+
+def find_setups(GUI: QtGui.QMainWindow):
 
     #print(list_ports.comports())
     ports = list(set([c[0] for c in list_ports.comports() if ('Pyboard' in c[1]) or ('USB Serial Device' in c[1])]))
     #ports =[i for i in ports if i not in GUI.setup_df['COM'].tolist()]
     return ports
 
-def get_variables_from_taskfile(pth):
+def get_variables_from_taskfile(pth: str):
     "Helper function to scan python script and return variables in that script"
     with open(pth,'r') as f:
         txt = f.read()
@@ -149,7 +151,7 @@ def load_data_csv():
 
     return task_df,exp_df,setup_df,mouse_df
 
-def get_tasks(GUI_fp):
+def get_tasks(GUI_fp: str) -> List[str]:
     """ Function to read available tasks from the tasks folder """
     
     task_dir = os.path.join(GUI_fp,'tasks')

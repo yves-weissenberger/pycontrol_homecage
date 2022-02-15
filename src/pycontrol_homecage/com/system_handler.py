@@ -95,10 +95,10 @@ class system_controller(Data_logger):
 
         """
         now = datetime.now().strftime('%Y-%m-%d-%H%M%S')
-        #print(self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port])
+
         exp_running_now = self.GUI.setup_df.loc[self.GUI.setup_df['COM']==self.PYC.serial_port]['Experiment'].values
 
-        if exp_running_now!='none': #YW 11/02/21 NOT SURE WHY THIS CHECK IS HERE
+        if exp_running_now!='none': # YW 11/02/21 NOT SURE WHY THIS CHECK IS HERE
             for msg in new_data:
                 self.GUI.print_msg(msg)
 
@@ -179,11 +179,6 @@ class system_controller(Data_logger):
                                 for k,v in persistent_variables.items(): 
                                     if v!='auto':
                                         self.PYC.set_variable(k[2:],eval(v))
-
-
-
-
-                        
 
                     else:
                         # If running a real protocol, handle (potential) update of protocol.
