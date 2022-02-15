@@ -169,7 +169,7 @@ class system_controller(Data_logger):
 
 
 
-                    self.open_data_file_(mouse_info=mouse_row, now)
+                    self.open_data_file_(mouse_info=mouse_row, now=now)
 
 
                     self.PYC.start_framework()
@@ -267,7 +267,7 @@ class system_controller(Data_logger):
         task = mouse_info['Task'].values[0]
 
 
-        file_name = '_'.join([mouse_ID,exp,task,now]) + '.txt'
+        file_name = '_'.join([mouse_ID, exp,task, now]) + '.txt'
         fullpath_to_datafile = os.path.join(self.data_dir,exp,mouse_ID,prot,file_name)
         self._save_taskFile_run() # save a copy of the taskfile that was run
 

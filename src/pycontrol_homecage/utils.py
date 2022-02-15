@@ -32,7 +32,7 @@ class TableCheckbox(QtGui.QWidget):
         self.layout = QtGui.QHBoxLayout(self)
         self.layout.addWidget(self.checkbox)
         self.layout.setAlignment(QtCore.Qt.AlignCenter)
-        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
     def isChecked(self):
         return self.checkbox.isChecked()
@@ -51,9 +51,10 @@ def cbox_update_options(cbox, options):
     cbox.addItems(available)
     cbox.setCurrentIndex(i)
 
+
 def cbox_set_item(cbox, item_name, insert=False) -> bool:
     '''Set the selected item in a combobox to the name provided.  If name is
-    not in item list returns False if insert is False or inserts item if insert 
+    not in item list returns False if insert is False or inserts item if insert
     is True.'''
     index = cbox.findText(item_name, QtCore.Qt.MatchFixedString)
     if index >= 0:
@@ -82,7 +83,7 @@ def find_setups(GUI: QtGui.QMainWindow):
     #ports =[i for i in ports if i not in GUI.setup_df['COM'].tolist()]
     return ports
 
-def get_variables_from_taskfile(pth: str):
+def get_variables_from_taskfile(pth: str) -> List[str]:
     "Helper function to scan python script and return variables in that script"
     with open(pth,'r') as f:
         txt = f.read()
@@ -92,7 +93,7 @@ def get_variables_from_taskfile(pth: str):
     return variables
 
 
-def get_variables_and_values_from_taskfile(pth):
+def get_variables_and_values_from_taskfile(pth: str) -> dict[str, str]:
     "Helper function to scan python script and return variables in that script"
     with open(pth,'r') as f:
         txt = f.readlines()
@@ -107,7 +108,7 @@ def get_variables_and_values_from_taskfile(pth):
         
     return var_dict
 
-def get_users():
+def get_users() -> List[str]:
     dat = open(user_path,'r').readlines()
     #users = [i.readline() for i in users]
     user_dat =  [re.findall(r'({.*})',l_)[0] for l_ in dat if 'user_data' in l_]
@@ -117,7 +118,7 @@ def get_users():
     return users
 
 
-def get_user_dicts():
+def get_user_dicts() -> dict[str, str]:
     dat = open(user_path,'r').readlines()
     #users = [i.readline() for i in users]
     user_dat =  [re.findall(r'({.*})',l_)[0] for l_ in dat if 'user_data' in l_]
@@ -126,7 +127,7 @@ def get_user_dicts():
     users = list(user_dict.keys())
     return user_dict
 
-def load_data_csv():
+def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
     ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
     fp = os.path.join(task_dir,'tasks.csv')
@@ -149,7 +150,8 @@ def load_data_csv():
         if 'Unnamed' in col:
             mouse_df.drop(col, inplace=True, axis=1)
 
-    return task_df,exp_df,setup_df,mouse_df
+    return task_df, exp_df, setup_df, mouse_df
+
 
 def get_tasks(GUI_fp: str) -> List[str]:
     """ Function to read available tasks from the tasks folder """
@@ -159,7 +161,7 @@ def get_tasks(GUI_fp: str) -> List[str]:
     return tasks
 
 
-def find_prev_base(dat):
+def find_prev_base(dat) -> float:
     """Find most recent baseline weight (going back in time). This is 
        to account for drift in the system. Gets the 5 most recent baseline
        measurements
@@ -177,5 +179,3 @@ def find_prev_base(dat):
     wbase = np.mean(store)
 
     return wbase
-
-#def excepthook()
