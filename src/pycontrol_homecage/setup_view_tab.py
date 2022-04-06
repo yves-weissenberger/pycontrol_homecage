@@ -17,42 +17,72 @@ class setups_tab(QtGui.QWidget):
         self.callibrate_dialog = None
         self.configure_box_dialog = None
 
-        # Add cages cages
-        self.add_cage_button = QtGui.QPushButton('Add setup')
-        self.add_cage_button.clicked.connect(self.add_cage)
+        self._init_add_setup()
 
+        self._init_update_setup()
 
-        self.CAT = QtGui.QGroupBox("Add Setup")
+        ##############################################################
+        ###############   ---   Setup Tables   ----    ###############
+        ##############################################################
 
-        self.cat_layout = QtGui.QHBoxLayout()  #for behavioral setup
+        # Setups table
+        self.cage_table_label = QtGui.QLabel()
+        self.cage_table_label.setText("List of setups")
 
-        self.cat_combo_box = QtGui.QComboBox()
+        self.scrollable_cage = QtGui.QScrollArea()
+        self.scrollable_cage.setWidgetResizable(True)
+        self.scrollable_cage.horizontalScrollBar().setEnabled(False)
 
+        self.list_of_setups = cageTable(tab=self)
+        self.scrollable_cage.setWidget(self.list_of_setups)
+
+        ##############################################################
+        ###############   ---   Setup Layout   ----    ###############
+        ##############################################################
+        self.Vlayout = QtGui.QVBoxLayout(self)
+        #self.Vlayout.addWidget(self.add_cage_button)
+        #self.Vlayout.addWidget(self.add_cage_table)
+        self.Vlayout.addWidget(self.CAT, 1)
+
+        self.Vlayout.addWidget(self.cage_table_label, 1)
+        self.Vlayout.addLayout(self.cage_manager_layout, 1)
+
+        self.Vlayout.addWidget(self.scrollable_cage, 15)
+
+    def _init_add_setup(self) -> None:
+
+        self.CAT = QtGui.QGroupBox("Add Setup")  # the main container
+        self.cat_layout = QtGui.QHBoxLayout()  # main layout class
+
+        # Name the setup you want to add
         self.setup_name_label = QtGui.QLabel('Setup Name:')
         self.setup_name = QtGui.QLineEdit()
 
-        self.cact_combo_box = QtGui.QComboBox()
+        # press button to add setup
+        self.add_cage_button = QtGui.QPushButton('Add setup')
+        self.add_cage_button.clicked.connect(self.add_cage)
 
+        self.cat_combo_box = QtGui.QComboBox()   # select operant chamber pyboard
+        self.cact_combo_box = QtGui.QComboBox()  # select access control pyboard
+
+        self._set_add_setup_layout()
+
+    def _set_add_setup_layout(self) -> None:
         self.cat_layout.addWidget(self.setup_name_label)
         self.cat_layout.addWidget(self.setup_name)
         self.cat_layout.addWidget(self.cat_combo_box)
         self.cat_layout.addWidget(self.cact_combo_box)
         self.cat_layout.addWidget(self.add_cage_button)
 
-
-
         self.CAT.setLayout(self.cat_layout)
-        #self.add_cage_layout.addWidget(self.add_cage_table)
-        #self.add_cage_layout.addWidget(self.add_cage_button)
 
-        ##############################################################
-        ###############     Remove and update cages    ###############
-        ##############################################################
+    def _init_update_setup(self) -> None:
 
-
+        self.cage_manager_layout = QtGui.QHBoxLayout()  # main layout container
 
         self.remove_cage_button = QtGui.QPushButton('Remove setup')
         self.remove_cage_button.clicked.connect(self.remove_cage)
+
         self.update_cage_button = QtGui.QPushButton('Update Connected setup')
         self.update_cage_button.clicked.connect(self.update_setup)
 
@@ -62,42 +92,11 @@ class setups_tab(QtGui.QWidget):
         self.cage_summary_button = QtGui.QPushButton('Get setup Summary')
         self.cage_summary_button.clicked.connect(self.get_summary)
 
-
-        self.cage_manager_layout = QtGui.QHBoxLayout()
+    def _set_update_setup_layout(self) -> None:
         self.cage_manager_layout.addWidget(self.remove_cage_button)
         self.cage_manager_layout.addWidget(self.update_cage_button)
         self.cage_manager_layout.addWidget(self.check_beh_hardware_button)
         self.cage_manager_layout.addWidget(self.cage_summary_button)
-
-        ##############################################################
-        ###############   ---   Setup Tables   ----    ###############
-        ##############################################################
-
-        #Setups table
-        self.cage_table_label = QtGui.QLabel()
-        self.cage_table_label.setText("List of setups")
-
-        self.scrollable_cage = QtGui.QScrollArea()
-        self.scrollable_cage.setWidgetResizable(True)
-        self.scrollable_cage.horizontalScrollBar().setEnabled(False)
-
-
-        self.list_of_setups = cageTable(self.GUI,self)
-        self.scrollable_cage.setWidget(self.list_of_setups)
-
-        ##############################################################
-        ###############   ---   Setup Layout   ----    ###############
-        ##############################################################
-        self.Vlayout = QtGui.QVBoxLayout(self)
-        #self.Vlayout.addWidget(self.add_cage_button)
-        #self.Vlayout.addWidget(self.add_cage_table)
-        self.Vlayout.addWidget(self.CAT,1)
-
-        self.Vlayout.addWidget(self.cage_table_label,1)
-        self.Vlayout.addLayout(self.cage_manager_layout,1)
-
-        self.Vlayout.addWidget(self.scrollable_cage,15)
-
 
 
     def cbh(self):
@@ -114,7 +113,7 @@ class setups_tab(QtGui.QWidget):
             boxM.setText("You must be connected to a setup to update it")
             boxM.exec()
 
-        if sum(isChecked)==1:
+        if sum(isChecked) == 1:
             checked_row = isChecked.index(1)
             setup_col = self.list_of_setups.header_names.index("Setup_ID")
             checked_setup_id = self.list_of_setups.item(checked_row, setup_col).text()
@@ -125,7 +124,6 @@ class setups_tab(QtGui.QWidget):
         else:
             pass
             print('You must edit one setup at a time')
-
 
     def update_setup(self):
 
@@ -155,7 +153,6 @@ class setups_tab(QtGui.QWidget):
 
 
     def add_cage(self):
-        #print(database.setup_df)
 
         entry_nr = len(database.setup_df)
 
@@ -172,7 +169,6 @@ class setups_tab(QtGui.QWidget):
             COM_AC = self.cact_combo_box.itemText(self.cact_combo_box.currentIndex())
             database.setup_df.loc[entry_nr, 'COM_AC'] = COM_AC
 
-
             # get the name of the setup
             database.setup_df.loc[entry_nr, 'Setup_ID'] = self.setup_name.text()
 
@@ -180,28 +176,25 @@ class setups_tab(QtGui.QWidget):
 
         database.setup_df.to_csv(database.setup_df.file_location)
 
-
     def _refresh(self):
         """ find which training seutps are available """
+
         ports = find_setups()
-        ports = [i for i in ports if i not in (database.setup_df['COM'].tolist() + database.setup_df['COM_AC'].tolist())]   
+        ports = [i for i in ports if i not in (database.setup_df['COM'].tolist() + database.setup_df['COM_AC'].tolist())]
 
         prev = ['Select Training Setup'] + list(ports)
 
         new_prop_cat = [self.cat_combo_box.itemText(i) for i in range(self.cat_combo_box.count())]
-        #print(new_prop_cat)
-        if new_prop_cat!=prev:
-            print(new_prop_cat,prev)
+
+        if new_prop_cat != prev:
+            print(new_prop_cat, prev)
             self.cat_combo_box.clear()
             self.cact_combo_box.clear()
             tmp = [i for i in ports if i not in (database.setup_df['COM'].tolist() + database.setup_df['COM_AC'].tolist())]   
             self.cat_combo_box.addItems(['Select Training Setup'] + list(tmp))
             self.cact_combo_box.addItems(['Select Access Control'] + list(tmp))
 
-
-
         self.list_of_setups._refresh()
-
 
     def remove_cage(self):
         """ Remove cage from df and CSV file """

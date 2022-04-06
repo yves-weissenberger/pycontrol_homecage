@@ -519,9 +519,10 @@ class mouse_list_table(QtGui.QTableWidget):
 
 class cageTable(QtGui.QTableWidget):
     """ This table contains information about the setups curren """
-    def __init__(self, GUI, tab=None):
+    def __init__(self, tab=None):
         super(QtGui.QTableWidget, self).__init__(1,12, parent=None)
-        self.header_names = ['Select','Setup_ID','Connection','Experiment','Protocol','Mouse_training',
+        self.header_names = ['Select','Setup_ID','Connection','Experiment',
+                             'Protocol','Mouse_training',
                              'COM','COM_AC', 'in_use','connected', 'User',
                              'AC_state','Door_Mag','Door_Sensor',
                              'n_mice','mice_in_setup']
@@ -545,10 +546,10 @@ class cageTable(QtGui.QTableWidget):
         self.buttons = []
         for row_index, row in database.setup_df.iterrows():    
 
-            self.fill_row(row_index, row)
+            self.fill_table_row(row_index, row)
 
 
-    def fill_row(self, row_index, row):
+    def fill_table_row(self, row_index, row):
 
         self.populate_cells_from_database(row_index, row)
 
