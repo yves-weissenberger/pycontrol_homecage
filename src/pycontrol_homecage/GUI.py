@@ -148,6 +148,13 @@ class Visualizator(QtGui.QMainWindow):
         self.system_tab.user_groupbox.setEnabled(True)
         self.experiment_tab.setEnabled(False)
 
+    def _reset_tables(self):
+        self.system_tab.list_of_experiments.fill_table()
+        self.system_tab.list_of_setups.fill_table()
+        self.experiment_tab.list_of_experiments.fill_table()
+        self.mouse_window_tab.list_of_mice.fill_table()
+        self.setup_window_tab.list_of_setups.fill_table()
+
 
 if __name__ == "__main__":
 

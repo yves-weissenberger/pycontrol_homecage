@@ -41,11 +41,11 @@ class mouse_window(QtGui.QWidget):
         self.vars_hlayout1 = QtGui.QHBoxLayout(self)
         self.vars_vlayout1 = QtGui.QVBoxLayout(self)
 
-        self.vars_combo  = QtGui.QComboBox()
+        self.vars_combo = QtGui.QComboBox()
         self.vars_combo.addItems(['Filter by'] + self.filter_categories)
         self.vars_combo.activated.connect(self.update_available_vfilt)
 
-        self.vars_combo_sel  = QtGui.QComboBox()
+        self.vars_combo_sel = QtGui.QComboBox()
         self.vars_combo_sel.addItems([''])
 
         self.vars_update_button = QtGui.QPushButton('Update Variables')

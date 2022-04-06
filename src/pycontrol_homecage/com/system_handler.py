@@ -12,7 +12,7 @@ import pycontrol_homecage.db as database
 # from utils import find_prev_base
 
 from .data_logger import Data_logger
-
+from .access_control import Access_control
 
 class system_controller(Data_logger):
 
@@ -21,8 +21,7 @@ class system_controller(Data_logger):
         mice enter/exit the training apparatus. There is one system controller 
         for each homecage system.
     """
-    def __init__(self,GUI,print_func=print,data_consumers=[],setup_id=None):
-
+    def __init__(self, GUI, print_func = print, data_consumers = [],setup_id=None):
 
         self.GUI = GUI
         self.on = True
@@ -40,11 +39,9 @@ class system_controller(Data_logger):
 
         self.print_queue = Queue()
 
-
-
     def _reset_mouse_data(self) -> None:
-        #dict to store data about mice as they are going through
-        #the access control system
+        # dict to store data about mice as they are going through
+        # the access control system
         self.mouse_data = {'weight': None,
                            'RFID': None,
                            'entry_time': None,
@@ -52,7 +49,7 @@ class system_controller(Data_logger):
                            'task': None
                            }
 
-    def add_AC(self, ac) -> None:
+    def add_AC(self, ac: Access_control) -> None:
 
         self.AC = ac
         self.has_AC = True
@@ -71,8 +68,8 @@ class system_controller(Data_logger):
     def disconnect(self):
         """ This needs to be done for when we have multiple setups """
 
-        self.PYC.close() # This closes the connection to the behaviour board
-        self.AC.close()  # This closes the connection to AC board by pyboard class
+        self.PYC.close()  # This closes the connection to the behaviour board
+        self.AC.close()   # This closes the connection to AC board by pyboard class
 
 
     def check_for_data(self):

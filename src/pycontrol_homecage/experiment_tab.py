@@ -106,12 +106,7 @@ class experiment_tab(QtGui.QWidget):
         return checked_ids[0] if checked_ids else None
 
     def _reset_tables(self):
-        self.GUI.system_tab.list_of_experiments.fill_table()
-        self.GUI.system_tab.list_of_setups.fill_table()
-
-        self.GUI.experiment_tab.list_of_experiments.fill_table()
-        self.GUI.mouse_window_tab.list_of_mice.fill_table()
-        self.GUI.setup_window_tab.list_of_setups.fill_table()
+        self.parent._reset_tables()
 
     def _update_mice(self, mice_in_exp: List[str], assigned: bool = False):
 

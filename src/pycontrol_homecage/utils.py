@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 import os
 import re
 
@@ -42,6 +42,7 @@ class TableCheckbox(QtGui.QWidget):
 
 # --------------------------------------------------------------------------------
 
+
 def cbox_update_options(cbox, options):
     '''Update the options available in a qcombobox without changing the selection.'''
     selected = str(cbox.currentText())
@@ -58,8 +59,8 @@ def cbox_set_item(cbox, item_name, insert=False) -> bool:
     is True.'''
     index = cbox.findText(item_name, QtCore.Qt.MatchFixedString)
     if index >= 0:
-         cbox.setCurrentIndex(index)
-         return True
+        cbox.setCurrentIndex(index)
+        return True
     else:
         if insert:
             cbox.insertItem(0, item_name)
@@ -69,80 +70,81 @@ def cbox_set_item(cbox, item_name, insert=False) -> bool:
             return False
 # ----------------------------------------------------------------------------------
 
-def get_pyhomecage_email() -> Tuple[str, str]:
-    lines_ = open(user_path,'r').readlines()
-    sender_email =  re.findall('"(.*)"',[l_ for l_ in lines_ if 'system_email' in l_][0])[0]
-    password = re.findall('"(.*)"',[l_ for l_ in lines_ if 'password' in l_][0])[0]
 
+def get_pyhomecage_email() -> Tuple[str, str]:
+    lines_ = open(user_path, 'r').readlines()
+    sender_email = re.findall('"(.*)"', [l_ for l_ in lines_ if 'system_email' in l_][0])[0]
+    password = re.findall('"(.*)"', [l_ for l_ in lines_ if 'password' in l_][0])[0]
     return sender_email, password
+
 
 def find_setups(GUI: QtGui.QMainWindow):
 
-    #print(list_ports.comports())
     ports = list(set([c[0] for c in list_ports.comports() if ('Pyboard' in c[1]) or ('USB Serial Device' in c[1])]))
-    #ports =[i for i in ports if i not in GUI.setup_df['COM'].tolist()]
     return ports
+
 
 def get_variables_from_taskfile(pth: str) -> List[str]:
     "Helper function to scan python script and return variables in that script"
-    with open(pth,'r') as f:
+    with open(pth, 'r') as f:
         txt = f.read()
-    #print(txt)
-    variables = re.findall(r'(v\.[^\s ]*) {0,2}=',txt)
+
+    variables = re.findall(r'(v\.[^\s ]*) {0,2}=', txt)
     variables = list(set(variables))
     return variables
 
 
 def get_variables_and_values_from_taskfile(pth: str) -> dict[str, str]:
     "Helper function to scan python script and return variables in that script"
-    with open(pth,'r') as f:
+    with open(pth, 'r') as f:
         txt = f.readlines()
+
     var_dict = {}
-    for l in txt:
-        if ('v.' in l) and ('=' in l):
-            var_ = re.findall(r'(v\.[^\s]*)',l)[0].strip()
-            val_ = re.findall(r'v\..*=(.*)[#|\n]',l)[0]
+    for line in txt:
+        if ('v.' in line) and ('=' in line):
+            var_ = re.findall(r'(v\.[^\s]*)', line)[0].strip()
+            val_ = re.findall(r'v\..*=(.*)[#|\n]', line)[0]
             var_dict[var_] = val_
-        if 'run_start' in l:
+        if 'run_start' in line:
             break
-        
+
     return var_dict
 
+
 def get_users() -> List[str]:
-    dat = open(user_path,'r').readlines()
-    #users = [i.readline() for i in users]
-    user_dat =  [re.findall(r'({.*})',l_)[0] for l_ in dat if 'user_data' in l_]
-    user_dict_list = [eval(i) for i in user_dat]   
-    user_dict = {k: v for d in user_dict_list for k, v in d.items()}   
+    dat = open(user_path, 'r').readlines()
+    user_dat = [re.findall(r'({.*})', l_)[0] for l_ in dat if 'user_data' in l_]
+    user_dict_list = [eval(i) for i in user_dat]
+    user_dict = {k: v for d in user_dict_list for k, v in d.items()}
     users = list(user_dict.keys())
     return users
 
 
 def get_user_dicts() -> dict[str, str]:
-    dat = open(user_path,'r').readlines()
-    #users = [i.readline() for i in users]
-    user_dat =  [re.findall(r'({.*})',l_)[0] for l_ in dat if 'user_data' in l_]
-    user_dict_list = [eval(i) for i in user_dat]   
-    user_dict = {k: v for d in user_dict_list for k, v in d.items()}   
-    users = list(user_dict.keys())
+    dat = open(user_path, 'r').readlines()
+
+    user_dat = [re.findall(r'({.*})', l_)[0] for l_ in dat if 'user_data' in l_]
+    user_dict_list = [eval(i) for i in user_dat]
+    user_dict = {k: v for d in user_dict_list for k, v in d.items()}
     return user_dict
+
 
 def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
-    ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
-    fp = os.path.join(task_dir,'tasks.csv')
+    ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = all_paths
+    fp = os.path.join(task_dir, 'tasks.csv')
     task_df = pd.read_csv(fp)
     task_df.file_location = fp
 
-    fp = os.path.join(experiment_dir,'experiments.csv')
+    fp = os.path.join(experiment_dir, 'experiments.csv')
     exp_df = pd.read_csv(fp)
     exp_df.file_location = fp
 
-    fp = os.path.join(setup_dir,'setups.csv')
+    fp = os.path.join(setup_dir, 'setups.csv')
     setup_df = pd.read_csv(fp)
     setup_df.file_location = fp
 
-    fp = os.path.join(mice_dir,'mice.csv')
+    fp = os.path.join(mice_dir, 'mice.csv')
     mouse_df = pd.read_csv(fp)
     mouse_df.file_location = fp
 
@@ -155,25 +157,24 @@ def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFr
 
 def get_tasks(GUI_fp: str) -> List[str]:
     """ Function to read available tasks from the tasks folder """
-    
-    task_dir = os.path.join(GUI_fp,'tasks')
-    tasks =  [t.split('.')[0] for t in os.listdir(task_dir) if t[-3:] == '.py']
+
+    task_dir = os.path.join(GUI_fp, 'tasks')
+    tasks = [t.split('.')[0] for t in os.listdir(task_dir) if t[-3:] == '.py']
     return tasks
 
 
 def find_prev_base(dat) -> float:
-    """Find most recent baseline weight (going back in time). This is 
+    """Find most recent baseline weight (going back in time). This is
        to account for drift in the system. Gets the 5 most recent baseline
        measurements
     """
-
-    store= []
+    store = []
     wbase = 0
-    for line in reversed(dat): #start at the end and work through the lines
-        tmp = re.findall(r'Wbase:([0-9]*\.[0-9]*)_',line)
+    for line in reversed(dat):  # start at the end and work through the lines
+        tmp = re.findall(r'Wbase:([0-9]*\.[0-9]*)_', line)
         if tmp:
             store.append(float(tmp[0]))
-            if len(store)>5:
+            if len(store) > 5:
                 break
 
     wbase = np.mean(store)

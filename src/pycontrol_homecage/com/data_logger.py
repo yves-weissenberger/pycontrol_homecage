@@ -2,8 +2,8 @@ import os
 from datetime import datetime
 
 
-class Data_logger():
-    '''Class for logging data from a pyControl setup to disk'''
+class Data_logger:
+    """Class for logging data from a pyControl setup to disk """
 
     def __init__(self, sm_info=None, print_func=None, data_consumers=[], GUI=None):
         self.data_file = None
@@ -13,19 +13,29 @@ class Data_logger():
         if sm_info:
             self.set_state_machine(sm_info)
 
-    def set_state_machine(self, sm_info):
+    def set_state_machine(self, sm_info: dict):
+        """"""
         self.sm_info = sm_info
         self.ID2name_fw = self.sm_info['ID2name']      # Dict mapping framework IDs to names.
         self.ID2name_hw = {ai['ID']: name for name, ai # Dict mapping hardware IDs to names.
                            in self.sm_info['analog_inputs'].items()}
         self.analog_files = {ai['ID']: None for ai in self.sm_info['analog_inputs'].values()}
 
-    def open_data_file(self, data_dir, experiment_name, subject_ID, datetime_now=None):
-        '''Open data file and write header information.'''
+    def open_data_file(self, data_dir: str, experiment_name: str, subject_ID: str, datetime_now: datetime.datetime = None):
+        """Opens the data to which data from a behavioural session will be written and write 
+           session metadata to that file
+
+        Args:
+            data_dir (str): the directory in which the file is to be located
+            experiment_name (str): name of the experiment
+            subject_ID (str): 
+            datetime_now (datetime.datetime, optional): _description_. Defaults to None.
+        """
         self.data_dir = data_dir
         self.experiment_name = experiment_name
         self.subject_ID = subject_ID
-        if datetime_now is None: datetime_now = datetime.now()
+        if datetime_now is None: 
+            datetime_now = datetime.now()
         file_name = os.path.join(self.subject_ID + datetime_now.strftime('-%Y-%m-%d-%H%M%S') + '.txt')
         self.file_path = os.path.join(self.data_dir, file_name)
         self.data_file = open(self.file_path, 'w', newline = '\n')
@@ -33,8 +43,8 @@ class Data_logger():
         self.data_file.write('I Task name : {}\n'.format(self.sm_info['name']))
         self.data_file.write('I Subject ID : {}\n'.format(self.subject_ID))
         self.data_file.write('I Start date : ' + datetime_now.strftime('%Y/%m/%d %H:%M:%S') + '\n\n')
-        self.data_file.write('S {}\n\n'.format(self.sm_info['states'] ))
-        self.data_file.write('E {}\n\n'.format(self.sm_info['events'] ))
+        self.data_file.write('S {}\n\n'.format(self.sm_info['states']))
+        self.data_file.write('E {}\n\n'.format(self.sm_info['events']))
 
     def close_files(self):
         if self.data_file:
@@ -47,7 +57,7 @@ class Data_logger():
                 analog_file = None
 
     def process_data(self, new_data):
-        '''If data _file is open new data is written to file.  If print_func is specified
+        '''If data _file is open new data is written to the present file.  If print_func is specified
         human readable data strings are passed to it.'''
         if self.data_file:
             self.write_to_file(new_data)
@@ -72,16 +82,16 @@ class Data_logger():
         data_string = ''
         for nd in new_data:
             if nd[0] == 'D':  # State entry or event.
-                    if verbose: # Print state or event name.
+                    if verbose:   # Print state or event name.
                         data_string += 'D {} {}\n'.format(nd[1], self.ID2name_fw[nd[2]])
                     else:       # Print state or event ID.
                         data_string += 'D {} {}\n'.format(nd[1], nd[2])
-            elif nd[0] in ('P', 'V'): # User print output or set variable.
+            elif nd[0] in ('P', 'V'):   # User print output or set variable.
                 data_string += '{} {} {}\n'.format(*nd)
-            elif nd[0] == '!': # Error
+            elif nd[0] == '!':   # Error
                 error_string = nd[1]
                 if not verbose:
-                    error_string = '! ' +error_string.replace('\n', '\n! ')
+                    error_string = '! ' + error_string.replace('\n', '\n! ')
                 data_string += '\n' + error_string + '\n'
         return data_string
 

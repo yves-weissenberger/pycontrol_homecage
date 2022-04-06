@@ -93,11 +93,10 @@ class Access_control(Pyboard):
         #self.exec('run()')
         print("OK")
 
-
     def process_data(self):
         """ Here process data from buffer to update dataframes """
-        ## Just send each message as being 16 characters long. That way
-        ## can just check padding. Should be fine
+        # Just send each message as being 16 characters long. That way
+        # can just check padding. Should be fine
 
         #requires GUI, or other object with access to dataframes to be here
 

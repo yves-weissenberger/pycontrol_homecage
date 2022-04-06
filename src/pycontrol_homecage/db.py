@@ -11,6 +11,7 @@ this.task_df, this.exp_df, this.setup_df, this.mouse_df = load_data_csv()
 this.controllers = {}
 this.connected_boards = []
 this.connected_access_controls = []
+this.updated = False
 
 ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = all_paths
 
@@ -23,3 +24,30 @@ this.paths = {'ROOT': ROOT,
               'AC_logger_dir': AC_logger_dir,
               'protocol_dir': protocol_dir
               }
+
+
+class pycontrol_homecage_database:
+
+    def __init__(self) -> None:
+        self.has_been_updated = True
+
+    def update_table_row(self, table_name: str, column_name: str, new_value: object, row_identifier: object, row_id_value: object) -> None:
+        pass
+
+    def add_table_row(self, table: str, row) -> None:
+        pass
+
+    def add_table_rows(self) -> None:
+        pass
+
+    def write_tables_to_file(self) -> None:
+        pass
+
+    def add_controller(self) -> None:
+        pass
+
+    def add_access_control_board(self) -> None:
+        pass
+
+    def add_pycontrol_board(self) -> None:
+        pass

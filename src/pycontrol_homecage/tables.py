@@ -15,30 +15,30 @@ from pycontrol_homecage.com.pycboard import PyboardError, Pycboard, _djb2_file
 from pycontrol_homecage.com.system_handler import system_controller
 from pycontrol_homecage.dialogs import calibrate_dialog
 from pycontrol_homecage.utils import (TableCheckbox, cbox_set_item, cbox_update_options,
-                                        find_setups, get_tasks, null_resize)
+                                      find_setups, get_tasks, null_resize)
 import pycontrol_homecage.db as database
 
-#######################################################################
-####################      Experiment Table      #######################
-#######################################################################
+# ######################################################################
+# ###################      Experiment Table      #######################
+# ######################################################################
 
 
 class variables_table(QtGui.QTableWidget):
     " Table that tracks what variables a mouse currently running in a task has"
 
-    def __init__(self, GUI: QtGui.QMainWindow, parent=None):
+    def __init__(self, GUI: QtGui.QMainWindow, parent = None):
         super(QtGui.QTableWidget, self).__init__(1, 7, parent=parent)
-        self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent','Summary','Set',''])
+        self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent', 'Summary', 'Set', ''])
         self.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
         self.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.Stretch)
         self.horizontalHeader().setResizeMode(5, QtGui.QHeaderView.ResizeToContents)
         self.verticalHeader().setVisible(False)
         add_button = QtGui.QPushButton('   add   ')
-        self.setCellWidget(0,5, add_button)
+        self.setCellWidget(0, 5, add_button)
         self.n_variables = 0
         self.variable_names = []
         self.available_variables = []
-        self.assigned = {v_name:[] for v_name in self.variable_names} # Which subjects have values assigned for each variable.
+        self.assigned = {v_name: [] for v_name in self.variable_names}  # Which subjects have values assigned for each variable.
         self.subject_variable_names = {}
 
     def remove_variable(self, variable_n: int) -> None:
@@ -52,11 +52,9 @@ class variables_table(QtGui.QTableWidget):
         for i in reversed(range(self.n_variables)):
             self.removeRow(i)
         self.n_variables = 0
-        self.assigned = {v_name:[] for v_name in self.variable_names} 
-        #self.subject_variable_names = {}
-        #self.variable_names = []
+        self.assigned = {v_name: [] for v_name in self.variable_names} 
 
-    def add_variable(self, var_dict: dict=None) -> None:
+    def add_variable(self, var_dict: dict = None) -> None:
 
         '''Add a row to the variables table.'''
         variable_cbox = QtGui.QComboBox()
@@ -64,11 +62,11 @@ class variables_table(QtGui.QTableWidget):
         subject_cbox = QtGui.QComboBox()
         subject_cbox.activated.connect(self.update_available)
         persistent = TableCheckbox()
-        summary    = TableCheckbox()
+        summary = TableCheckbox()
         set_var = TableCheckbox()
         
-        set_var.checkbox.stateChanged.connect(partial(self.setVar_changed,self.n_variables))
-        persistent.checkbox.stateChanged.connect(partial(self.persistent_changed,self.n_variables))
+        set_var.checkbox.stateChanged.connect(partial(self.setVar_changed, self.n_variables))
+        persistent.checkbox.stateChanged.connect(partial(self.persistent_changed, self.n_variables))
         remove_button = QtGui.QPushButton('remove')
         ind = QtCore.QPersistentModelIndex(self.model().index(self.n_variables, 2))
         remove_button.clicked.connect(lambda :self.remove_variable(ind.row()))
@@ -108,52 +106,52 @@ class variables_table(QtGui.QTableWidget):
         self.cellWidget(row,5).setChecked(False)
         self.item(row,2).setText("auto")
 
-    def setVar_changed(self,row: int) -> None:
-        self.cellWidget(row,3).setChecked(False)
+    def setVar_changed(self, row: int) -> None:
+        self.cellWidget(row, 3).setChecked(False)
 
     def update_available(self, i=None):
-            # Find out what variable-subject combinations already assigned.
-            self.assigned = {v_name:[] for v_name in self.variable_names}
+        # Find out what variable-subject combinations already assigned.
+        self.assigned = {v_name: [] for v_name in self.variable_names}
 
+        # to maintain consistency with main pycontrol, the way this works
+        # is by setting variables assigned that 
+        for v_name in self.variable_names:
+            for subject, vars_ in self.subject_variable_names.items():
 
-            #to maintain consistency with main pycontrol, the way this works
-            #is by setting variables assigned that 
-            for v_name in self.variable_names:
-                for subject,vars_ in self.subject_variable_names.items():
+                if v_name not in vars_:
+                    self.assigned[v_name].append(subject)
 
-                    if v_name not in vars_:
-                        self.assigned[v_name].append(subject)
+        # print(self.assigned)
+        for v in range(self.n_variables):
+            v_name = self.cellWidget(v, 0).currentText()
+            s_name = self.cellWidget(v, 1).currentText()
+            if s_name and s_name not in self.subjects_in_group + ['all']:
+                cbox_set_item(self.cellWidget(v, 1), '', insert=True)
+                continue
+            if v_name != 'select variable' and s_name:
+                self.assigned[v_name].append(s_name)
+        # Update the variables available:
+        fully_asigned_variables = [v_n for v_n in self.assigned.keys()
+                                   if 'all' in self.assigned[v_n]]
+        if self.subjects_in_group:
+            fully_asigned_variables += [v_n for v_n in self.assigned.keys()
+                                        if set(self.assigned[v_n]) == set(self.subjects_in_group)]
+        self.available_variables = sorted(list(
+            set(self.variable_names) - set(fully_asigned_variables)), key=str.lower)
+        # Update the available options in the variable and subject comboboxes.
 
-            #print(self.assigned)
-            for v in range(self.n_variables):
-                v_name = self.cellWidget(v,0).currentText()
-                s_name = self.cellWidget(v,1).currentText()
-                if s_name and s_name not in self.subjects_in_group + ['all']:
-                    cbox_set_item(self.cellWidget(v,1),'', insert=True)
-                    continue
-                if v_name != 'select variable' and s_name:
-                    self.assigned[v_name].append(s_name)
-            # Update the variables available:
-            fully_asigned_variables = [v_n for v_n in self.assigned.keys()
-                                       if 'all' in self.assigned[v_n]]
-            if self.subjects_in_group:
-                fully_asigned_variables += [v_n for v_n in self.assigned.keys()
-                    if set(self.assigned[v_n]) == set(self.subjects_in_group)]
-            self.available_variables = sorted(list(
-                set(self.variable_names) - set(fully_asigned_variables)), key=str.lower)
-            # Update the available options in the variable and subject comboboxes.
-            for v in range(self.n_variables):  
-                v_name = self.cellWidget(v,0).currentText()
-                s_name = self.cellWidget(v,1).currentText()
-                cbox_update_options(self.cellWidget(v,0), self.available_variables)
-                if v_name != 'select variable':
-                    # If variable has no subjects assigned, set subjects to 'all'.
-                    if not self.assigned[v_name]:
-                        self.cellWidget(v,1).addItems(['all'])
-                        self.assigned[v_name] = ['all']
-                        self.available_variables.remove(v_name)
-                    cbox_update_options(self.cellWidget(v,1), self.available_subjects(v_name, s_name))
-    
+        for v in range(self.n_variables):
+            v_name = self.cellWidget(v, 0).currentText()
+            s_name = self.cellWidget(v, 1).currentText()
+            cbox_update_options(self.cellWidget(v, 0), self.available_variables)
+            if v_name != 'select variable':
+                # If variable has no subjects assigned, set subjects to 'all'.
+                if not self.assigned[v_name]:
+                    self.cellWidget(v, 1).addItems(['all'])
+                    self.assigned[v_name] = ['all']
+                    self.available_variables.remove(v_name)
+                cbox_update_options(self.cellWidget(v, 1), self.available_subjects(v_name, s_name))
+
     def set_available_subjects(self, subjects: List[str]):
         self.subjects_in_group = subjects
 
@@ -162,58 +160,60 @@ class variables_table(QtGui.QTableWidget):
         if not self.variable_names:
             self.variable_names = variable_names
         else:
-            #print(self.variable_names,variable_names)
+            # print(self.variable_names,variable_names)
             self.variable_names.extend(variable_names)
             self.variable_names = list(set(self.variable_names))
 
-
-    def set_variable_names_by_subject(self,subject: str,variable_names: List[str]):
+    def set_variable_names_by_subject(self, subject: str, variable_names: List[str]) -> None:
         """ Allow tracking of which subject has which variables available
             to them in principle
         """
         self.subject_variable_names[subject] = variable_names
 
-
     def available_subjects(self, v_name, s_name=None):
-        '''Return sorted list of the subjects that are available for selection 
+        '''Return sorted list of the subjects that are available for selection
         for the specified variable v_name given that subject s_name is already
         selected.'''
         if (not self.assigned[v_name]) or self.assigned[v_name] == [s_name]:
-            available_subjects = ['all']+ sorted(self.subjects_in_group)
+            available_subjects = ['all'] + sorted(self.subjects_in_group)
         else:
-            available_subjects = sorted(list(set(self.subjects_in_group)-
+            available_subjects = sorted(list(set(self.subjects_in_group) -
                                              set(self.assigned[v_name])))
         return available_subjects
 
     def variables_list(self):
         '''Return the variables table contents as a list of dictionaries.'''
-        return [{'name'  : str(self.cellWidget(v,0).currentText()),
-                 'subject'   : str(self.cellWidget(v,1).currentText()),
-                 'value'     : str(self.item(v, 2).text()) if self.item(v,2) else '',
-                 'persistent': self.cellWidget(v,3).isChecked(),
-                 'summary'   : self.cellWidget(v,4).isChecked(),
-                 'set'       : self.cellWidget(v,5).isChecked()}
+        return [{'name'  : str(self.cellWidget(v, 0).currentText()),
+                 'subject'   : str(self.cellWidget(v, 1).currentText()),
+                 'value'     : str(self.item(v, 2).text()) if self.item(v, 2) else '',
+                 'persistent': self.cellWidget(v, 3).isChecked(),
+                 'summary'   : self.cellWidget(v, 4).isChecked(),
+                 'set'       : self.cellWidget(v, 5).isChecked()}
                  for v in range(self.n_variables)]
 
 
 class experiment_overview_table(QtGui.QTableWidget):
     " Table for system tab that shows all experiments currently running"
 
-    def __init__(self, GUI, tab=None,only_active=False,parent=None):
-        super(QtGui.QTableWidget, self).__init__(1,7, parent=parent)
-        self.header_names = ['Select','Name','Setups','User','Active','Protocol','Subjects','n_subjects']
+    def __init__(self, only_active: bool = False, parent=None):
 
-        self.tab = tab
-        self.GUI = GUI
-        self.setHorizontalHeaderLabels(self.header_names)
+        super(QtGui.QTableWidget, self).__init__(1, 7, parent=parent)
 
-        self.verticalHeader().setVisible(False)
-        self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
+        self.header_names = ['Select', 'Name', 'Setups', 'User', 
+                             'Active', 'Protocol', 'Subjects',
+                             'n_subjects'
+                             ]
+        self._set_headers()
         self.only_active = only_active
 
-        self.select_nr = self.header_names.index("Select")
-
         self.fill_table()
+
+    def _set_headers(self):
+
+        self.setHorizontalHeaderLabels(self.header_names)
+        self.verticalHeader().setVisible(False)
+        self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
+        self.select_nr = self.header_names.index("Select")
 
     def fill_table(self):
 
@@ -249,7 +249,7 @@ class protocol_table(QtGui.QTableWidget):
 
     def __init__(self, GUI, tab, nRows=None, parent=None):
 
-        super(QtGui.QTableWidget, self).__init__(1,6, parent=parent)
+        super(QtGui.QTableWidget, self).__init__(1, 6, parent=parent)
         self.set_headers()
         if nRows:
             self.setRowCount(nRows)
@@ -269,35 +269,29 @@ class protocol_table(QtGui.QTableWidget):
         for h_ix in range(len(self.header_names)-1):
             self.horizontalHeader().setResizeMode(h_ix, QtGui.QHeaderView.Stretch)
 
-    def fill_table(self,dat):
+    def fill_table(self, dat):
         " Here pass prot_dict"
 
         self.nRows = len(dat)
 
-
         self.clear()
         self.setHorizontalHeaderLabels(self.header_names)
         self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
-        for i in range(1,len(self.header_names)-1):
+        for i in range(1, len(self.header_names)-1):
             self.horizontalHeader().setResizeMode(i, QtGui.QHeaderView.Stretch)
 
         if self.nRows:
             self.setRowCount(self.nRows)
 
         for k in dat.keys():
-            self.fill_row(dat[k],row=int(k))
+            self.fill_row(dat[k], row=int(k))
 
-            
-
-
-    def fill_row(self,dat,row=None):
+    def fill_row(self, dat, row=None):
         "Here pass "
 
         if not row:
             row = 0
             self.reset_()
-
-            
 
         for k in dat.keys():
             if ('thresh' in k) or ('default' in k):
@@ -305,35 +299,34 @@ class protocol_table(QtGui.QTableWidget):
             else:
                 Vtmp = Qt.QtWidgets.QTableWidgetItem(str(dat[k]))
 
-            if k=='threshV':
-                self.setItem(row,self.header_names.index('Threshold(s)'),Vtmp)
-            elif k=='defaultV':
-                self.setItem(row,self.header_names.index('Default(s)'),Vtmp)
-            elif k=='trackV':
-                self.setItem(row,self.header_names.index('Tracked'),Vtmp)
-            elif k=='stage_nr':
-                self.setItem(row,self.header_names.index('Stage'),Vtmp)
-            elif k=='task':
-                self.setItem(row,self.header_names.index('Task'),Vtmp)
+            if k == 'threshV':
+                self.setItem(row, self.header_names.index('Threshold(s)'), Vtmp)
+            elif k == 'defaultV':
+                self.setItem(row, self.header_names.index('Default(s)'), Vtmp)
+            elif k == 'trackV':
+                self.setItem(row, self.header_names.index('Tracked'), Vtmp)
+            elif k == 'stage_nr':
+                self.setItem(row, self.header_names.index('Stage'), Vtmp)
+            elif k == 'task':
+                self.setItem(row, self.header_names.index('Task'), Vtmp)
 
         self.resizeRowToContents(row)
 
-
-    def _translate(self,x):
+    def _translate(self, x):
         ret = ''
         if len(x):
             for x_ in x:
                 ret = ret + str(x_[0]) + ': ' + str(x_[1]) + '\n'
         return ret
 
-
     def reset_(self):
 
         self.clear()
         self.setHorizontalHeaderLabels(self.header_names)
         self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
-        for i in range(1,len(self.header_names)-1):
-                self.horizontalHeader().setResizeMode(i, QtGui.QHeaderView.Stretch)
+
+        for i in range(1, len(self.header_names)-1):
+            self.horizontalHeader().setResizeMode(i, QtGui.QHeaderView.Stretch)
 
         if self.nRows:
             self.setRowCount(self.nRows)
@@ -472,8 +465,6 @@ class cage_list_table(QtGui.QTableWidget):
 
             else:
                 self.tab.MICE.setEnabled(False)
-
-
 
             if len(self.selected_setups)>1:
 
@@ -627,7 +618,7 @@ class cageTable(QtGui.QTableWidget):
             print(e, flush=True)
             print("Failed to connect", flush=True)
 
-    def _fill_setup_df_row(self,send_name):
+    def _fill_setup_df_row(self, send_name):
         " Just fill that row of the df"
         _, com_, _ = send_name
         database.setup_df['connected'].loc[database.setup_df['COM']==com_] = True
