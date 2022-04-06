@@ -14,6 +14,7 @@ import pycontrol_homecage.db as database
 from .data_logger import Data_logger
 from .access_control import Access_control
 
+
 class system_controller(Data_logger):
 
     """ This is a class that sits on top of access control and pycboard classes
@@ -21,7 +22,7 @@ class system_controller(Data_logger):
         mice enter/exit the training apparatus. There is one system controller 
         for each homecage system.
     """
-    def __init__(self, GUI, print_func = print, data_consumers = [],setup_id=None):
+    def __init__(self, GUI, print_func = print, data_consumers: list = [], setup_id=None):
 
         self.GUI = GUI
         self.on = True
@@ -71,13 +72,11 @@ class system_controller(Data_logger):
         self.PYC.close()  # This closes the connection to the behaviour board
         self.AC.close()   # This closes the connection to AC board by pyboard class
 
-
     def check_for_data(self):
         " check whether either AC or the PYC board have data to deliver "
         if self.active:
             self.AC.process_data()
-            self.PYC.process_data()  #process data
-
+            self.PYC.process_data()  # process data
 
     def process_data(self, new_data):
         '''If data _file is open new data is written to file.  If print_func is specified
@@ -88,15 +87,17 @@ class system_controller(Data_logger):
             for data_consumer in self.data_consumers:
                 data_consumer.process_data(new_data)
 
-        self.GUI.print_msg(new_data,ac_pyc='pyc')
-                
-    def process_data_AC(self,new_data):
+        self.GUI.print_msg(new_data, ac_pyc='pyc')
+
+    def process_data_AC(self, new_data):
 
         """ Here process the data from the access control system to 
             actually do stuff: open/close files, update csv files with
             weights etc
 
         """
+
+        # the time at which the data was received
         now = datetime.now().strftime('%Y-%m-%d-%H%M%S')
 
         exp_running_now = database.setup_df.loc[database.setup_df['COM'] == self.PYC.serial_port]['Experiment'].values
@@ -109,7 +110,7 @@ class system_controller(Data_logger):
                     pass
                 else:
                     if 'state' in msg: 
-                        self.process_ac_state(msg[6:],now)
+                        self.process_ac_state(msg[6:], now)
                     if 'RFID' in msg:
                         self.mouse_data['RFID'] = int(msg.strip('RFID:'))
                     if 'weight' in msg:
@@ -143,6 +144,7 @@ class system_controller(Data_logger):
             # This guards the state changing to to check_mouse_in_ac (i.e. when the mouse starts to leave)
             # but then then decides to back into training chamber so state changes back to 'mouse_training'
             mouse_just_entered = self.data_file is None
+
             if mouse_just_entered:
                 
 
@@ -168,13 +170,9 @@ class system_controller(Data_logger):
 
                     self.PYC.start_framework()
 
-                    database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'Current_weight'] = self.mouse_data['weight']
-                    database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = True
-                    database.setup_df.loc[database.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = mouse_ID
-
+                    self._update_database_on_entry(self.mouse_data['weight'], mouse_ID)
                     self.GUI.setup_window_tab.list_of_setups.fill_table()
                     self.GUI.system_tab.list_of_setups.fill_table()
-
 
         elif state == 'allow_exit':
             self.mouse_data['exit_time'] = datetime.now().strftime('%Y-%m-%d-%H%M%S')
@@ -185,7 +183,20 @@ class system_controller(Data_logger):
                 self.PYC.process_data()
                 self.close_files()
 
-    def run_mouse_task(self, mouse_info: pd.Series)->str:
+    def _update_database_on_entry(self, mouse_weight: float, mouse_ID: str):
+        """When a mouse enters the training chamber, update the setup_df and the
+           mouse_df to reflect this
+
+        Args:
+            mouse_weight (float)
+            mouse_ID (str)
+        """
+        database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID'], 'Current_weight'] = self.mouse_data['weight']
+        database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID'], 'is_training'] = True
+        database.setup_df.loc[database.setup_df['COM'] == self.PYC.serial_port, 'Mouse_training'] = mouse_ID
+
+
+    def run_mouse_task(self, mouse_info: pd.Series) -> str:
         task = mouse_info['Task'].values[0]
         self.GUI.print_msg("Uploading: " + str(task), ac_pyc='pyc')
 
@@ -194,25 +205,24 @@ class system_controller(Data_logger):
         if not pd.isnull(mouse_info['set_variables'].values):
             set_variables = eval(mouse_info['set_variables'].values[0])
             if set_variables:
-                for k,v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
+                for k, v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
         
         if not pd.isnull(mouse_info['persistent_variables'].values):
             persistent_variables = eval(mouse_info['persistent_variables'].values[0])
             if persistent_variables:
-                for k,v in persistent_variables.items(): 
-                    if v!='auto':
-                        self.PYC.set_variable(k[2:],eval(v))
-
+                for k, v in persistent_variables.items():
+                    if v != 'auto':
+                        self.PYC.set_variable(k[2:], eval(v))
 
     def run_mouse_protocol(self, mouse_info: pd.Series)->str:
         # If running a real protocol, handle (potential) update of protocol.
         newStage = False
         stage = mouse_info['Stage'].values[0]
-        with open(os.path.join(protocol_dir,prot),'r') as f:
+        with open(os.path.join(protocol_dir, prot), 'r') as f:
             mouse_prot = json.loads(f.read())
 
         #read last stage of training
-        logPth = os.path.join(mice_dir,mouse_ID+'.csv')
+        logPth = os.path.join(mice_dir, mouse_ID + '.csv')
         df_mouseLog = pd.read_csv(logPth)
 
         if len(df_mouseLog)>0:

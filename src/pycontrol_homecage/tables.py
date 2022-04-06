@@ -7,6 +7,7 @@ import numpy as np
 from pyqtgraph import Qt
 from pyqtgraph.Qt import QtCore, QtGui
 from serial import SerialException
+import pandas as pd
 
 from pycontrol_homecage.com.access_control import Access_control
 ##### TA code imports
@@ -26,7 +27,7 @@ import pycontrol_homecage.db as database
 class variables_table(QtGui.QTableWidget):
     " Table that tracks what variables a mouse currently running in a task has"
 
-    def __init__(self, GUI: QtGui.QMainWindow, parent = None):
+    def __init__(self, parent = None):
         super(QtGui.QTableWidget, self).__init__(1, 7, parent=parent)
         self.setHorizontalHeaderLabels(['Variable', 'Subject', 'Value', 'Persistent', 'Summary', 'Set', ''])
         self.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
@@ -213,7 +214,7 @@ class experiment_overview_table(QtGui.QTableWidget):
         self.setHorizontalHeaderLabels(self.header_names)
         self.verticalHeader().setVisible(False)
         self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
-        self.select_nr = self.header_names.index("Select")
+        self.select_col_ix = self.header_names.index("Select")
 
     def fill_table(self):
 
@@ -225,7 +226,7 @@ class experiment_overview_table(QtGui.QTableWidget):
 
         self.buttons = []
         row_index = 0
-        for _, row in database.exp_df.iterrows():    
+        for _, row in database.exp_df.iterrows():
             if ((not self.only_active) or (self.only_active and row['Active'])):
                 for col_index in range(self.columnCount()):
 
@@ -239,7 +240,7 @@ class experiment_overview_table(QtGui.QTableWidget):
                 chkBoxItem = QtGui.QTableWidgetItem()
                 chkBoxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
                 chkBoxItem.setCheckState(QtCore.Qt.Unchecked)
-                self.setItem(row_index, self.select_nr, chkBoxItem)
+                self.setItem(row_index, self.select_col_ix, chkBoxItem)
                 row_index += 1
 
 # ######################################################################
@@ -404,7 +405,7 @@ class cage_list_table(QtGui.QTableWidget):
 
             protocols = QtGui.QComboBox()
 
-            self.available_tasks = get_tasks(self.GUI.GUI_filepath)
+            self.available_tasks = get_tasks(database.paths['task_dir'])
             protocols.addItems(['Select Task'] + self.available_tasks)
             protocols.setEnabled(False)
             #QtGui.QTableWidgetItem()
@@ -517,8 +518,7 @@ class mouse_list_table(QtGui.QTableWidget):
 
 
 class cageTable(QtGui.QTableWidget):
-    """ This table contains information about all mice currently running in the
-        system """
+    """ This table contains information about the setups curren """
     def __init__(self, GUI, tab=None):
         super(QtGui.QTableWidget, self).__init__(1,12, parent=None)
         self.header_names = ['Select','Setup_ID','Connection','Experiment','Protocol','Mouse_training',
@@ -527,17 +527,14 @@ class cageTable(QtGui.QTableWidget):
                              'n_mice','mice_in_setup']
 
         self.tab = tab
-        self.GUI = GUI
         self.setHorizontalHeaderLabels(self.header_names)
         #for i in range(8):
         #    self.horizontalHeader().setResizeMode(i, QtGui.QHeaderView.Stretch)
         self.verticalHeader().setVisible(False)
         self.setEditTriggers(Qt.QtWidgets.QTableWidget.NoEditTriggers)
 
-        self.select_nr = self.header_names.index("Select")
-        self.connect_nr = self.header_names.index("Connection")
-
-
+        self.select_col_ix = self.header_names.index("Select")
+        self.connect_col_ix = self.header_names.index("Connection")  # column index of connect button
 
         self.fill_table()
 
@@ -548,36 +545,47 @@ class cageTable(QtGui.QTableWidget):
         self.buttons = []
         for row_index, row in database.setup_df.iterrows():    
 
-            for col_index in range(self.columnCount()):
-
-                try:
-                    cHeader = self.header_names[col_index]
-
-                    self.setItem(row_index,col_index,Qt.QtWidgets.QTableWidgetItem(str(row[cHeader])))
-                except KeyError:
-                    pass
-
-            if row['connected']:
-                buttonText = 'Connected'
-            else:
-                buttonText = 'Connect'
-
-            button = QtGui.QPushButton(buttonText)
-            button.name = [row['Setup_ID'],row['COM'],row['COM_AC']]
-            button.clicked.connect(self.connect)
-            self.buttons.append(button)
-
-            if self.tab is None:  #if this is the table in system overview
-                button.setEnabled(False)
+            self.fill_row(row_index, row)
 
 
-            self.setCellWidget(row_index,self.connect_nr,button)
+    def fill_row(self, row_index, row):
 
-            chkBoxItem = QtGui.QTableWidgetItem()
-            chkBoxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-            chkBoxItem.setCheckState(QtCore.Qt.Unchecked)   
-            self.setItem(row_index,self.select_nr,chkBoxItem)
+        self.populate_cells_from_database(row_index, row)
 
+        button = self._build_connect_button(row)
+        self.buttons.append(button)
+
+        if self.tab is None:  #if this is the table in system overview
+            button.setEnabled(False)
+
+        self.setCellWidget(row_index, self.connect_col_ix, button)
+
+        chkBoxItem = QtGui.QTableWidgetItem()
+        chkBoxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+        chkBoxItem.setCheckState(QtCore.Qt.Unchecked)   
+        self.setItem(row_index, self.select_col_ix, chkBoxItem)
+
+    def populate_cells_from_database(self, row_index: int, row: pd.Series):
+        for col_index in range(self.columnCount()):
+            try:
+                cHeader = self.header_names[col_index]
+                self.setItem(row_index, col_index, Qt.QtWidgets.QTableWidgetItem(str(row[cHeader])))
+            except KeyError:
+                pass
+
+    def _build_connect_button(self, row: pd.Series):
+        """ Set properties of button that allows you to connect to the serial ports
+            controlling one of the setups 
+        """
+        if row['connected']:
+            buttonText = 'Connected'
+        else:
+            buttonText = 'Connect'
+        
+        button = QtGui.QPushButton(buttonText)
+        button.name = [row['Setup_ID'], row['COM'], row['COM_AC']]
+        button.clicked.connect(self.connect)
+        return button
 
     def connect(self):
 
@@ -591,14 +599,14 @@ class cageTable(QtGui.QTableWidget):
 
             board.load_framework()
             time.sleep(0.05)
-            self.GUI.connected_boards.append(board)
+            database.connected_boards.append(board)
             ac = Access_control(comAC_,print_func=print_func,data_logger=SC,GUI=self.GUI)
             time.sleep(0.05)
             SC.add_PYC(board)
             SC.add_AC(ac)
 
             ac.load_framework()
-            self.GUI.connected_access_controls.append(ac)
+            database.connected_access_controls.append(ac)
             #self.GUI.data_loggers.append(self.data_logger)
             #self.sender().setText("Connected")
 
@@ -629,16 +637,15 @@ class cageTable(QtGui.QTableWidget):
 
 
     def _refresh(self):
-        ports = find_setups(self.GUI)
+        ports = find_setups()
 
         ac_nr = self.header_names.index("COM")
         setup_nr = self.header_names.index("COM_AC")
         for r in range(self.rowCount()):
             if (self.item(r,ac_nr).text() in ports) and (self.item(r,setup_nr).text() in ports):
-                self.cellWidget(r,self.connect_nr).setEnabled(True)
-                #self.cellWidget(r,self.connect_nr).setText("Connected")
+                self.cellWidget(r,self.connect_col_ix).setEnabled(True)
             else:
-                self.cellWidget(r,self.connect_nr).setEnabled(False)
+                self.cellWidget(r,self.connect_col_ix).setEnabled(False)
                  
 
 
@@ -702,7 +709,7 @@ class MouseTable(QtGui.QTableWidget):
                         task_combo.installEventFilter(self)
                         task_combo.RFID = row['RFID']
                         cTask = database.mouse_df.loc[database.mouse_df['RFID']==row['RFID'],'Task'].values[0]
-                        task_combo.addItems([cTask] + get_tasks(self.GUI.GUI_filepath))
+                        task_combo.addItems([cTask] + get_tasks(database.paths['task_dir']))
 
                         self.setCellWidget(row_index,table_col_ix,task_combo)
 
@@ -724,7 +731,7 @@ class MouseTable(QtGui.QTableWidget):
     def update_task_combo(self, combo: QtGui.QComboBox) -> None:
         cTask = combo.currentText()
         combo.clear()
-        combo.addItems([cTask] + get_tasks(self.GUI.GUI_filepath))
+        combo.addItems([cTask] + get_tasks(database.paths['task_dir']))
 
 
     def change_mouse_task(self, combo: QtGui.QComboBox) -> None:

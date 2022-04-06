@@ -78,7 +78,7 @@ def get_pyhomecage_email() -> Tuple[str, str]:
     return sender_email, password
 
 
-def find_setups(GUI: QtGui.QMainWindow):
+def find_setups():
 
     ports = list(set([c[0] for c in list_ports.comports() if ('Pyboard' in c[1]) or ('USB Serial Device' in c[1])]))
     return ports
@@ -155,10 +155,9 @@ def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFr
     return task_df, exp_df, setup_df, mouse_df
 
 
-def get_tasks(GUI_fp: str) -> List[str]:
+def get_tasks(task_dir: str) -> List[str]:
     """ Function to read available tasks from the tasks folder """
 
-    task_dir = os.path.join(GUI_fp, 'tasks')
     tasks = [t.split('.')[0] for t in os.listdir(task_dir) if t[-3:] == '.py']
     return tasks
 

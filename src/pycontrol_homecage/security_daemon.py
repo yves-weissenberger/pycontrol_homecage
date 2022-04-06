@@ -24,26 +24,26 @@ def check_loggers_running(user):
         baseline weight message has been received recently 
     """
 
-    setup_df = pd.read_csv(os.path.join(setup_dir,'setups.csv'))
-    setup_rows = setup_df.loc[setup_df['User']==user]
+    setup_df = pd.read_csv(os.path.join(setup_dir, 'setups.csv'))
+    setup_rows = setup_df.loc[setup_df['User'] == user]
     active_dict = {}
     warn = False
     now = datetime.now()
     for _,setup_row in setup_rows.iterrows():
 
         logger_path = setup_row['logger_path']
-        with open(logger_path,'r') as lgF:
+        with open(logger_path, 'r') as lgF:
             logger_line = lgF.readlines()[-1]
-        last_time_str = re.findall(r'_-(20.*)',logger_line)[0]  #-2021-03-19-125542
-        last_time = datetime.strptime(last_time_str,'%Y-%m-%d-%H%M%S')
+        last_time_str = re.findall(r'_-(20.*)', logger_line)[0]  #-2021-03-19-125542
+        last_time = datetime.strptime(last_time_str, '%Y-%m-%d-%H%M%S')
 
         last_delta = ((now-last_time).total_seconds())
         active_dict[setup_row['Setup_ID']] = last_time.strftime("%m/%d/%Y, %H:%M:%S")
 
         #extended the time until warning message comes on to 5 minutes
         # for mice who linger in the training apparatus.
-        if (last_delta>600): warn = True
-    return active_dict,warn
+        if (last_delta > 600): warn = True
+    return active_dict, warn
 
 def check_ac_status(user):
     """ Check system state to ensure that no warning message 

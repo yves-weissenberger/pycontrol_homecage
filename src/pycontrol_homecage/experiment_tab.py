@@ -14,11 +14,9 @@ class experiment_tab(QtGui.QWidget):
     def __init__(self, parent=None):
         super(QtGui.QWidget, self).__init__(parent)
 
-        self.GUI = self.parent()
-
         self._setup_buttons()
         self._set_button_layout()
-        self.list_of_experiments = experiment_overview_table(GUI=self.GUI, only_active=False)
+        self.list_of_experiments = experiment_overview_table(only_active=False)
 
         self._set_global_layout()
 

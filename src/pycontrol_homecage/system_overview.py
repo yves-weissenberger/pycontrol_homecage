@@ -34,7 +34,6 @@ class system_tab(QtGui.QWidget):
         self.Hlayout_users.addWidget(self.logout_button)
         self.user_groupbox.setLayout(self.Hlayout_users)
 
-
         self.add_box_button = QtGui.QPushButton('Add Box')
 
 
@@ -47,7 +46,7 @@ class system_tab(QtGui.QWidget):
         self.experiment_groupbox = QtGui.QGroupBox("Experiments")
         self.scrollable_experiments = QtGui.QScrollArea()
         self.scrollable_experiments.setWidgetResizable(True)
-        self.list_of_experiments = experiment_overview_table(GUI=self.GUI, only_active=True)
+        self.list_of_experiments = experiment_overview_table(only_active=True)
         self.scrollable_experiments.setWidget(self.list_of_experiments)
 
         # Buttons to control stuff

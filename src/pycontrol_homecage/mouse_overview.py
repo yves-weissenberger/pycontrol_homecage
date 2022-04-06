@@ -35,7 +35,7 @@ class mouse_window(QtGui.QWidget):
 
 
         #### Deal with variables of the tasks
-        self.variables_table = variables_table(GUI=self.GUI)
+        self.variables_table = variables_table()
         self.filter_categories = ['Experiment', 'User', 'Mouse_ID', 'RFID']
         self.variables_box = QtGui.QGroupBox('Variables')
         self.vars_hlayout1 = QtGui.QHBoxLayout(self)
@@ -83,7 +83,7 @@ class mouse_window(QtGui.QWidget):
         self.mouse_table_label = QtGui.QLabel()
         self.mouse_table_label.setText("Mice in setup")
 
-        self.scrollable_mouse =  QtGui.QScrollArea()
+        self.scrollable_mouse = QtGui.QScrollArea()
         self.scrollable_mouse.setWidgetResizable(True)
         self.scrollable_mouse.horizontalScrollBar().setEnabled(False)
         self.list_of_mice = MouseTable(self.GUI, self)

@@ -59,7 +59,7 @@ class new_experiment_dialog(QtGui.QDialog):
         self.shared_protocol.stateChanged.connect(self._enable_prot_sel)
 
         self.protocol_combo = QtGui.QComboBox()
-        self.available_tasks = get_tasks(self.GUI.GUI_filepath)
+        self.available_tasks = get_tasks(database.task_dir)
         self.protocol_combo.addItems(['Select Task'] + self.available_tasks)
 
 
@@ -92,7 +92,7 @@ class new_experiment_dialog(QtGui.QDialog):
         # populate this column
 
         # Controls for adding a setup to an experiment
-        self.CAT = QtGui.QGroupBox('Add Setup')#cage_setup_table(GUI=self.GUI,exp_dialog=self)
+        self.CAT = QtGui.QGroupBox('Add Setup')
         self.cat_layout = QtGui.QHBoxLayout()
 
         self.setup_combo = QtGui.QComboBox()

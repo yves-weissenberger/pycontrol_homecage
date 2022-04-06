@@ -13,13 +13,11 @@ class setups_tab(QtGui.QWidget):
 
         super(QtGui.QWidget, self).__init__(parent)
 
-        self.GUI = self.parent()
-
         self.board = None
         self.callibrate_dialog = None
         self.configure_box_dialog = None
 
-        ### Add cages cages
+        # Add cages cages
         self.add_cage_button = QtGui.QPushButton('Add setup')
         self.add_cage_button.clicked.connect(self.add_cage)
 
@@ -79,7 +77,7 @@ class setups_tab(QtGui.QWidget):
         self.cage_table_label = QtGui.QLabel()
         self.cage_table_label.setText("List of setups")
 
-        self.scrollable_cage =  QtGui.QScrollArea()
+        self.scrollable_cage = QtGui.QScrollArea()
         self.scrollable_cage.setWidgetResizable(True)
         self.scrollable_cage.horizontalScrollBar().setEnabled(False)
 
@@ -109,8 +107,8 @@ class setups_tab(QtGui.QWidget):
         """
         isChecked = []
         for row in range(self.list_of_setups.rowCount()):
-            isChecked.append(self.list_of_setups.item(row,self.list_of_setups.select_nr).checkState()==2)
-        if len(self.GUI.controllers)==0:
+            isChecked.append(self.list_of_setups.item(row, self.list_of_setups.select_nr).checkState() == 2)
+        if len(database.controllers) == 0:
             boxM = QtGui.QMessageBox()
             boxM.setIcon(QtGui.QMessageBox.Information)
             boxM.setText("You must be connected to a setup to update it")
@@ -119,25 +117,23 @@ class setups_tab(QtGui.QWidget):
         if sum(isChecked)==1:
             checked_row = isChecked.index(1)
             setup_col = self.list_of_setups.header_names.index("Setup_ID")
-            checked_setup_id = self.list_of_setups.item(checked_row,setup_col).text()
-            for k,G in self.GUI.controllers.items():
-                if k==checked_setup_id:
-                    self.configure_box_dialog = direct_pyboard_dialog(k,self.GUI)
+            checked_setup_id = self.list_of_setups.item(checked_row, setup_col).text()
+            for k, G in database.controllers.items():
+                if k == checked_setup_id:
+                    self.configure_box_dialog = direct_pyboard_dialog(k, self.GUI)
                     self.configure_box_dialog.exec_()
-
-
-            #self.GUI.controllers.append(SC)
         else:
             pass
             print('You must edit one setup at a time')
+
+
     def update_setup(self):
 
         isChecked = []
 
-
         for row in range(self.list_of_setups.rowCount()):
-            isChecked.append(self.list_of_setups.item(row,self.list_of_setups.select_nr).checkState()==2)
-        if len(self.GUI.controllers)==0:
+            isChecked.append(self.list_of_setups.item(row, self.list_of_setups.select_nr).checkState() == 2)
+        if len(database.controllers) == 0:
             #box_conn_dialog().exec_()
             boxM = QtGui.QMessageBox()
             boxM.setIcon(QtGui.QMessageBox.Information)
@@ -147,14 +143,12 @@ class setups_tab(QtGui.QWidget):
             checked_row = isChecked.index(1)
             setup_col = self.list_of_setups.header_names.index("Setup_ID")
             checked_setup_id = self.list_of_setups.item(checked_row,setup_col).text()
-            for k,G in self.GUI.controllers.items():
-                if k==checked_setup_id:
+            for k, G in database.controllers.items():
+                if k == checked_setup_id:
                     #print("YA")
-                    self.configure_box_dialog = configure_box_dialog(k,self.GUI)
+                    self.configure_box_dialog = configure_box_dialog(k, self.GUI)
                     self.configure_box_dialog.exec_()
 
-
-            #self.GUI.controllers.append(SC)
         else:
             pass
             print('You must edit one setup at a time')
@@ -165,35 +159,31 @@ class setups_tab(QtGui.QWidget):
 
         entry_nr = len(database.setup_df)
 
-        #add a check to see that something about the cage has been filled in
-        if not (self.cat_combo_box.currentIndex()==0 or self.setup_name.text() is None):
+        # add a check to see that something about the cage has been filled in
+        if not (self.cat_combo_box.currentIndex() == 0 or self.setup_name.text() is None):
 
-            #first fill row with NA
+            # first fill row with NA
             database.setup_df.loc[entry_nr] = ['none']*len(database.setup_df.columns)
 
-            #get and set the USB port key
+            # get and set the USB port key
             COM = self.cat_combo_box.itemText(self.cat_combo_box.currentIndex())
-            database.setup_df.loc[entry_nr,'COM'] = COM
+            database.setup_df.loc[entry_nr, 'COM'] = COM
 
             COM_AC = self.cact_combo_box.itemText(self.cact_combo_box.currentIndex())
-            database.setup_df.loc[entry_nr,'COM_AC'] = COM_AC
+            database.setup_df.loc[entry_nr, 'COM_AC'] = COM_AC
 
 
-            #get the name of the setup
-            database.setup_df.loc[entry_nr,'Setup_ID'] = self.setup_name.text()
+            # get the name of the setup
+            database.setup_df.loc[entry_nr, 'Setup_ID'] = self.setup_name.text()
 
-
-        self.list_of_setups.fill_table()
-        self.GUI.system_tab.list_of_setups.fill_table()
+        self.parent()._reset_tables()
 
         database.setup_df.to_csv(database.setup_df.file_location)
-        #print(database.setup_df)
-
 
 
     def _refresh(self):
         """ find which training seutps are available """
-        ports = find_setups(self.GUI)
+        ports = find_setups()
         ports = [i for i in ports if i not in (database.setup_df['COM'].tolist() + database.setup_df['COM_AC'].tolist())]   
 
         prev = ['Select Training Setup'] + list(ports)

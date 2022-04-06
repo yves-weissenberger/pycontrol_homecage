@@ -21,7 +21,7 @@ class Data_logger:
                            in self.sm_info['analog_inputs'].items()}
         self.analog_files = {ai['ID']: None for ai in self.sm_info['analog_inputs'].values()}
 
-    def open_data_file(self, data_dir: str, experiment_name: str, subject_ID: str, datetime_now: datetime.datetime = None):
+    def open_data_file(self, data_dir: str, experiment_name: str, subject_ID: str, datetime_now: datetime = None):
         """Opens the data to which data from a behavioural session will be written and write 
            session metadata to that file
 
