@@ -114,14 +114,16 @@ class mouse_window(QtGui.QWidget):
                                      if ((i['subject']==ms_rfid) and
                                      (i['summary']))])
             #set variables are different to default values in the task file but not persistent across sessions
-            set_variables_dict = dict([(str(i['name']),i['value'].strip()) for i in all_variables 
-                                    if ((i['subject']==ms_rfid) and 
-                                    not (i['persistent'])
-                                    and i['set'] )])
+            set_variables_dict = dict([(str(i['name']), i['value'].strip()) for i in all_variables
+                                       if ((i['subject'] == ms_rfid) and
+                                       not (i['persistent'])
+                                       and i['set'])
+                                       ]
+                                      )
 
-            database.mouse_df.loc[database.mouse_df['RFID']==float(ms_rfid), 'summary_variables'] = json.dumps(summary_variables_dict)
-            database.mouse_df.loc[database.mouse_df['RFID']==float(ms_rfid), 'persistent_variables'] = json.dumps(persistent_variables_dict)
-            database.mouse_df.loc[database.mouse_df['RFID']==float(ms_rfid), 'set_variables'] = json.dumps(set_variables_dict)
+            database.mouse_df.loc[database.mouse_df['RFID'] == float(ms_rfid), 'summary_variables'] = json.dumps(summary_variables_dict)
+            database.mouse_df.loc[database.mouse_df['RFID'] == float(ms_rfid), 'persistent_variables'] = json.dumps(persistent_variables_dict)
+            database.mouse_df.loc[database.mouse_df['RFID'] == float(ms_rfid), 'set_variables'] = json.dumps(set_variables_dict)
 
             database.mouse_df.to_csv(database.mouse_df.file_location)
 
@@ -131,37 +133,37 @@ class mouse_window(QtGui.QWidget):
         self.variables_table.setEnabled(True)
         filtby = str(self.vars_combo.currentText())
         self.variables_table.clearContents()
-        if filtby=='RFID':
+        if filtby == 'RFID':
             RFIDs = [str(self.vars_combo_sel.currentText())]
 
-        elif filtby=='Mouse_ID':
-            ID = database.mouse_df.loc[database.mouse_df['Mouse_ID']==self.vars_combo_sel.currentText(),'RFID'].values
+        elif filtby == 'Mouse_ID':
+            ID = database.mouse_df.loc[database.mouse_df['Mouse_ID'] == self.vars_combo_sel.currentText(),'RFID'].values
             RFIDs = [str(i) for i in ID]
-            #self.variables_table.set_available_subjects(RFIDs)
-        elif filtby=='Experiment':
-            #OK THIS IS MORE COMPLICATED BECAUSE DIFFERENT MICE IN THE SAME EXPERIMENT MIGHT HAVE DIFFERENT VARIABLES
-            RFIDs = list(set([str(i) for i in database.mouse_df.loc[database.mouse_df['Experiment']==self.vars_combo_sel.currentText(),'RFID'].values]))
-            #print(RFIDs)
+            # self.variables_table.set_available_subjects(RFIDs)
+        elif filtby == 'Experiment':
+            # OK THIS IS MORE COMPLICATED BECAUSE DIFFERENT MICE IN THE SAME EXPERIMENT MIGHT HAVE DIFFERENT VARIABLES
+            RFIDs = list(set([str(i) for i in database.mouse_df.loc[database.mouse_df['Experiment'] == self.vars_combo_sel.currentText(),'RFID'].values]))
+            # print(RFIDs)
 
         self.variables_table.set_available_subjects(RFIDs)
         for sel_RFID in RFIDs:
 
-            mouseRow = database.mouse_df.loc[database.mouse_df['RFID']==float(sel_RFID)]
+            mouseRow = database.mouse_df.loc[database.mouse_df['RFID'] == float(sel_RFID)]
             #print(mouseRow)
             mouseTask = mouseRow['Task'].values[0] + '.py'
 
             summary_variables = {}; persistent_variables = {}; set_variables = {}
-            if not pd.isnull(mouseRow['summary_variables'].values): 
+            if not pd.isnull(mouseRow['summary_variables'].values):
                 summary_variables = eval(mouseRow['summary_variables'].values[0])
             if not pd.isnull(mouseRow['persistent_variables'].values):
                 persistent_variables = eval(mouseRow['persistent_variables'].values[0])
             if not pd.isnull(mouseRow['set_variables'].values):
-                set_variables = eval(mouseRow['set_variables'].values[0])  #set variables are persistent variables that are not updated. Is this necessary?? YES
+                set_variables = eval(mouseRow['set_variables'].values[0])  # set variables are persistent variables that are not updated. Is this necessary?? YES
             
-            task_dir = os.path.join(main_path,'tasks')
-            task_path = os.path.join(task_dir,mouseTask)
+            task_dir = os.path.join(main_path, 'tasks')
+            task_path = os.path.join(task_dir, mouseTask)
             self.default_variables =  get_variables_and_values_from_taskfile(task_path)
-            self.variable_names =  list(set(self.default_variables.keys()))#get_variables_from_taskfile(task_path)
+            self.variable_names =  list(set(self.default_variables.keys()))  # get_variables_from_taskfile(task_path)
             self.variables_table.set_variable_names(self.variable_names)
             self.variables_table.set_variable_names_by_subject(sel_RFID,self.variable_names)
             #if you are showing all variables
@@ -187,21 +189,17 @@ class mouse_window(QtGui.QWidget):
                                 'set': set_var}
                     self.variables_table.add_variable(var_dict)
 
-
-
-
     def update_available_vfilt(self):
         "Change what you are filtering variables you show by"
         filtby = str(self.vars_combo.currentText())
         self.vars_combo_sel.clear()
-        if filtby in ('Mouse_ID','RFID'):
+        if filtby in ('Mouse_ID', 'RFID'):
             self.vars_combo_sel.clear()
             dat = database.mouse_df[filtby]
             self.vars_combo_sel.addItems(['Select'] + [str(i) for i in dat.values])
-        elif filtby=='Experiment':
+        elif filtby == 'Experiment':
             dat = list(set(database.mouse_df[filtby].values))
             self.vars_combo_sel.addItems(['Select'] + [str(i) for i in dat])
-            
 
     def remove_mouse(self):
         """ Remove mouse from df and CSV file"""
@@ -209,22 +207,15 @@ class mouse_window(QtGui.QWidget):
         RFID_index = self.list_of_mice.header_names.index("RFID")
 
         for row in range(self.list_of_mice.rowCount()):
-            if self.list_of_mice.item(row,0).checkState()==2:
-                isChecked.append(float(self.list_of_mice.item(row,RFID_index).text()))   #because its a float in the mouse_df
-            #isChecked.append(self.list_of_mice.item(row,0).checkState()==2)
+            if self.list_of_mice.item(row, 0).checkState() == 2:
+                isChecked.append(float(self.list_of_mice.item(row, RFID_index).text()))   # because its a float in the mouse_df
 
         if isChecked:
             sure = are_you_sure_dialog()
             sure.exec_()
             if sure.GO:
                 for ch_ in isChecked:
-                    #if 
-
-                    #fl = database.mouse_df.file_location
-                    #ix_ = database.mouse_df.index[database.mouse_df['RFID']==ch_]
-                    database.mouse_df.loc[database.mouse_df['RFID']==ch_,'in_system'] = False
-                    #database.mouse_df = database.mouse_df.drop(ix_)
-                    #database.mouse_df.file_location = fl  #because the file location is not part of the class so when using drop this is removed
+                    database.mouse_df.loc[database.mouse_df['RFID'] == ch_, 'in_system'] = False
                     database.mouse_df.to_csv(database.mouse_df.file_location)
 
                     self.list_of_mice.fill_table()
@@ -235,18 +226,15 @@ class mouse_window(QtGui.QWidget):
     def get_summary(self):
         """ Get summary information for the set of selected mice """
 
-
         isChecked = []
         for row in range(self.list_of_mice.rowCount()):
-            checked = self.list_of_mice.item(row,0).checkState()==2
+            checked = self.list_of_mice.item(row, 0).checkState() == 2
             isChecked.append(checked)
 
         if np.any(isChecked):
             sd = mouse_summary_dialog()
             sd.show()
             sd.exec_()
-
-
 
     def _refresh(self):
         pass

@@ -3,6 +3,7 @@ import os
 import time
 from datetime import datetime
 from queue import Queue
+from typing import Callable
 
 import pandas as pd
 from pycontrol_homecage.homecage_config.paths import tasks_dir
@@ -22,7 +23,7 @@ class system_controller(Data_logger):
         mice enter/exit the training apparatus. There is one system controller 
         for each homecage system.
     """
-    def __init__(self, GUI, print_func = print, data_consumers: list = [], setup_id=None):
+    def __init__(self, GUI, print_func: Callable = print, data_consumers: list = [], setup_id=None) -> None:
 
         self.GUI = GUI
         self.on = True
@@ -40,9 +41,10 @@ class system_controller(Data_logger):
 
         self.print_queue = Queue()
 
-    def _reset_mouse_data(self) -> None:
-        # dict to store data about mice as they are going through
-        # the access control system
+    def _handle_allow_entry(self) -> None:
+        """ This resets the state of the dict that stores data about
+            a mouse entering and exiting the system
+        """
         self.mouse_data = {'weight': None,
                            'RFID': None,
                            'entry_time': None,
@@ -91,7 +93,7 @@ class system_controller(Data_logger):
 
     def process_data_AC(self, new_data):
 
-        """ Here process the data from the access control system to 
+        """ Here process the data from the access control system to
             actually do stuff: open/close files, update csv files with
             weights etc
 
@@ -109,7 +111,7 @@ class system_controller(Data_logger):
                 if 'cal' in msg:
                     pass
                 else:
-                    if 'state' in msg: 
+                    if 'state' in msg:
                         self.process_ac_state(msg[6:], now)
                     if 'RFID' in msg:
                         self.mouse_data['RFID'] = int(msg.strip('RFID:'))
@@ -130,49 +132,22 @@ class system_controller(Data_logger):
     def process_ac_state(self, state: str, now: str) -> None:
         """ Here do more global updates of stuff based on state """
 
-        database.setup_df.loc[database.setup_df['COM']==self.PYC.serial_port,'AC_state'] = state
+        # update access control state in the database
+        database.setup_df.loc[database.setup_df['COM'] == self.PYC.serial_port, 'AC_state'] = state
 
         if state == 'error_state':
             self._handle_error_state()
 
         if state == 'allow_entry':
-            self._reset_mouse_data()
+            self._handle_allow_entry(now)
 
         # first entry in this state is when the mouse first enters the apparatus
         elif state == 'mouse_training':
-            
             # This guards the state changing to to check_mouse_in_ac (i.e. when the mouse starts to leave)
             # but then then decides to back into training chamber so state changes back to 'mouse_training'
             mouse_just_entered = self.data_file is None
-
             if mouse_just_entered:
-                
-
-                # need an exception here for cases where RFID is incorrectly typed in
-                mouse_row = database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID']]
-
-                mouse_ID = mouse_row['Mouse_ID'].values[0]
-                prot = mouse_row['Protocol'].values[0]
-
-                # if a task has been assigned to this mouse
-                if mouse_row['is_assigned'].values[0]:
-
-                    # if the current protocol is a task do so.
-                    if 'task' in prot:
-                        task = self.run_mouse_task(mouse_info=mouse_row)
-                    else:
-                        task = self.run_mouse_protocol(mouse_info=mouse_row)
-
-                    self.mouse_data['entry_time'] = now
-                    self.mouse_data['task'] = task
-
-                    self.open_data_file_(mouse_info=mouse_row, now=now)
-
-                    self.PYC.start_framework()
-
-                    self._update_database_on_entry(self.mouse_data['weight'], mouse_ID)
-                    self.GUI.setup_window_tab.list_of_setups.fill_table()
-                    self.GUI.system_tab.list_of_setups.fill_table()
+                self._handle_mouse_training()
 
         elif state == 'allow_exit':
             self.mouse_data['exit_time'] = datetime.now().strftime('%Y-%m-%d-%H%M%S')
@@ -183,7 +158,36 @@ class system_controller(Data_logger):
                 self.PYC.process_data()
                 self.close_files()
 
-    def _update_database_on_entry(self, mouse_weight: float, mouse_ID: str):
+    def _handle_mouse_training(self, now: str) -> None:
+        """ This is the data"""
+
+        # need an exception here for cases where RFID is incorrectly typed in
+        mouse_row = database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID']]
+
+        mouse_ID = mouse_row['Mouse_ID'].values[0]
+        prot = mouse_row['Protocol'].values[0]
+
+        # if a task has been assigned to this mouse
+        if mouse_row['is_assigned'].values[0]:
+
+            # if the current protocol is a task do so.
+            if 'task' in prot:
+                task = self.run_mouse_task(mouse_info=mouse_row)
+            else:
+                task = self.run_mouse_protocol(mouse_info=mouse_row)
+
+            self.mouse_data['entry_time'] = now
+            self.mouse_data['task'] = task
+
+            self.open_data_file_(mouse_info=mouse_row, now=now)
+
+            self.PYC.start_framework()
+
+            self._update_database_on_entry(self.mouse_data['weight'], mouse_ID)
+            self.GUI.setup_window_tab.list_of_setups.fill_table()
+            self.GUI.system_tab.list_of_setups.fill_table()
+
+    def _update_database_on_entry(self, mouse_weight: float, mouse_ID: str) -> None:
         """When a mouse enters the training chamber, update the setup_df and the
            mouse_df to reflect this
 
@@ -195,7 +199,6 @@ class system_controller(Data_logger):
         database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID'], 'is_training'] = True
         database.setup_df.loc[database.setup_df['COM'] == self.PYC.serial_port, 'Mouse_training'] = mouse_ID
 
-
     def run_mouse_task(self, mouse_info: pd.Series) -> str:
         task = mouse_info['Task'].values[0]
         self.GUI.print_msg("Uploading: " + str(task), ac_pyc='pyc')
@@ -206,7 +209,7 @@ class system_controller(Data_logger):
             set_variables = eval(mouse_info['set_variables'].values[0])
             if set_variables:
                 for k, v in set_variables.items(): self.PYC.set_variable(k[2:],eval(v))
-        
+
         if not pd.isnull(mouse_info['persistent_variables'].values):
             persistent_variables = eval(mouse_info['persistent_variables'].values[0])
             if persistent_variables:
@@ -214,7 +217,7 @@ class system_controller(Data_logger):
                     if v != 'auto':
                         self.PYC.set_variable(k[2:], eval(v))
 
-    def run_mouse_protocol(self, mouse_info: pd.Series)->str:
+    def run_mouse_protocol(self, mouse_info: pd.Series) -> str:
         # If running a real protocol, handle (potential) update of protocol.
         newStage = False
         stage = mouse_info['Stage'].values[0]
@@ -225,7 +228,7 @@ class system_controller(Data_logger):
         logPth = os.path.join(mice_dir, mouse_ID + '.csv')
         df_mouseLog = pd.read_csv(logPth)
 
-        if len(df_mouseLog)>0:
+        if len(df_mouseLog) > 0:
 
             df_mouseLog = df_mouseLog.iloc[-1]
 
@@ -251,13 +254,13 @@ class system_controller(Data_logger):
 
         #handle setting varibles
 
-        for k,defV in mouse_prot[str(stage)]['defaultV']:
-            self.PYC.set_variable(k,float(defV))
+        for k, defV in mouse_prot[str(stage)]['defaultV']:
+            self.PYC.set_variable(k, float(defV))
 
-        if len(df_mouseLog)>0:
+        if len(df_mouseLog) > 0:
             if not newStage:
                 for k in mouse_prot[str(stage)]['trackV']:
-                    self.PYC.set_variable(k,float(v_[k]))
+                    self.PYC.set_variable(k, float(v_[k]))
         return task
 
     def open_data_file_(self, mouse_info: pd.Series, now: str) -> None:
@@ -282,9 +285,9 @@ class system_controller(Data_logger):
         self.data_file.write('S {}\n\n'.format(self.sm_info['states']))
         self.data_file.write('E {}\n\n'.format(self.sm_info['events']))
 
-    def _save_taskFile_run(self, fullpath_to_datafile:str, task:str)->None:
+    def _save_taskFile_run(self, fullpath_to_datafile: str, task: str) -> None:
         # read the task file uploaded to pyboard
-        with open(os.path.join(tasks_dir,task+'.py'),'r') as f_:
+        with open(os.path.join(tasks_dir, task+'.py'), 'r') as f_:
             dat_ = f_.readlines()
 
             # save it to a new file
@@ -302,24 +305,24 @@ class system_controller(Data_logger):
                 v_ = self.PYC.get_variables()
                 self.data_file.writelines("Variables")
                 self.data_file.writelines(repr(v_))
-                if not database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].isnull().values.any():
-                    persistent_variables = eval(database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
+                if not database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID'], 'persistent_variables'].isnull().values.any():
+                    persistent_variables = eval(database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID'], 'persistent_variables'].values[0])
                 else:
                     persistent_variables = {}
-                for k,v__ in v_.items():
+                for k, v__ in v_.items():
                     k = 'v.' + k
                     if k in persistent_variables.keys():
                         persistent_variables[k] = v__
-                database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'] = json.dumps(persistent_variables) #ignore this line
+                database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID'], 'persistent_variables'] = json.dumps(persistent_variables)  # ignore this line
             except Exception as e:
                 print(e)
-                if not (database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables']).isnull().values.any():
-                    v_ = eval(database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'persistent_variables'].values[0])
+                if not (database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID'], 'persistent_variables']).isnull().values.any():
+                    v_ = eval(database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID'], 'persistent_variables'].values[0])
                 self.PYC.reset()
                 RUN_ERROR = True
 
             self.data_file.close()
-            self.update_mouseLog(v_,RUN_ERROR)
+            self.update_mouseLog(v_, RUN_ERROR)
 
             self.data_file = None
             self.file_path = None
@@ -329,13 +332,13 @@ class system_controller(Data_logger):
             mouse_fl = database.mouse_df.file_location
             database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'RUN_ERROR'] = RUN_ERROR
             database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'is_training'] = False
-            database.mouse_df =  database.mouse_df.loc[:, ~ database.mouse_df.columns.str.contains('^Unnamed')]
-            database.mouse_df.file_location = mouse_fl 
+            database.mouse_df = database.mouse_df.loc[:, ~ database.mouse_df.columns.str.contains('^Unnamed')]
+            database.mouse_df.file_location = mouse_fl
             database.mouse_df.to_csv(database.mouse_df.file_location)
 
             setup_fl = database.setup_df.file_location
-            database.setup_df.loc[database.setup_df['COM']==self.PYC.serial_port,'Mouse_training'] = ''
-            database.setup_df =  database.setup_df.loc[:, ~ database.setup_df.columns.str.contains('^Unnamed')]
+            database.setup_df.loc[database.setup_df['COM'] == self.PYC.serial_port, 'Mouse_training'] = ''
+            database.setup_df = database.setup_df.loc[:, ~ database.setup_df.columns.str.contains('^Unnamed')]
             database.setup_df.file_location = setup_fl
             database.setup_df.to_csv(database.setup_df.file_location)
 
@@ -344,36 +347,31 @@ class system_controller(Data_logger):
                 analog_file.close()
                 analog_file = None
 
-    def update_mouseLog(self,v_,RUN_ERROR):
+    def update_mouseLog(self, v_, RUN_ERROR):
 
         """ Update the log of mouse behavior. v_ are the variables
             If there is an error retrieving variables from the
             pyboard, then copies over variables from the previous
             session
-            
         """
 
-        mouse_row = database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID']]
+        mouse_row = database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID']]
         mouse_ID = mouse_row['Mouse_ID'].values[0]
 
-        logPth = os.path.join(mice_dir,mouse_ID+'.csv')
+        logPth = os.path.join(mice_dir, mouse_ID+'.csv')
         df_mouseLog = pd.read_csv(logPth)
 
-        
         entry_nr = len(df_mouseLog)
-        df_mouseLog.append(pd.Series(), ignore_index = True)
+        df_mouseLog.append(pd.Series(), ignore_index=True)
         if 'RUN_ERROR' not in df_mouseLog.columns:
-            df_mouseLog.insert(len(df_mouseLog.columns),'RUN_ERROR',pd.Series(),True) 
+            df_mouseLog.insert(len(df_mouseLog.columns), 'RUN_ERROR', pd.Series(), True)
 
         for k in self.mouse_data.keys():
             if k in df_mouseLog.columns:
-                df_mouseLog.loc[entry_nr,k] = self.mouse_data[k]
+                df_mouseLog.loc[entry_nr, k] = self.mouse_data[k]
 
-        df_mouseLog.loc[entry_nr,'Variables'] = repr(v_)
-        df_mouseLog.loc[entry_nr,'RUN_ERROR'] = RUN_ERROR
+        df_mouseLog.loc[entry_nr, 'Variables'] = repr(v_)
+        df_mouseLog.loc[entry_nr, 'RUN_ERROR'] = RUN_ERROR
 
         df_mouseLog = df_mouseLog.loc[:, ~df_mouseLog.columns.str.contains('^Unnamed')]
         df_mouseLog.to_csv(logPth)
-
-
-

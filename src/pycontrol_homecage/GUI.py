@@ -9,7 +9,7 @@ from pycontrol_homecage.loc_def import all_paths, create_paths
 from pycontrol_homecage.utils import custom_excepthook
 
 
-def initialise_excepthook():
+def initialise_excepthook() -> None:
     """Initialise a custom excepthook that prints errors to a log
        in addition to shutting down the program
     """
@@ -23,7 +23,7 @@ def initialise_excepthook():
     sys.excepthook = except_hook
 
 
-def main():
+def main() -> None:
     app = QtGui.QApplication(sys.argv)
     gui = GUIApp()
     gui.app = app   # To allow app functions to be called from GUI.

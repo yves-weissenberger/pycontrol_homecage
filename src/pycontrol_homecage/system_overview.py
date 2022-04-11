@@ -1,5 +1,4 @@
 from pyqtgraph.Qt import QtGui
-import time
 
 from pycontrol_homecage.new_experiment_menu import new_experiment_dialog
 from pycontrol_homecage.tables import cageTable, experiment_overview_table
@@ -19,80 +18,14 @@ class system_tab(QtGui.QWidget):
 
         self._init_experiment_groupbox()
 
-        # Setups table
-        self.setup_groupbox = QtGui.QGroupBox("Setups")
-        self.scrollable_setups = QtGui.QScrollArea()
-        self.scrollable_setups.setWidgetResizable(True)
-        self.list_of_setups = cageTable(self.GUI)
-        self.scrollable_setups.setWidget(self.list_of_setups)
+        self._init_setup_groupbox()
 
-        # Buttons to control stuff
-        self.show_setup_plot = QtGui.QPushButton('Show Plot')
-        self.show_setup_plot.clicked.connect(self.activate_plot)
-        self.filter_setup_combo = QtGui.QComboBox()
-        self.filter_setup_combo.addItems(['Filter by'])
-
-        self.Hlayout_setup_buttons = QtGui.QHBoxLayout()
-        self.Hlayout_setup_buttons.addWidget(self.show_setup_plot)
-        self.Hlayout_setup_buttons.addWidget(self.filter_setup_combo)
-
-        self.setup_label = QtGui.QLabel()
-        self.setup_label.setText("Setups")
-
-        self.Vlayout_setup = QtGui.QVBoxLayout()
-        self.Vlayout_setup.addLayout(self.Hlayout_setup_buttons)
-        self.Vlayout_setup.addWidget(QtGui.QLabel("Table of Setups"))
-        self.Vlayout_setup.addWidget(self.scrollable_setups)
-        self.setup_groupbox.setLayout(self.Vlayout_setup)
-
-
-        # ----------------------------------- #
-        # -------- Central print log  ------- #
-        # ----------------------------------- #
-
-        self.log_groupbox = QtGui.QGroupBox("Log")
-
-        self.log_hlayout = QtGui.QHBoxLayout()
-
-
-        self.log_active = QtGui.QCheckBox("Print to log")
-        self.log_active.setChecked(True)
-
-
-        self.filter_exp = QtGui.QCheckBox("Filter by experiment")
-        self.filter_exp.setChecked(False)
-        #self.filter_exp.stateChanged.connect(self._enable_prot_sel)
-
-        self.filter_setup = QtGui.QCheckBox("Filter by setup")
-        self.filter_setup.setChecked(False)
-        #self.filter_setup.stateChanged.connect(self._enable_prot_sel)
-
-        self.log_hlayout.addWidget(self.log_active)
-        self.log_hlayout.addWidget(self.filter_exp)
-        self.log_hlayout.addWidget(self.filter_setup)
-
-        self.log_textbox = QtGui.QPlainTextEdit()
-        self.log_textbox.setMaximumBlockCount(500) 
-        self.log_textbox.setFont(QtGui.QFont('Courier', 12))
-        self.log_textbox.setReadOnly(True)
-
-        self.log_layout = QtGui.QVBoxLayout()
-        self.log_layout.addLayout(self.log_hlayout)
-        self.log_layout.addWidget(self.log_textbox)
-
-        self.log_groupbox.setLayout(self.log_layout)
+        self._init_log_groupbox()
         # ------------------------------------ #
         # -------- Vertical stacking  -------- #
         # ------------------------------------ #
 
-        self.Vlayout = QtGui.QVBoxLayout(self)
-
-        self.Vlayout.addWidget(self.user_groupbox)
-
-        self.Vlayout.addWidget(self.experiment_groupbox)
-
-        self.Vlayout.addWidget(self.setup_groupbox)
-        self.Vlayout.addWidget(self.log_groupbox)
+        self._set_global_layout()
 
     def _init_user_groupbox(self):
 
@@ -105,6 +38,7 @@ class system_tab(QtGui.QWidget):
         self.add_user_button = QtGui.QPushButton('Add User')
         self.logout_button = QtGui.QPushButton('Logout')
 
+    def _set_user_layout(self) -> None:
         self.Hlayout_users = QtGui.QHBoxLayout()
         self.Hlayout_users.addWidget(self.login_button)
         self.Hlayout_users.addWidget(self.add_user_button)
@@ -141,6 +75,73 @@ class system_tab(QtGui.QWidget):
 
         self.experiment_groupbox.setLayout(self.Vlayout_exp)
 
+    def _init_setup_groupbox(self) -> None:
+        self.setup_groupbox = QtGui.QGroupBox("Setups")
+        self.scrollable_setups = QtGui.QScrollArea()
+        self.scrollable_setups.setWidgetResizable(True)
+        self.list_of_setups = cageTable(self.GUI)
+        self.scrollable_setups.setWidget(self.list_of_setups)
+
+        # Buttons to control stuff
+        self.show_setup_plot = QtGui.QPushButton('Show Plot')
+        self.show_setup_plot.clicked.connect(self.activate_plot)
+        self.filter_setup_combo = QtGui.QComboBox()
+        self.filter_setup_combo.addItems(['Filter by'])
+
+        self.setup_label = QtGui.QLabel()
+        self.setup_label.setText("Setups")
+
+        self._set_setup_layout()
+
+    def _set_setup_layout(self) -> None:
+
+        self.Hlayout_setup_buttons = QtGui.QHBoxLayout()
+        self.Hlayout_setup_buttons.addWidget(self.show_setup_plot)
+        self.Hlayout_setup_buttons.addWidget(self.filter_setup_combo)
+
+        self.Vlayout_setup = QtGui.QVBoxLayout()
+        self.Vlayout_setup.addLayout(self.Hlayout_setup_buttons)
+        self.Vlayout_setup.addWidget(QtGui.QLabel("Table of Setups"))
+        self.Vlayout_setup.addWidget(self.scrollable_setups)
+        self.setup_groupbox.setLayout(self.Vlayout_setup)
+
+    def _init_log_groupbox(self) -> None:
+        self.log_groupbox = QtGui.QGroupBox("Log")
+
+        self.log_active = QtGui.QCheckBox("Print to log")
+        self.log_active.setChecked(True)
+
+        self.filter_exp = QtGui.QCheckBox("Filter by experiment")
+        self.filter_exp.setChecked(False)
+        self.filter_setup = QtGui.QCheckBox("Filter by setup")
+        self.filter_setup.setChecked(False)
+
+        self.log_textbox = QtGui.QPlainTextEdit()
+        self.log_textbox.setMaximumBlockCount(500)
+        self.log_textbox.setFont(QtGui.QFont('Courier', 12))
+        self.log_textbox.setReadOnly(True)
+        self._set_log_layout()
+
+    def _set_log_layout(self) -> None:
+
+        self.log_hlayout = QtGui.QHBoxLayout()
+        self.log_hlayout.addWidget(self.log_active)
+        self.log_hlayout.addWidget(self.filter_exp)
+        self.log_hlayout.addWidget(self.filter_setup)
+
+        self.log_layout = QtGui.QVBoxLayout()
+        self.log_layout.addLayout(self.log_hlayout)
+        self.log_layout.addWidget(self.log_textbox)
+        self.log_groupbox.setLayout(self.log_layout)
+
+    def _set_global_layout(self) -> None:
+        self.Vlayout = QtGui.QVBoxLayout(self)
+
+        self.Vlayout.addWidget(self.user_groupbox)
+        self.Vlayout.addWidget(self.experiment_groupbox)
+        self.Vlayout.addWidget(self.setup_groupbox)
+        self.Vlayout.addWidget(self.log_groupbox)
+
     def activate_plot(self):
         " start plotting incoming data from an experiment"
 
@@ -172,42 +173,18 @@ class system_tab(QtGui.QWidget):
             self.experiment_plot.start_experiment()
             self.plot_isactive = True
 
-    def start_new_experiment(self):
+    def start_new_experiment(self) -> None:
+        """ This creates a new experiment which refers to a cohort of mice
+            performing a set of tasks.
+        """
         self.new_experiment_config = new_experiment_dialog(self.GUI)
         self.new_experiment_config.exec_()
 
     def end_experiment(self):
-        #print("END")
-        for rowN in range(self.list_of_experiments.rowCount()):
 
-            if self.list_of_experiments.item(rowN, 0).checkState() == 2:
-                # print("FOUND")
-                expName = self.list_of_experiments.item(rowN, self.list_of_experiments.header_names.index('Name')).text()
-                for setup in database.exp_df.loc[database.exp_df['Name'] == expName,'Setups'].values:
-                    setup = eval(setup)[0]
-
-                    if database.controllers.items():  #if there are any controllers
-                        print(expName)
-                        handler_ = [setup_ for k, setup_ in database.controllers.items() if k == setup][0]
-                        
-                        handler_.PYC.stop_framework()
-                        time.sleep(.05)
-                        handler_.PYC.process_data()
-                        handler_.close_files()
-                        handler_.PYC.reset()
-
-                        database.exp_df.loc[database.exp_df['Name'] == expName, 'Active'] = False
-                        database.setup_df.loc[database.setup_df['Setup_ID'] == setup, 'Experiment'] = None
-                        database.setup_df.to_csv(database.setup_df.file_location)
-                        database.exp_df.to_csv(database.exp_df.file_location)
-
-                        print("CLOSED")
-
-                    for subject in eval(database.exp_df.loc[database.exp_df['Name'] == expName, 'Subjects'].values[0]):
-                        database.mouse_df.loc[database.mouse_df['Mouse_ID'] == subject, 'in_system'] = False
-
-            else:
-                pass
+        selected_experiments = self.list_of_experiments.get_checked_experiments()
+        if selected_experiments:
+            self.list_of_experiments.end_experiments(selected_experiments)
 
         self.list_of_experiments.fill_table()
 
@@ -233,14 +210,3 @@ class system_tab(QtGui.QWidget):
 
     def _refresh(self):
         pass
-
-
-# A class implementing experiments tables
-class ExperimentsTable(QtGui.QTableWidget):
-    def __init__(self, parent=None):
-        super(QtGui.QTableWidget, self).__init__(1, 3, parent=parent)
-        self.setHorizontalHeaderLabels(['Experiment', 'User', ''])
-        self.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
-        self.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
-        self.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.ResizeToContents)
-        self.verticalHeader().setVisible(False)

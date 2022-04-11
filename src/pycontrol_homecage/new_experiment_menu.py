@@ -304,7 +304,7 @@ class new_experiment_dialog(QtGui.QDialog):
 
 
     def _prot_or_task(self):
-        
+
         if self.protVtask.isChecked():
             self.running_protocol = True
             self.protocol_combo.clear()

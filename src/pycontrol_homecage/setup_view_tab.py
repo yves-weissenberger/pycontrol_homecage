@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import List
 
 from pyqtgraph.Qt import QtGui
 
@@ -135,7 +135,7 @@ class setups_tab(QtGui.QWidget):
             boxM.setText("You must be connected to a setup to update it")
             boxM.exec()
 
-    def update_setup(self):
+    def update_setup(self) -> None:
 
         isChecked = []
 
@@ -147,7 +147,7 @@ class setups_tab(QtGui.QWidget):
             boxM.setIcon(QtGui.QMessageBox.Information)
             boxM.setText("You must be connected to a setup to update it")
             boxM.exec()
-    
+
         if sum(isChecked) == 1:
             checked_row = isChecked.index(1)
             setup_col = self.list_of_setups.header_names.index("Setup_ID")

@@ -243,6 +243,51 @@ class experiment_overview_table(QtGui.QTableWidget):
                 self.setItem(row_index, self.select_col_ix, chkBoxItem)
                 row_index += 1
 
+    def get_checked_experiments(self) -> List[str]:
+        """Check which experiments the user has checked
+
+        Returns:
+            List[str]: Names of selected experiments
+        """
+        selected_experiments = []
+        for rowN in range(self.rowCount()):
+            if self(rowN, 0).checkState() == 2:  # 2 is checked state
+                expName = self.item(rowN, self.header_names.index('Name')).text()
+                selected_experiments.append(expName)
+
+        return selected_experiments
+
+    def end_experiments(self, experiment_names: List[str]) -> None:
+        """ End experiment by switching off handlers for relevant setups, closing files and updating setup, experiment
+            databases.
+
+        Args:
+            experiment_names (List[str]): names of experiments to be ended
+        """
+        for exp_name in experiment_names:
+            for setup in database.exp_df.loc[database.exp_df['Name'] == exp_name, 'Setups'].values:
+                setup = eval(setup)[0]
+
+                if database.controllers.items():  # if there are any controllers
+                    print(exp_name)
+                    handler_ = [setup_ for k, setup_ in database.controllers.items() if k == setup][0]
+
+                    handler_.PYC.stop_framework()
+                    time.sleep(.05)
+                    handler_.PYC.process_data()
+                    handler_.close_files()
+                    handler_.PYC.reset()
+
+                    database.exp_df.loc[database.exp_df['Name'] == exp_name, 'Active'] = False
+                    database.setup_df.loc[database.setup_df['Setup_ID'] == setup, 'Experiment'] = None
+                    database.setup_df.to_csv(database.setup_df.file_location)
+                    database.exp_df.to_csv(database.exp_df.file_location)
+
+                    print("CLOSED")
+
+                for subject in eval(database.exp_df.loc[database.exp_df['Name'] == exp_name, 'Subjects'].values[0]):
+                    database.mouse_df.loc[database.mouse_df['Mouse_ID'] == subject, 'in_system'] = False
+
 # ######################################################################
 # ##############      For setting up a new protocol      ###############
 # ######################################################################

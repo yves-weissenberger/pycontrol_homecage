@@ -183,12 +183,14 @@ class configure_box_dialog(QtGui.QDialog):
         database.controllers[self.setup_id].AC.reset()
         database.controllers[self.setup_id].AC.load_framework()
         self.log_textbox.insertPlainText('done!')
+
     def load_framework(self):
         self.log_textbox.insertPlainText('Loading framework...')
         database.controllers[self.setup_id].PYC.load_framework()
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
         self.log_textbox.insertPlainText('done!')
-        self.log_textbox.moveCursor(QtGui.QTextCursor.End)  
+        self.log_textbox.moveCursor(QtGui.QTextCursor.End)
+
     def disable_flashdrive(self):
         database.controllers[self.setup_id].PYC.disable_flashdrive()
 
@@ -242,7 +244,6 @@ class login_dialog(QtGui.QDialog):
     def __init__(self, parent=None):
         super(login_dialog, self).__init__(parent)
 
-
         self.setGeometry(10, 30, 300, 200) # Left, top, width, height.
 
         self.userID = None
@@ -251,8 +252,6 @@ class login_dialog(QtGui.QDialog):
         self.combo = QtGui.QComboBox()
         self.users = get_users()
         self.combo.addItems(['Select User'] + self.users)
-
-
 
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(self.combo)
