@@ -109,8 +109,8 @@ class box_conn_dialog(QtGui.QDialog):
 class configure_box_dialog(QtGui.QDialog):
     """ Dialog window that allows you to upload harware definitions etc """ 
 
-    def __init__(self,setup_id,GUI,parent=None):
-        super(configure_box_dialog,self).__init__(parent)
+    def __init__(self, setup_id, GUI, parent=None):
+        super(configure_box_dialog, self).__init__(parent)
         self.setGeometry(10, 30, 500, 200) # Left, top, width, height.
         self.setup_id = setup_id
         self.GUI = GUI
@@ -151,21 +151,28 @@ class configure_box_dialog(QtGui.QDialog):
         self.buttonWeigh = QtGui.QPushButton('Weigh', self)
         self.buttonWeigh.clicked.connect(self.weigh)
 
-
         self.calibration_weight = QtGui.QLineEdit("")
         self.buttonCal = QtGui.QPushButton('callibrate', self)
         self.buttonCal.clicked.connect(self.callibrate)
-
-
-
 
         self.log_textbox = QtGui.QTextEdit()
         self.log_textbox.setFont(QtGui.QFont('Courier', 9))
         self.log_textbox.setReadOnly(True)
 
-
-
         layout = QtGui.QVBoxLayout()
+
+        layout.addWidget(self.buttonWeigh)
+        layout.addWidget(self.buttonTare)
+        layout.addWidget(self.calibration_weight)
+        layout.addWidget(self.buttonCal)
+        layout.addWidget(self.buttonDone)
+
+        layoutH.addLayout(layout2)
+        layoutH.addLayout(layout)
+        layoutH.addWidget(self.log_textbox)
+
+    def _set_layout(self) -> None:
+    layout = QtGui.QVBoxLayout()
 
         layout.addWidget(self.buttonWeigh)
         layout.addWidget(self.buttonTare)
@@ -268,9 +275,9 @@ class direct_pyboard_dialog(QtGui.QDialog):
         the pyboard. This is useful for e.g. flushing solenoids or testing
         a task.
      """ 
-    def __init__(self,setup_id,GUI,parent=None):
-        super(direct_pyboard_dialog,self).__init__(parent)
-        self.setGeometry(10, 30, 500, 200) # Left, top, width, height.
+    def __init__(self, setup_id, GUI, parent=None):
+        super(direct_pyboard_dialog, self).__init__(parent)
+        self.setGeometry(10, 30, 500, 200)  # Left, top, width, height.
         self.setup_id = setup_id
         self.selected_task = 'None'
         self.GUI = GUI
@@ -285,15 +292,14 @@ class direct_pyboard_dialog(QtGui.QDialog):
         database.controllers[self.setup_id]
         self.reject = self._done
 
-
-        #self.setGeometry(10, 30, 400, 200) # Left, top, width, height.
+        # self.setGeometry(10, 30, 400, 200) # Left, top, width, height.
         self.task_combo = QtGui.QComboBox()
         self.task_combo.addItems(['None'] + get_tasks(self.GUI.GUI_filepath))
 
         self.start_stop_button = QtGui.QPushButton('Start')
         self.start_stop_button.clicked.connect(self.start_stop)
 
-        #self.onClose_chechbox = QtGui.Qte
+        # self.onClose_chechbox = QtGui.Qte
         self.onClose_chechbox = QtGui.QCheckBox("Stop task when closing dialog?")
         self.onClose_chechbox.setChecked(True)
 
@@ -312,26 +318,26 @@ class direct_pyboard_dialog(QtGui.QDialog):
     def start_stop(self):
         """ Button that allows you to start and stop task"""
 
-        if self.start_stop_button.text()=="Start":
+        if self.start_stop_button.text() == "Start":
             self.selected_task = self.task_combo.currentText()
-            if self.task_combo.currentText()!='None':
+            if self.task_combo.currentText() != 'None':
                 self.process_data("Uploading: " + str(self.selected_task))
                 self.PYC.setup_state_machine(sm_name=self.selected_task)
                 self.PYC.start_framework()
             self.start_stop_button.setText("Stop")
-        elif self.start_stop_button.text()=="Stop":
+        elif self.start_stop_button.text() == "Stop":
             self.PYC.stop_framework()
             self.start_stop_button.setText("Start")
 
+    def _done(self) -> None:
 
-    def _done(self):
         del database.controllers[self.setup_id].data_consumers[-1]  #remove this dialog from the data consumers of the system handler
         if self.onClose_chechbox.isChecked():
             self.PYC.stop_framework()  #stop the framework
         self.accept()   #close the dialog
 
 
-    def process_data(self,msg):
+    def process_data(self, msg):
         "function to accept data from the system handler"
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
         self.log_textbox.insertPlainText(str(msg)+'\n')

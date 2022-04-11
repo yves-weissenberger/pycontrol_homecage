@@ -37,6 +37,7 @@ class system_tab(QtGui.QWidget):
         self.login_button = QtGui.QPushButton('Login')
         self.add_user_button = QtGui.QPushButton('Add User')
         self.logout_button = QtGui.QPushButton('Logout')
+        self._set_user_layout()
 
     def _set_user_layout(self) -> None:
         self.Hlayout_users = QtGui.QHBoxLayout()

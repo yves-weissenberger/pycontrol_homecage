@@ -71,7 +71,6 @@ class GUIApp(QtGui.QMainWindow):
         self.refresh_timer.start(100)
 
     def refresh(self) -> None:
-        # print(self.setup_window_tab.callibrate_dialog)
         for k, SC in database.controllers.items():
             SC.check_for_data()
 
@@ -99,7 +98,6 @@ class GUIApp(QtGui.QMainWindow):
 
     def print_msg(self, msg: str, ac_pyc: str = None, setup_ID=None) -> None:
         self.system_tab.write_to_log(msg)
-
         if ac_pyc == 'pyc':
             pass
 

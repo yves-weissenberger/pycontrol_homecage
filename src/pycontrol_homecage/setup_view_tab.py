@@ -15,7 +15,6 @@ class setups_tab(QtGui.QWidget):
         super(QtGui.QWidget, self).__init__(parent)
 
         self.board = None
-        self.callibrate_dialog = None
         self.configure_box_dialog = None
 
         # initialise each of the tab regions then bind them
@@ -24,7 +23,7 @@ class setups_tab(QtGui.QWidget):
         self._init_update_setup()
         self._init_setup_table()
         self._set_global_tab_layout()
-        
+
     def _init_add_setup(self) -> None:
 
         self.CAT = QtGui.QGroupBox("Add Setup")  # the main container

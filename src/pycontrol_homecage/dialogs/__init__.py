@@ -1,0 +1,2 @@
+from pycontrol_homecage.dialogs.calibrate_dialog import calibrate_dialog
+from pycontrol_homecage.dialogs.box_conn_dialog import box_conn_dialog

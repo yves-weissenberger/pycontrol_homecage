@@ -6,21 +6,19 @@ from queue import Queue
 from typing import Callable
 
 import pandas as pd
-from pycontrol_homecage.homecage_config.paths import tasks_dir
+from pycontrol_homecage.homecage_config.paths import tasks_dir, data_dir
 from pycontrol_homecage.loc_def import mice_dir, protocol_dir
 import pycontrol_homecage.db as database
-
-# from utils import find_prev_base
-
-from .data_logger import Data_logger
-from .access_control import Access_control
+from pycontrol_homecage.com.data_logger import Data_logger
+from pycontrol_homecage.com.access_control import Access_control
+from pycontrol_homecage.com.pycboard import Pycboard
 
 
 class system_controller(Data_logger):
 
     """ This is a class that sits on top of access control and pycboard classes
-        and controls data storage for the system as well as setting tasks when 
-        mice enter/exit the training apparatus. There is one system controller 
+        and controls data storage for the system as well as setting tasks when
+        mice enter/exit the training apparatus. There is one system controller
         for each homecage system.
     """
     def __init__(self, GUI, print_func: Callable = print, data_consumers: list = [], setup_id=None) -> None:
@@ -36,7 +34,7 @@ class system_controller(Data_logger):
         self.print_func = print_func
         self.active = False
         self.mouse_in_AC = None
-        self.data_dir = GUI.paths['data_dir']
+        self.data_dir = data_dir
         self.data_file = None
 
         self.print_queue = Queue()
@@ -58,7 +56,7 @@ class system_controller(Data_logger):
         self.has_AC = True
         self._check_active()
 
-    def add_PYC(self, pyc) -> None:
+    def add_PYC(self, pyc: Pycboard) -> None:
 
         self.PYC = pyc
         self.has_PYC = True
@@ -81,8 +79,7 @@ class system_controller(Data_logger):
             self.PYC.process_data()  # process data
 
     def process_data(self, new_data):
-        '''If data _file is open new data is written to file.  If print_func is specified
-        human readable data strings are passed to it.'''
+        '''If data _file is open new data is written to file.'''
         if self.data_file:
             self.write_to_file(new_data)
         if self.data_consumers:
@@ -96,7 +93,6 @@ class system_controller(Data_logger):
         """ Here process the data from the access control system to
             actually do stuff: open/close files, update csv files with
             weights etc
-
         """
 
         # the time at which the data was received
@@ -244,7 +240,6 @@ class system_controller(Data_logger):
                         newStage = True
                         stage += 1
 
-
         task = mouse_prot[str(stage)]['task']
 
         database.mouse_df.loc[database.mouse_df['RFID']==self.mouse_data['RFID'],'Task'] = task
@@ -252,7 +247,7 @@ class system_controller(Data_logger):
 
         self.PYC.setup_state_machine(sm_name=task)
 
-        #handle setting varibles
+        # handle setting varibles
 
         for k, defV in mouse_prot[str(stage)]['defaultV']:
             self.PYC.set_variable(k, float(defV))

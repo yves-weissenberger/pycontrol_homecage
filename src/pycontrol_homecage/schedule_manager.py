@@ -57,7 +57,7 @@ class scheduler(QtGui.QWidget):
         self.task_combo.addItems(['Select Task'] + self.available_tasks)
         self.task_combo.currentIndexChanged.connect(self.picked_task)
 
-        #track value stuff
+        # track value stuff
         self.trackV_label = QtGui.QLabel("Track value")
         self.trackV_combo = QtGui.QComboBox()
         self.trackV_add = QtGui.QPushButton("Add")
@@ -106,7 +106,7 @@ class scheduler(QtGui.QWidget):
         self.Hlayout4.addWidget(self.trackV_label)
         self.Hlayout4.addWidget(self.trackV_combo)
         self.Hlayout4.addWidget(self.trackV_add)
-        #self.Hlayout4.addWidget(self.add_stage_button)
+        # self.Hlayout4.addWidget(self.add_stage_button)
 
         self.Vlayout_add = QtGui.QVBoxLayout()
         self.Vlayout_add.addLayout(self.Hlayout1)
@@ -117,11 +117,11 @@ class scheduler(QtGui.QWidget):
 
         self.ATP.setLayout(self.Vlayout_add)
 
-        self.protocol_table = protocol_table(GUI=self.GUI, tab=self)
+        self.protocol_table = protocol_table(tab=self)
 
         self.dummy_overview = QtGui.QGroupBox('Current Stage Overview')
         self.dummy_layout = QtGui.QVBoxLayout()
-        self.protocol_table_dummy = protocol_table(GUI=self.GUI, tab=self, nRows=1)
+        self.protocol_table_dummy = protocol_table(tab=self, nRows=1)
         self.dummy_layout.addWidget(self.protocol_table_dummy)
         self.dummy_overview.setLayout(self.dummy_layout)
 
@@ -140,7 +140,7 @@ class scheduler(QtGui.QWidget):
     def set_stage_task(self):
 
         "set task for a given stage"
-        pth = os.path.join(tasks_dir,self.task_combo.currentText()+'.py')
+        pth = os.path.join(tasks_dir, self.task_combo.currentText()+'.py')
 
         self.stage_dict = {'stage_nr': len(self.prot_dict),
                            'task': self.task_combo.currentText(),
