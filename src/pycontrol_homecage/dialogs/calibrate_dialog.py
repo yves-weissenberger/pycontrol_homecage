@@ -16,7 +16,7 @@ class calibrate_dialog(QtGui.QDialog):
 
         self._setup_buttons()
         self._setup_calibration_weight_lineedit()
-        self._setup_layout()
+        self._set_dialog_layout()
 
     def _setup_buttons(self) -> None:
         self.buttonDone = QtGui.QPushButton('Done')
@@ -38,7 +38,7 @@ class calibrate_dialog(QtGui.QDialog):
         self.log_textbox.setFont(QtGui.QFont('Courier', 9))
         self.log_textbox.setReadOnly(True)
 
-    def _setup_layout(self) -> None:
+    def _set_dialog_layout(self) -> None:
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.buttonWeigh)
         layout.addWidget(self.buttonTare)

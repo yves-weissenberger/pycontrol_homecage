@@ -11,7 +11,7 @@ from pyqtgraph.Qt import QtGui, QtCore
 from serial.tools import list_ports
 
 
-from pycontrol_homecage.loc_def import user_path, all_paths
+from pycontrol_homecage.loc_def import user_path, all_paths, task_dir
 
 
 def custom_excepthook(type_, exception, traceback_, filepath):
@@ -28,8 +28,6 @@ def custom_excepthook(type_, exception, traceback_, filepath):
         traceback.print_exception(type_, exception, traceback_, file=f)
         f.write(now + '\n')
     sys._excepthook(type_, exception, traceback)
-
-
 
 
 # --------------------------------------------------------------------------------
@@ -176,7 +174,7 @@ def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFr
     return task_df, exp_df, setup_df, mouse_df
 
 
-def get_tasks(task_dir: str) -> List[str]:
+def get_tasks() -> List[str]:
     """ Function to read available tasks from the tasks folder """
 
     tasks = [t.split('.')[0] for t in os.listdir(task_dir) if t[-3:] == '.py']

@@ -53,7 +53,7 @@ class scheduler(QtGui.QWidget):
         self.task_set_button.clicked.connect(self.set_stage_task)
         self.task_set_button.setEnabled(False)
 
-        self.available_tasks = get_tasks(self.GUI.GUI_filepath)
+        self.available_tasks = get_tasks()
         self.task_combo.addItems(['Select Task'] + self.available_tasks)
         self.task_combo.currentIndexChanged.connect(self.picked_task)
 

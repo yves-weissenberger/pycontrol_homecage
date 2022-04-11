@@ -172,7 +172,7 @@ class configure_box_dialog(QtGui.QDialog):
         layoutH.addWidget(self.log_textbox)
 
     def _set_layout(self) -> None:
-    layout = QtGui.QVBoxLayout()
+        layout = QtGui.QVBoxLayout()
 
         layout.addWidget(self.buttonWeigh)
         layout.addWidget(self.buttonTare)
