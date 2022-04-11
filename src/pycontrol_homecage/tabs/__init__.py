@@ -1,0 +1,5 @@
+from pycontrol_homecage.tabs.experiment_overview_tab import experiment_tab
+from pycontrol_homecage.tabs.mouse_overview_tab import mouse_tab
+from pycontrol_homecage.tabs.protocol_assembly_tab import protocol_tab
+from pycontrol_homecage.tabs.setup_overview_tab import setups_tab
+from pycontrol_homecage.tabs.system_overview import system_tab

@@ -11,7 +11,7 @@ from pycontrol_homecage.loc_def import protocol_dir
 from pycontrol_homecage.tables import protocol_table
 
 
-class scheduler(QtGui.QWidget):
+class protocol_tab(QtGui.QWidget):
 
     """This tab is used to create protocols. These are multi step training
        protocols that use variables from pycontrol scripts to advance between

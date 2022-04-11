@@ -115,10 +115,10 @@ class Access_control(Pyboard):
                     # into the calibrate dialog
                     if 'cal' in msg:
 
-                        if self.GUI.setup_window_tab.callibrate_dialog:
-                            self.GUI.setup_window_tab.callibrate_dialog.print_msg(msg)
-                        if self.GUI.setup_window_tab.configure_box_dialog:
-                            self.GUI.setup_window_tab.configure_box_dialog.print_msg(msg)
+                        if self.GUI.setup_tab.callibrate_dialog:
+                            self.GUI.setup_tab.callibrate_dialog.print_msg(msg)
+                        if self.GUI.setup_tab.configure_box_dialog:
+                            self.GUI.setup_tab.configure_box_dialog.print_msg(msg)
 
                     self.data_logger.process_data_AC(messages)
 

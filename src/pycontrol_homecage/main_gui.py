@@ -2,11 +2,11 @@ import os
 
 from pyqtgraph.Qt import QtGui, QtCore
 
-from pycontrol_homecage.mouse_overview import mouse_window
-from pycontrol_homecage.setup_view_tab import setups_tab
-from pycontrol_homecage.schedule_manager import scheduler
-from pycontrol_homecage.system_overview import system_tab
-from pycontrol_homecage.experiment_tab import experiment_tab
+from pycontrol_homecage.tabs import mouse_tab
+from pycontrol_homecage.tabs import setups_tab
+from pycontrol_homecage.tabs import protocol_tab
+from pycontrol_homecage.tabs import system_tab
+from pycontrol_homecage.tabs import experiment_tab
 from pycontrol_homecage.dialogs import login_dialog, add_user_dialog
 import pycontrol_homecage.db as database
 
@@ -41,9 +41,9 @@ class GUIApp(QtGui.QMainWindow):
         self.refresh()    # Refresh tasks and ports lists.
 
     def _init_tabs(self) -> None:
-        self.mouse_window_tab = mouse_window(self)
-        self.setup_window_tab = setups_tab(self)
-        self.schedule_tab = scheduler(self)
+        self.mouse_tab = mouse_tab(self)
+        self.setup_tab = setups_tab(self)
+        self.protocol_tab = protocol_tab(self)
         self.system_tab = system_tab(self)
         self.experiment_tab = experiment_tab(self)
 
@@ -51,14 +51,14 @@ class GUIApp(QtGui.QMainWindow):
         self.tab_widget = QtGui.QTabWidget(self)
         self.tab_widget.addTab(self.system_tab, 'System Overview')
         self.tab_widget.addTab(self.experiment_tab, 'Experiments')
-        self.tab_widget.addTab(self.mouse_window_tab, 'Mouse Overview')
-        self.tab_widget.addTab(self.setup_window_tab, 'Setup Overview')
-        self.tab_widget.addTab(self.schedule_tab, 'Task scheduler')
+        self.tab_widget.addTab(self.mouse_tab, 'Mouse Overview')
+        self.tab_widget.addTab(self.setup_tab, 'Setup Overview')
+        self.tab_widget.addTab(self.protocol_tab, 'Protocols')
 
     def _disable_gui_pre_login(self) -> None:
-        self.mouse_window_tab.setEnabled(False)
-        self.setup_window_tab.setEnabled(False)
-        self.schedule_tab.setEnabled(False)
+        self.mouse_tab.setEnabled(False)
+        self.setup_tab.setEnabled(False)
+        self.protocol_tab.setEnabled(False)
         self.system_tab.setup_groupbox.setEnabled(False)
         self.system_tab.log_groupbox.setEnabled(False)
         self.system_tab.experiment_groupbox.setEnabled(False)
@@ -77,20 +77,20 @@ class GUIApp(QtGui.QMainWindow):
             if self.system_tab.plot_isactive:
                 self.system_tab.experiment_plot.update()
 
-        self.setup_window_tab._refresh()
+        self.setup_tab._refresh()
         self.system_tab._refresh()
         self.experiment_tab._refresh()
-        self.mouse_window_tab._refresh()
-        self.schedule_tab._refresh()
+        self.mouse_tab._refresh()
+        self.protocol_tab._refresh()
 
     def change_user(self) -> None:
         self.login.exec_()
         self.active_user = self.login.userID
         if self.active_user:
             self.setWindowTitle('Logged in as {}'.format(self.active_user))
-            self.mouse_window_tab.setEnabled(True)
-            self.setup_window_tab.setEnabled(True)
-            self.schedule_tab.setEnabled(True)
+            self.mouse_tab.setEnabled(True)
+            self.setup_tab.setEnabled(True)
+            self.protocol_tab.setEnabled(True)
             self.system_tab.setup_groupbox.setEnabled(True)
             self.system_tab.log_groupbox.setEnabled(True)
             self.system_tab.experiment_groupbox.setEnabled(True)
@@ -108,9 +108,9 @@ class GUIApp(QtGui.QMainWindow):
     def logout_user(self):
         self.active_user = None
         self.setWindowTitle('Not logged in')
-        self.mouse_window_tab.setEnabled(False)
-        self.setup_window_tab.setEnabled(False)
-        self.schedule_tab.setEnabled(False)
+        self.mouse_tab.setEnabled(False)
+        self.setup_tab.setEnabled(False)
+        self.protocol_tab.setEnabled(False)
         self.system_tab.setup_groupbox.setEnabled(False)
         self.system_tab.log_groupbox.setEnabled(False)
         self.system_tab.experiment_groupbox.setEnabled(False)
@@ -121,5 +121,5 @@ class GUIApp(QtGui.QMainWindow):
         self.system_tab.list_of_experiments.fill_table()
         self.system_tab.list_of_setups.fill_table()
         self.experiment_tab.list_of_experiments.fill_table()
-        self.mouse_window_tab.list_of_mice.fill_table()
-        self.setup_window_tab.list_of_setups.fill_table()
+        self.mouse_tab.list_of_mice.fill_table()
+        self.setup_tab.list_of_setups.fill_table()

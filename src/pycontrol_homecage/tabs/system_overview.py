@@ -190,7 +190,7 @@ class system_tab(QtGui.QWidget):
         self.list_of_experiments.fill_table()
 
         self.GUI.experiment_tab.list_of_experiments.fill_table()
-        self.GUI.setup_window_tab.list_of_setups.fill_table()
+        self.GUI.setup_tab.list_of_setups.fill_table()
 
     def write_to_log(self, msg, from_sys=None):
 

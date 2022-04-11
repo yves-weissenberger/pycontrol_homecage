@@ -3,7 +3,7 @@
   File "/Users/yves/Documents/Code/pyhomecage/GUI.py", line 194, in <module>
     gui = Visualizator()
   File "/Users/yves/Documents/Code/pyhomecage/GUI.py", line 90, in __init__
-    self.schedule_tab = scheduler(self)
+    self.protocol_tab = scheduler(self)
   File "/Users/yves/Documents/Code/pyhomecage/schedule_manager.py", line 57, in __init__
     self.available_tasks = get_tasks(self.GUI.GUI_filepath)
   File "/Users/yves/Documents/Code/pyhomecage/utils.py", line 156, in get_tasks

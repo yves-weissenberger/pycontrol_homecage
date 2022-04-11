@@ -129,7 +129,7 @@ class configure_box_dialog(QtGui.QDialog):
         self.ac.serial.write(b'weigh')
 
     def _done(self):
-        self.ac.GUI.setup_window_tab.configure_box_dialog = None  #sorry
+        self.ac.GUI.setup_tab.configure_box_dialog = None  #sorry
         self.accept()
 
     def print_msg(self,msg):

@@ -180,7 +180,7 @@ class system_controller(Data_logger):
             self.PYC.start_framework()
 
             self._update_database_on_entry(self.mouse_data['weight'], mouse_ID)
-            self.GUI.setup_window_tab.list_of_setups.fill_table()
+            self.GUI.setup_tab.list_of_setups.fill_table()
             self.GUI.system_tab.list_of_setups.fill_table()
 
     def _update_database_on_entry(self, mouse_weight: float, mouse_ID: str) -> None:

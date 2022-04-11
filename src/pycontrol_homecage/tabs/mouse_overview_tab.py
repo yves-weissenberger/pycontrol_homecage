@@ -11,7 +11,7 @@ from pycontrol_homecage.loc_def import main_path
 import pycontrol_homecage.db as database
 
 
-class mouse_window(QtGui.QWidget):
+class mouse_tab(QtGui.QWidget):
 
     def __init__(self, parent: QtGui.QMainWindow = None):
 

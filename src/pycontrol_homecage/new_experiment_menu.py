@@ -406,7 +406,7 @@ class new_experiment_dialog(QtGui.QDialog):
 
 
             database.mouse_df.to_csv(database.mouse_df.file_location)
-            self.GUI.mouse_window_tab.list_of_mice.fill_table()
+            self.GUI.mouse_tab.list_of_mice.fill_table()
 
 
             #update experiment information
@@ -438,7 +438,7 @@ class new_experiment_dialog(QtGui.QDialog):
 
             database.exp_df.to_csv(database.exp_df.file_location)
             database.setup_df.to_csv(database.setup_df.file_location)
-            self.GUI.setup_window_tab.list_of_setups.fill_table()
+            self.GUI.setup_tab.list_of_setups.fill_table()
             self.GUI.system_tab.list_of_setups.fill_table()
             self.GUI.system_tab.list_of_experiments.fill_table()
 
