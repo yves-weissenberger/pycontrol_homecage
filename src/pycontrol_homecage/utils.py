@@ -1,6 +1,9 @@
 from typing import List, Tuple
 import os
 import re
+import sys
+import traceback
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
@@ -9,6 +12,24 @@ from serial.tools import list_ports
 
 
 from pycontrol_homecage.loc_def import user_path, all_paths
+
+
+def custom_excepthook(type_, exception, traceback_, filepath):
+    """ A custom exception hook that prints
+        exceptions to a file so that they can then be used as alerts
+        for an email daemon
+    """
+    now = datetime.strftime(datetime.now(), '%Y-%m-%d-%H%M%S')
+
+    with open(filepath, 'a') as f:
+        f.write('----------------- \n')
+        f.write(repr(type_))
+        f.write(repr(exception))
+        traceback.print_exception(type_, exception, traceback_, file=f)
+        f.write(now + '\n')
+    sys._excepthook(type_, exception, traceback)
+
+
 
 
 # --------------------------------------------------------------------------------

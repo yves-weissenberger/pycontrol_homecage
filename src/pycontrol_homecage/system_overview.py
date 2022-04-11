@@ -15,65 +15,13 @@ class system_tab(QtGui.QWidget):
         self.GUI = self.parent()
         self.plot_isactive = False
 
-        # ------------------------------ #
-        # ----------- Users ------------ #
-        # ------------------------------ #
-        self.user_groupbox = QtGui.QGroupBox('Users')
+        self._init_user_groupbox()
 
-        self.user_label = QtGui.QLabel()
-        self.user_label.setText("Users")
+        self._init_experiment_groupbox()
 
-        self.Hlayout_users = QtGui.QHBoxLayout()
-
-        self.login_button = QtGui.QPushButton('Login')
-        self.add_user_button = QtGui.QPushButton('Add User')
-        self.logout_button = QtGui.QPushButton('Logout')
-
-        self.Hlayout_users.addWidget(self.login_button)
-        self.Hlayout_users.addWidget(self.add_user_button)
-        self.Hlayout_users.addWidget(self.logout_button)
-        self.user_groupbox.setLayout(self.Hlayout_users)
-
-        self.add_box_button = QtGui.QPushButton('Add Box')
-
-
-        # ------------------------------ #
-        # -------- Experiments  -------- #
-        # ------------------------------ #
-
-
-        # Experiments Table
-        self.experiment_groupbox = QtGui.QGroupBox("Experiments")
-        self.scrollable_experiments = QtGui.QScrollArea()
-        self.scrollable_experiments.setWidgetResizable(True)
-        self.list_of_experiments = experiment_overview_table(only_active=True)
-        self.scrollable_experiments.setWidget(self.list_of_experiments)
-
-        # Buttons to control stuff
-        self.start_experiment_button = QtGui.QPushButton('Start New Experiment')
-        self.start_experiment_button.clicked.connect(self.start_new_experiment)
-
-        self.end_experiment_button = QtGui.QPushButton('End Experiment')
-        self.end_experiment_button.clicked.connect(self.end_experiment)
-
-        self.Hlayout_exp_buttons = QtGui.QHBoxLayout()
-        self.Hlayout_exp_buttons.addWidget(self.start_experiment_button)
-        self.Hlayout_exp_buttons.addWidget(self.end_experiment_button)
-
-        self.Vlayout_exp = QtGui.QVBoxLayout(self)
-        self.Vlayout_exp.addLayout(self.Hlayout_exp_buttons)
-        self.Vlayout_exp.addWidget(self.scrollable_experiments)
-
-        self.experiment_groupbox.setLayout(self.Vlayout_exp)
-
-
-        # ------------------------ #
-        # -------- Setups  ------- #
-        # ------------------------ #
-
-        #Setups table
+        # Setups table
         self.setup_groupbox = QtGui.QGroupBox("Setups")
-        self.scrollable_setups =  QtGui.QScrollArea()
+        self.scrollable_setups = QtGui.QScrollArea()
         self.scrollable_setups.setWidgetResizable(True)
         self.list_of_setups = cageTable(self.GUI)
         self.scrollable_setups.setWidget(self.list_of_setups)
@@ -139,22 +87,64 @@ class system_tab(QtGui.QWidget):
 
         self.Vlayout = QtGui.QVBoxLayout(self)
 
-        #self.Vlayout.addWidget(self.user_label)
-        #self.Vlayout.addLayout(self.Hlayout_users)
         self.Vlayout.addWidget(self.user_groupbox)
 
         self.Vlayout.addWidget(self.experiment_groupbox)
-        #self.Vlayout.addWidget(self.setup_label)
-        #self.Vlayout.addLayout(self.Hlayout_setup_buttons)
 
         self.Vlayout.addWidget(self.setup_groupbox)
         self.Vlayout.addWidget(self.log_groupbox)
 
+    def _init_user_groupbox(self):
+
+        self.user_groupbox = QtGui.QGroupBox('Users')
+
+        self.user_label = QtGui.QLabel()
+        self.user_label.setText("Users")
+
+        self.login_button = QtGui.QPushButton('Login')
+        self.add_user_button = QtGui.QPushButton('Add User')
+        self.logout_button = QtGui.QPushButton('Logout')
+
+        self.Hlayout_users = QtGui.QHBoxLayout()
+        self.Hlayout_users.addWidget(self.login_button)
+        self.Hlayout_users.addWidget(self.add_user_button)
+        self.Hlayout_users.addWidget(self.logout_button)
+        self.user_groupbox.setLayout(self.Hlayout_users)
+
+    def _init_experiment_groupbox(self):
+
+        self.experiment_groupbox = QtGui.QGroupBox("Experiments")
+        self.scrollable_experiments = QtGui.QScrollArea()
+        self.scrollable_experiments.setWidgetResizable(True)
+        self.list_of_experiments = experiment_overview_table(only_active=True)
+        self.scrollable_experiments.setWidget(self.list_of_experiments)
+
+        self._init_experiment_buttons()
+
+        self._set_experiment_layout()
+
+    def _init_experiment_buttons(self):
+        self.start_experiment_button = QtGui.QPushButton('Start New Experiment')
+        self.start_experiment_button.clicked.connect(self.start_new_experiment)
+
+        self.end_experiment_button = QtGui.QPushButton('End Experiment')
+        self.end_experiment_button.clicked.connect(self.end_experiment)
+
+    def _set_experiment_layout(self):
+        self.Hlayout_exp_buttons = QtGui.QHBoxLayout()
+        self.Hlayout_exp_buttons.addWidget(self.start_experiment_button)
+        self.Hlayout_exp_buttons.addWidget(self.end_experiment_button)
+
+        self.Vlayout_exp = QtGui.QVBoxLayout(self)
+        self.Vlayout_exp.addLayout(self.Hlayout_exp_buttons)
+        self.Vlayout_exp.addWidget(self.scrollable_experiments)
+
+        self.experiment_groupbox.setLayout(self.Vlayout_exp)
 
     def activate_plot(self):
         " start plotting incoming data from an experiment"
 
-        if len(database.exp_df)>0: #check first if an experiment is running
+        if len(database.exp_df) > 0:  # check first if an experiment is running
 
             self.experiment_plot = Experiment_plot()
 
