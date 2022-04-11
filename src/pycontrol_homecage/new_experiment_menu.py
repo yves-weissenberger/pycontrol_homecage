@@ -13,26 +13,27 @@ import pycontrol_homecage.db as database
 
 
 class new_experiment_dialog(QtGui.QDialog):
+    """This Class represents a dialog that is used to configure the details of a new experiment
 
+    """
     def __init__(self, GUI, parent=None):
         super(new_experiment_dialog, self).__init__(parent)
 
         self.GUI = GUI
         self.setGeometry(100, 30, 1300, 600)  # Left, top, width, height.
 
-        self.df_setup_tmp = pd.DataFrame(columns=['COM','COM_AC','Setup_ID',
-                                                'in_use','connected','User','Experiment',
-                                                'Protocol','Mouse_training','Door','n_mice'
-                                                ]
-                                        )
+        self.df_setup_tmp = pd.DataFrame(columns=['COM', 'COM_AC', 'Setup_ID',
+                                                  'in_use', 'connected', 'User', 'Experiment',
+                                                  'Protocol', 'Mouse_training', 'Door', 'n_mice'
+                                                  ]
+                                         )
 
-        self.df_mouse_tmp = pd.DataFrame(columns=['Mouse_ID','RFID','Sex','Age','Experiment',
-                                             'Protocol','Stage','Task','User','Start_date','Current_weight',
-                                             'Start_weight','is_training','is_assigned',
-                                             'training_log','Setup_ID','in_system'
-                                             ]
-                                        )
-
+        self.df_mouse_tmp = pd.DataFrame(columns=['Mouse_ID', 'RFID', 'Sex', 'Age', 'Experiment',
+                                                  'Protocol', 'Stage', 'Task', 'User', 'Start_date', 'Current_weight',
+                                                  'Start_weight', 'is_training', 'is_assigned',
+                                                  'training_log', 'Setup_ID', 'in_system'
+                                                  ]
+                                         )
 
         self.used_setups = []
         self.used_mice = []
@@ -41,7 +42,7 @@ class new_experiment_dialog(QtGui.QDialog):
 
         self.left_column = QtGui.QVBoxLayout()
 
-        #### Data related to experiment
+        # Data related to experiment
         self.exp_name_groupbox = QtGui.QGroupBox('Status')
 
         self.expLabel = QtGui.QLabel()

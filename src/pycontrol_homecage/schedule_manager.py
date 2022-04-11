@@ -13,7 +13,13 @@ from pycontrol_homecage.tables import protocol_table
 
 class scheduler(QtGui.QWidget):
 
-    " In this tab create schedules for tasks "
+    """This tab is used to create protocols. These are multi step training
+       protocols that use variables from pycontrol scripts to advance between
+       different stages of training. 
+       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+       THIS CODE IS NOT REALLY TESTED
+       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    """
 
     def __init__(self, parent=None):
 
@@ -25,7 +31,7 @@ class scheduler(QtGui.QWidget):
         self.stage_dict = {}
         self.task_variables = []
 
-        #add stage to protocol
+        # add stage to protocol
         self.ATP = QtGui.QGroupBox("Add stage to protocol")
 
         self.protocol_namer = QtGui.QLineEdit("")

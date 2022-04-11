@@ -65,14 +65,13 @@ class Access_control(Pyboard):
             self.status['serial'] = False
             raise(e)
 
-
-    def load_framework(self, framework_dir: str=framework_dir, accCtrl_dir: str=accCtrl_dir) -> None:
+    def load_framework(self, framework_dir: str = framework_dir, accCtrl_dir: str = accCtrl_dir) -> None:
         '''Copy the pyControl framework folder to the board.'''
 
         self.print('\nTransfering access control framework to pyboard.', end='')
 
-        self.transfer_folder(accCtrl_dir, file_type='py', show_progress=True)    #upload access control framework
-        self.transfer_file(os.path.join(accCtrl_dir,'main_script_for_pyboard.py'),'main.py')
+        self.transfer_folder(accCtrl_dir, file_type='py', show_progress=True)    # upload access control framework
+        self.transfer_file(os.path.join(accCtrl_dir, 'main_script_for_pyboard.py'), 'main.py')
 
         try:
             self.exec('from access_control_upy.access_control_1_0 import Access_control_upy')
@@ -87,10 +86,10 @@ class Access_control(Pyboard):
         try:
             self.exec('from main import handler')
             self.exec_raw_no_follow('handler().run()')
-            #print(self.eval('print(run)'))
+            # print(self.eval('print(run)'))
         except PyboardError as e:
             raise(e)
-        #self.exec('run()')
+        # self.exec('run()')
         print("OK")
 
     def process_data(self):
@@ -98,7 +97,7 @@ class Access_control(Pyboard):
         # Just send each message as being 16 characters long. That way
         # can just check padding. Should be fine
 
-        #requires GUI, or other object with access to dataframes to be here
+        # requires GUI, or other object with access to dataframes to be here
 
         if self.data_logger.GUI is not None:
 
@@ -112,7 +111,8 @@ class Access_control(Pyboard):
                         f.write(msg+'_'+datetime.now().strftime('-%Y-%m-%d-%H%M%S')+'\n')
 
                 for msg in messages:
-                    #This is a horrible information flow. The point is simply to print into the calibrate dialog
+                    # This is a horrible information flow. The point is simply to print
+                    # into the calibrate dialog
                     if 'cal' in msg:
 
                         if self.GUI.setup_window_tab.callibrate_dialog:
