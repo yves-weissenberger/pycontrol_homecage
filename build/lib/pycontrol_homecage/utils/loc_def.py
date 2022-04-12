@@ -1,9 +1,7 @@
 import os
 import pandas as pd
-import json
 
-config = json.loads("../config.json")
-ROOT = config["ROOT"]
+ROOT = r'../all_data_path'
 if not os.path.isdir(ROOT):
     os.mkdir(ROOT)
 
@@ -16,12 +14,7 @@ mice_dir = os.path.join(ROOT, 'mice')
 protocol_dir = os.path.join(ROOT, 'prot')
 
 
-user_path = os.path.join(ROOT, "users.txt")
-if not os.path.isfile(user_path):
-    with open(user_path, 'w') as f:
-        f.writeline('system_email: "{}"'.format(config["System_email"]))
-        f.writeline('password: "{}"'.format(config["System_email"]))
-
+user_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'users.txt')
 main_path = os.path.dirname(os.path.abspath(__file__))
 
 

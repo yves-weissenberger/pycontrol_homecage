@@ -3,7 +3,6 @@ import random
 import smtplib
 import ssl
 from string import ascii_lowercase
-# from pycontrol_homecage.emailer import send_email probably best to port to here eventually
 
 from pycontrol_homecage.utils import get_users, get_pyhomecage_email
 from pycontrol_homecage.utils.loc_def import user_path
@@ -55,19 +54,12 @@ class add_user_dialog(QtGui.QDialog):
 
         self.textName.setEnabled(False)
         self.textEmail.setEnabled(False)
-        message = self._construct_email()
-        self.send_email(message, sender_email, password, self.receiver_email)
-
-    def send_email(self, message: str, sender_email: str,
-                   password: str, receiver_email: str
-                   ) -> None:
-
-        # Email setup
         port = 587  # For starttls
         smtp_server = "smtp.gmail.com"
-        context = ssl.create_default_context()
+        receiver_email = self.textEmail.text()
 
-        # Open conext and send email
+        message = self._construct_email()
+        context = ssl.create_default_context()
         with smtplib.SMTP(smtp_server, port) as server:
             server.ehlo()  # Can be omitted
             server.starttls(context=context)

@@ -220,7 +220,7 @@ class system_controller(Data_logger):
         with open(os.path.join(protocol_dir, prot), 'r') as f:
             mouse_prot = json.loads(f.read())
 
-        #read last stage of training
+        # read last stage of training
         logPth = os.path.join(mice_dir, mouse_ID + '.csv')
         df_mouseLog = pd.read_csv(logPth)
 
@@ -266,10 +266,9 @@ class system_controller(Data_logger):
         prot = mouse_info['Protocol'].values[0]
         task = mouse_info['Task'].values[0]
 
-
-        file_name = '_'.join([mouse_ID, exp,task, now]) + '.txt'
-        fullpath_to_datafile = os.path.join(self.data_dir,exp,mouse_ID,prot,file_name)
-        self._save_taskFile_run() # save a copy of the taskfile that was run
+        file_name = '_'.join([mouse_ID, exp, task, now]) + '.txt'
+        fullpath_to_datafile = os.path.join(self.data_dir, exp, mouse_ID, prot, file_name)
+        self._save_taskFile_run()  # save a copy of the taskfile that was run
 
         self.data_file = open(fullpath_to_datafile, 'w', newline = '\n')
 
@@ -288,7 +287,6 @@ class system_controller(Data_logger):
             # save it to a new file
             with open(fullpath_to_datafile[:-4] + '_taskFile.txt','w') as f_backup:
                 f_backup.writelines(dat_)
-
 
     def close_files(self):
         ##NEED TO UPDATE THIS FUNCTION SO THAT ON ERROR IT CLOSES THE DATA FILES AND 

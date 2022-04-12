@@ -100,7 +100,6 @@ def cbox_set_item(cbox, item_name, insert=False) -> bool:
 
 
 def get_pyhomecage_email() -> Tuple[str, str]:
-    """ Return email and password of the system email account """
     lines_ = open(user_path, 'r').readlines()
     sender_email = re.findall('"(.*)"', [l_ for l_ in lines_ if 'system_email' in l_][0])[0]
     password = re.findall('"(.*)"', [l_ for l_ in lines_ if 'password' in l_][0])[0]

@@ -108,7 +108,7 @@ class Access_control(Pyboard):
                 messages = re.findall('start_(.*?)_end', read)
                 for msg in messages:
                     with open(self.logger_path, 'a') as f:
-                        f.write(msg+'_'+datetime.now().strftime('-%Y-%m-%d-%H%M%S')+'\n')
+                        f.write(msg + '_' + datetime.now().strftime('-%Y-%m-%d-%H%M%S')+'\n')
 
                 for msg in messages:
                     # This is a horrible information flow. The point is simply to print
@@ -133,5 +133,3 @@ class Access_control(Pyboard):
 
     def rfid_read_tag(self):
         return eval(self.eval('access_control.rfid.read_tag()').decode())
-
-

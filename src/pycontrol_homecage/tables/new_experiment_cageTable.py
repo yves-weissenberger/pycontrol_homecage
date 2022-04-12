@@ -6,15 +6,17 @@ from pycontrol_homecage.com.pycboard import _djb2_file
 from pycontrol_homecage.utils import get_tasks
 import pycontrol_homecage.db as database
 
-"""This class is used when configuring a new experiment """
-class cage_list_table(QtGui.QTableWidget):
+
+class new_experiment_cageTable(QtGui.QTableWidget):
+
+    """This table is used when configuring a new experiment """
 
     def __init__(self, GUI, tab, parent=None):
         super(QtGui.QTableWidget, self).__init__(1, 12, parent=parent)
-        self.header_names = ['Show mice','Shared Protocol','Protocol',
-                             'COM','COM_AC','Setup_ID',
-                             'in_use','connected','User','Experiment',
-                             'Protocol','Mouse_training','Door','n_mice']
+        self.header_names = ['Show mice', 'Shared Protocol', 'Protocol',
+                             'COM', 'COM_AC', 'Setup_ID',
+                             'in_use', 'connected', 'User', 'Experiment',
+                             'Protocol', 'Mouse_training', 'Door', 'n_mice']
 
         self.GUI = GUI
         self.tab = tab
