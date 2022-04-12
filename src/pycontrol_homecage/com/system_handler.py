@@ -7,7 +7,7 @@ from typing import Callable
 
 import pandas as pd
 from pycontrol_homecage.homecage_config.paths import tasks_dir, data_dir
-from pycontrol_homecage.loc_def import mice_dir, protocol_dir
+from pycontrol_homecage.utils.loc_def import mice_dir, protocol_dir
 import pycontrol_homecage.db as database
 from pycontrol_homecage.com.data_logger import Data_logger
 from pycontrol_homecage.com.access_control import Access_control

@@ -2,11 +2,11 @@ import os
 
 from pyqtgraph.Qt import QtGui, QtCore
 
-from pycontrol_homecage.tabs import mouse_tab
-from pycontrol_homecage.tabs import setups_tab
-from pycontrol_homecage.tabs import protocol_tab
-from pycontrol_homecage.tabs import system_tab
-from pycontrol_homecage.tabs import experiment_tab
+from pycontrol_homecage.gui_tabs import mouse_tab
+from pycontrol_homecage.gui_tabs import setups_tab
+from pycontrol_homecage.gui_tabs import protocol_tab
+from pycontrol_homecage.gui_tabs import system_tab
+from pycontrol_homecage.gui_tabs import experiment_tab
 from pycontrol_homecage.dialogs import login_dialog, add_user_dialog
 import pycontrol_homecage.db as database
 

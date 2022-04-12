@@ -4,7 +4,7 @@ import smtplib
 import ssl
 
 from pycontrol_homecage.utils import get_users, get_pyhomecage_email
-from pycontrol_homecage.loc_def import user_path
+from pycontrol_homecage.utils.loc_def import user_path
 
 
 class add_user_dialog(QtGui.QDialog):

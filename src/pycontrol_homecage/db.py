@@ -2,7 +2,7 @@
 import sys
 
 from pycontrol_homecage.utils import load_data_csv
-from pycontrol_homecage.loc_def import all_paths
+from pycontrol_homecage.utils.loc_def import all_paths
 # this is a pointer to the module object instance itself.
 this = sys.modules[__name__]
 

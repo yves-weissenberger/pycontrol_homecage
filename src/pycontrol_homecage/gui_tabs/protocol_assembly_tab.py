@@ -7,7 +7,7 @@ from pycontrol_homecage.homecage_config.paths import tasks_dir
 
 
 from pycontrol_homecage.utils import get_variables_from_taskfile, get_tasks
-from pycontrol_homecage.loc_def import protocol_dir
+from pycontrol_homecage.utils.loc_def import protocol_dir
 from pycontrol_homecage.tables import protocol_table
 
 

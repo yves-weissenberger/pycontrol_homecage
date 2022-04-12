@@ -11,7 +11,7 @@ from pyqtgraph.Qt import QtGui, QtCore
 from serial.tools import list_ports
 
 
-from pycontrol_homecage.loc_def import user_path, all_paths, task_dir
+from pycontrol_homecage.utils.loc_def import user_path, all_paths, task_dir
 
 
 def custom_excepthook(type_, exception, traceback_, filepath):

@@ -8,7 +8,7 @@ from pyqtgraph.Qt import QtGui
 
 from pycontrol_homecage.utils import get_tasks
 from pycontrol_homecage.tables import mouse_list_table, cage_list_table, variables_table
-from pycontrol_homecage.loc_def import data_dir, mice_dir, protocol_dir
+from pycontrol_homecage.utils.loc_def import data_dir, mice_dir, protocol_dir
 import pycontrol_homecage.db as database
 
 
@@ -123,9 +123,9 @@ class new_experiment_dialog(QtGui.QDialog):
         #####################################################
         #############     Overview of setups     ############
         #####################################################
-        self.CLT = cage_list_table(GUI=self.GUI,tab=self)
-        self.setups_column.addWidget(self.CAT,1)
-        self.setups_column.addWidget(self.CLT,10)
+        self.CLT = cage_list_table(GUI=self.GUI, tab=self)
+        self.setups_column.addWidget(self.CAT, 1)
+        self.setups_column.addWidget(self.CLT, 10)
         self.setup_groupbox.setLayout(self.setups_column)
         self.setup_groupbox.setEnabled(False)
         #self.CLT

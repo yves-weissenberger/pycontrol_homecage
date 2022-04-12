@@ -7,7 +7,7 @@ import json
 from pycontrol_homecage.dialogs import are_you_sure_dialog, mouse_summary_dialog
 from pycontrol_homecage.tables import MouseTable, variables_table
 from pycontrol_homecage.utils import get_variables_and_values_from_taskfile
-from pycontrol_homecage.loc_def import main_path
+from pycontrol_homecage.utils.loc_def import main_path
 import pycontrol_homecage.db as database
 
 
