@@ -1,16 +1,12 @@
-from typing import List, Tuple
+import json
+from typing import List, Optional, Tuple
 import os
 import re
 import sys
 import traceback
 from datetime import datetime
-from enum import Enum
 
 import pandas as pd
-import numpy as np
-from pyqtgraph.Qt import QtGui, QtCore
-from serial.tools import list_ports
-
 
 from pycontrol_homecage.utils.loc_def import user_path, all_paths, task_dir
 
@@ -30,113 +26,41 @@ def custom_excepthook(type_, exception, traceback_, filepath):
         f.write(now + '\n')
     sys._excepthook(type_, exception, traceback)
 
-
-# --------------------------------------------------------------------------------
-
-def null_resize(widget):
-    '''Call a widgets resize event with its current size.  Used when rows are added
-    by user to tables to prevent mangling of the table layout.'''
-    size = QtCore.QSize(widget.frameGeometry().width(), widget.frameGeometry().height())
-    resize = QtGui.QResizeEvent(size, size)
-    widget.resizeEvent(resize)
-
-
 # --------------------------------------------------------------------------------
 
 
+def get_root_path() -> str:
+    """ Read root path from config.json file"""
+    return get_config()["ROOT"]
 
 
+def get_paths() -> List[str]:
 
-# --------------------------------------------------------------------------------
-
-
-
-class TableCheckbox(QtGui.QWidget):
-    '''Checkbox that is centered in cell when placed in table.'''
-
-    def __init__(self, parent=None):
-        super(QtGui.QWidget, self).__init__(parent)
-        self.checkbox = QtGui.QCheckBox(parent=parent)
-        self.layout = QtGui.QHBoxLayout(self)
-        self.layout.addWidget(self.checkbox)
-        self.layout.setAlignment(QtCore.Qt.AlignCenter)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-
-    def isChecked(self):
-        return self.checkbox.isChecked()
-
-    def setChecked(self, state):
-        self.checkbox.setChecked(state)
-
-# --------------------------------------------------------------------------------
+    path_list = ["data", "tasks", "setups", "loggers", "experiments", "mice", "prot"]
+    return list(map(get_path, path_list))
 
 
-def cbox_update_options(cbox, options):
-    '''Update the options available in a qcombobox without changing the selection.'''
-    selected = str(cbox.currentText())
-    available = sorted(list(set([selected]+options)))
-    i = available.index(selected)
-    cbox.clear()
-    cbox.addItems(available)
-    cbox.setCurrentIndex(i)
+def get_config() -> dict:
+    config_path = os.path.join(os.path.split(os.path.dirname(__file__))[0], "config.json")
+    config = json.load(open(config_path, 'r'))
+    return config
 
 
-def cbox_set_item(cbox, item_name, insert=False) -> bool:
-    '''Set the selected item in a combobox to the name provided.  If name is
-    not in item list returns False if insert is False or inserts item if insert
-    is True.'''
-    index = cbox.findText(item_name, QtCore.Qt.MatchFixedString)
-    if index >= 0:
-        cbox.setCurrentIndex(index)
-        return True
-    else:
-        if insert:
-            cbox.insertItem(0, item_name)
-            cbox.setCurrentIndex(0)
-            return True
-        else:
-            return False
-# ----------------------------------------------------------------------------------
+def get_path(path_type) -> str:
+
+    path_list = ["data", "tasks", "setups", "loggers", "experiments", "mice", "prot"]
+    assert path_type in path_list, "PATH must be one of {}".format(path_list)
+    return os.path.join(get_root_path(), path_type)
 
 
 def get_pyhomecage_email() -> Tuple[str, str]:
+    """ Return email and password of the system email account """
     lines_ = open(user_path, 'r').readlines()
     sender_email = re.findall('"(.*)"', [l_ for l_ in lines_ if 'system_email' in l_][0])[0]
     password = re.findall('"(.*)"', [l_ for l_ in lines_ if 'password' in l_][0])[0]
     return sender_email, password
 
 
-def find_setups():
-
-    ports = list(set([c[0] for c in list_ports.comports() if ('Pyboard' in c[1]) or ('USB Serial Device' in c[1])]))
-    return ports
-
-
-def get_variables_from_taskfile(pth: str) -> List[str]:
-    "Helper function to scan python script and return variables in that script"
-    with open(pth, 'r') as f:
-        txt = f.read()
-
-    variables = re.findall(r'(v\.[^\s ]*) {0,2}=', txt)
-    variables = list(set(variables))
-    return variables
-
-
-def get_variables_and_values_from_taskfile(pth: str) -> dict[str, str]:
-    "Helper function to scan python script and return variables in that script"
-    with open(pth, 'r') as f:
-        txt = f.readlines()
-
-    var_dict = {}
-    for line in txt:
-        if ('v.' in line) and ('=' in line):
-            var_ = re.findall(r'(v\.[^\s]*)', line)[0].strip()
-            val_ = re.findall(r'v\..*=(.*)[#|\n]', line)[0]
-            var_dict[var_] = val_
-        if 'run_start' in line:
-            break
-
-    return var_dict
 
 
 def get_users() -> List[str]:
@@ -181,29 +105,3 @@ def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFr
             mouse_df.drop(col, inplace=True, axis=1)
 
     return task_df, exp_df, setup_df, mouse_df
-
-
-def get_tasks() -> List[str]:
-    """ Function to read available tasks from the tasks folder """
-
-    tasks = [t.split('.')[0] for t in os.listdir(task_dir) if t[-3:] == '.py']
-    return tasks
-
-
-def find_prev_base(dat) -> float:
-    """Find most recent baseline weight (going back in time). This is
-       to account for drift in the system. Gets the 5 most recent baseline
-       measurements
-    """
-    store = []
-    wbase = 0
-    for line in reversed(dat):  # start at the end and work through the lines
-        tmp = re.findall(r'Wbase:([0-9]*\.[0-9]*)_', line)
-        if tmp:
-            store.append(float(tmp[0]))
-            if len(store) > 5:
-                break
-
-    wbase = np.mean(store)
-
-    return wbase

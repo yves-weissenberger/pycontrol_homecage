@@ -1,2 +1,4 @@
-import pycontrol_homecage.utils.loc_def
 from pycontrol_homecage.utils.utils import *
+from pycontrol_homecage.utils.qt_utils import *
+from pycontrol_homecage.utils.pycontrol_utils import *
+#from pycontrol_homecage.utils.setup_utils import *
