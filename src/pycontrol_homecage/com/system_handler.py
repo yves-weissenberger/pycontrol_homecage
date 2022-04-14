@@ -6,8 +6,7 @@ from queue import Queue
 from typing import Callable
 
 import pandas as pd
-from pycontrol_homecage.homecage_config.paths import tasks_dir, data_dir
-from pycontrol_homecage.utils.loc_def import mice_dir, protocol_dir
+from pycontrol_homecage.utils import get_path
 import pycontrol_homecage.db as database
 from pycontrol_homecage.com.data_logger import Data_logger
 from pycontrol_homecage.com.access_control import Access_control
@@ -34,7 +33,7 @@ class system_controller(Data_logger):
         self.print_func = print_func
         self.active = False
         self.mouse_in_AC = None
-        self.data_dir = data_dir
+        self.data_dir = get_path("data")
         self.data_file = None
 
         self.print_queue = Queue()
@@ -217,11 +216,11 @@ class system_controller(Data_logger):
         # If running a real protocol, handle (potential) update of protocol.
         newStage = False
         stage = mouse_info['Stage'].values[0]
-        with open(os.path.join(protocol_dir, prot), 'r') as f:
+        with open(os.path.join(get_path("protocols"), prot), 'r') as f:
             mouse_prot = json.loads(f.read())
 
         # read last stage of training
-        logPth = os.path.join(mice_dir, mouse_ID + '.csv')
+        logPth = os.path.join(get_path("mice"), mouse_ID + '.csv')
         df_mouseLog = pd.read_csv(logPth)
 
         if len(df_mouseLog) > 0:
@@ -281,7 +280,7 @@ class system_controller(Data_logger):
 
     def _save_taskFile_run(self, fullpath_to_datafile: str, task: str) -> None:
         # read the task file uploaded to pyboard
-        with open(os.path.join(tasks_dir, task+'.py'), 'r') as f_:
+        with open(os.path.join(get_path("tasks"), task+'.py'), 'r') as f_:
             dat_ = f_.readlines()
 
             # save it to a new file
@@ -351,7 +350,7 @@ class system_controller(Data_logger):
         mouse_row = database.mouse_df.loc[database.mouse_df['RFID'] == self.mouse_data['RFID']]
         mouse_ID = mouse_row['Mouse_ID'].values[0]
 
-        logPth = os.path.join(mice_dir, mouse_ID+'.csv')
+        logPth = os.path.join(get_path("mice"), mouse_ID+'.csv')
         df_mouseLog = pd.read_csv(logPth)
 
         entry_nr = len(df_mouseLog)

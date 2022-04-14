@@ -5,8 +5,7 @@ import ssl
 from string import ascii_lowercase
 # from pycontrol_homecage.emailer import send_email probably best to port to here eventually
 
-from pycontrol_homecage.utils import get_users, get_pyhomecage_email
-from pycontrol_homecage.utils.loc_def import user_path
+from pycontrol_homecage.utils import get_users, get_pyhomecage_email, get_path
 
 
 class add_user_dialog(QtGui.QDialog):
@@ -52,10 +51,12 @@ class add_user_dialog(QtGui.QDialog):
         self.receiver_email = str(self.textEmail.text())
         self.user = str(self.textName.text())
         sender_email, password = get_pyhomecage_email()
+        print(sender_email)
+        print(password)
 
         self.textName.setEnabled(False)
         self.textEmail.setEnabled(False)
-        message = self._construct_email()
+        message = self._construct_email(self.code)
         self.send_email(message, sender_email, password, self.receiver_email)
 
     def send_email(self, message: str, sender_email: str,
@@ -91,7 +92,7 @@ class add_user_dialog(QtGui.QDialog):
         if str(self.confirm_email.text()) == str(self.code):
             # !!!!!!!!!!   FIX TO IGNORE CASE   !!!!!!!!!!!!!!!!!
             if self.user.lower() not in [i.lower() for i in self.users]:
-                with open(user_path, 'a') as file:
+                with open(get_path("users.txt"), 'a') as file:
                     user_details = "user_data:{'"+str(self.user) + "':' " + str(self.receiver_email) + "'}"
                     file.writelines('\n'+user_details)
         self.accept()

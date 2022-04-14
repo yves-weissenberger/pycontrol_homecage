@@ -2,7 +2,7 @@
 import sys
 
 from pycontrol_homecage.utils import load_data_csv
-from pycontrol_homecage.utils.loc_def import all_paths
+from pycontrol_homecage.utils import get_paths 
 # this is a pointer to the module object instance itself.
 this = sys.modules[__name__]
 
@@ -16,7 +16,7 @@ this.updated = False
 # These are print consumers that ensure that things are printer to the correct place
 this.print_consumers = {}
 
-ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = all_paths
+ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = get_paths()
 
 this.paths = {'ROOT': ROOT,
               'task_dir': task_dir,

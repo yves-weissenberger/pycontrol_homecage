@@ -5,7 +5,7 @@ from functools import partial
 from pyqtgraph.Qt import QtGui
 
 from pycontrol_homecage.main_gui import GUIApp
-from pycontrol_homecage.utils.loc_def import all_paths, create_paths
+from pycontrol_homecage.utils import get_path
 from pycontrol_homecage.utils import custom_excepthook
 
 
@@ -13,9 +13,7 @@ def initialise_excepthook() -> None:
     """Initialise a custom excepthook that prints errors to a log
        in addition to shutting down the program
     """
-    print(all_paths)
-    _, _, _, setup_dir, _, _, _, _ = all_paths
-
+    setup_dir= get_path("setups")
     sys._excepthook = sys.excepthook
 
     exception_path = os.path.join(setup_dir, 'exception_store.txt')
@@ -32,7 +30,6 @@ def main() -> None:
 
 if __name__ == "__main__":
 
-    create_paths(all_paths)
     initialise_excepthook()
 
     app = main()

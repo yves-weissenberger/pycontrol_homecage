@@ -17,7 +17,7 @@ def get_root_path() -> str:
 
 def get_path(path_type) -> str:
 
-    path_list = ["data", "tasks", "setups", "loggers", "experiments", "mice", "prot"]
+    path_list = ["data", "tasks", "setups", "loggers", "experiments", "mice", "prot","users.txt"]
     assert path_type in path_list, "PATH must be one of {}".format(path_list)
     return os.path.join(get_root_path(), path_type)
 

@@ -2,11 +2,12 @@ import re
 import os
 from typing import List
 from serial.tools import list_ports
+from pycontrol_homecage.utils import get_path
 
 def get_tasks() -> List[str]:
     """ Function to read available tasks from the tasks folder """
 
-    tasks = [t.split('.')[0] for t in os.listdir(task_dir) if t[-3:] == '.py']
+    tasks = [t.split('.')[0] for t in os.listdir(get_path("tasks")) if t[-3:] == '.py']
     return tasks
 
 

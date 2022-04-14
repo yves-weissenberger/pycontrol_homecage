@@ -1,3 +1,4 @@
+from distutils.core import setup
 import json
 from typing import List, Optional, Tuple
 import os
@@ -7,9 +8,6 @@ import traceback
 from datetime import datetime
 
 import pandas as pd
-
-from pycontrol_homecage.utils.loc_def import user_path, all_paths, task_dir
-
 
 def custom_excepthook(type_, exception, traceback_, filepath):
     """ A custom exception hook that prints
@@ -27,7 +25,8 @@ def custom_excepthook(type_, exception, traceback_, filepath):
     sys._excepthook(type_, exception, traceback)
 
 # --------------------------------------------------------------------------------
-
+def get_user_path() -> str:
+    return get_root_path() + "users.txt"
 
 def get_root_path() -> str:
     """ Read root path from config.json file"""
@@ -36,7 +35,7 @@ def get_root_path() -> str:
 
 def get_paths() -> List[str]:
 
-    path_list = ["data", "tasks", "setups", "loggers", "experiments", "mice", "prot"]
+    path_list = ["data", "tasks", "setups", "loggers", "experiments", "mice", "protocols"]
     return list(map(get_path, path_list))
 
 
@@ -48,23 +47,23 @@ def get_config() -> dict:
 
 def get_path(path_type) -> str:
 
-    path_list = ["data", "tasks", "setups", "loggers", "experiments", "mice", "prot"]
+    path_list = ["data", "tasks", "setups", "loggers", "experiments", "mice", "protocols", "users.txt"]
     assert path_type in path_list, "PATH must be one of {}".format(path_list)
     return os.path.join(get_root_path(), path_type)
 
 
 def get_pyhomecage_email() -> Tuple[str, str]:
     """ Return email and password of the system email account """
-    lines_ = open(user_path, 'r').readlines()
-    sender_email = re.findall('"(.*)"', [l_ for l_ in lines_ if 'system_email' in l_][0])[0]
-    password = re.findall('"(.*)"', [l_ for l_ in lines_ if 'password' in l_][0])[0]
+    lines_ = open(get_path("users.txt"), 'r').readlines()
+    sender_email = re.findall('system_email: "(.*)"password', [l_ for l_ in lines_ if 'system_email' in l_][0])[0]
+    password = re.findall('password.*"(.*)"', [l_ for l_ in lines_ if 'password' in l_][0])[0]
     return sender_email, password
 
 
 
 
 def get_users() -> List[str]:
-    dat = open(user_path, 'r').readlines()
+    dat = open(get_path("users.txt"), 'r').readlines()
     user_dat = [re.findall(r'({.*})', l_)[0] for l_ in dat if 'user_data' in l_]
     user_dict_list = [eval(i) for i in user_dat]
     user_dict = {k: v for d in user_dict_list for k, v in d.items()}
@@ -73,7 +72,7 @@ def get_users() -> List[str]:
 
 
 def get_user_dicts() -> dict[str, str]:
-    dat = open(user_path, 'r').readlines()
+    dat = open(get_path("users.txt"), 'r').readlines()
 
     user_dat = [re.findall(r'({.*})', l_)[0] for l_ in dat if 'user_data' in l_]
     user_dict_list = [eval(i) for i in user_dat]
@@ -83,7 +82,7 @@ def get_user_dicts() -> dict[str, str]:
 
 def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
-    ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = all_paths
+    task_dir, experiment_dir, setup_dir, mice_dir = tuple(map(get_path,["tasks", "experiments", "setups", "mice"]))
     fp = os.path.join(task_dir, 'tasks.csv')
     task_df = pd.read_csv(fp)
     task_df.file_location = fp
@@ -101,7 +100,7 @@ def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFr
     mouse_df.file_location = fp
 
     for col in mouse_df.columns:
-        if 'Unnamed' in col:
+        if 'unnamed' in col:
             mouse_df.drop(col, inplace=True, axis=1)
 
     return task_df, exp_df, setup_df, mouse_df
