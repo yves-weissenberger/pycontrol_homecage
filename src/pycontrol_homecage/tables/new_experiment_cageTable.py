@@ -72,7 +72,7 @@ class new_experiment_cageTable(QtGui.QTableWidget):
 
             protocols = QtGui.QComboBox()
 
-            self.available_tasks = get_tasks(database.paths['task_dir'])
+            self.available_tasks = get_tasks()
             protocols.addItems(['Select Task'] + self.available_tasks)
             protocols.setEnabled(False)
             # QtGui.QTableWidgetItem()

@@ -1,6 +1,7 @@
 from typing import List
+from pycontrol_homecage.com.messages import MessageRecipient
 
-from pyqtgraph.Qt import QtGui
+from pyqtgraph.Qt import QtGui, QtCore
 
 from pycontrol_homecage.dialogs import are_you_sure_dialog, cage_summary_dialog, configure_box_dialog, direct_pyboard_dialog
 from pycontrol_homecage.tables import cageTable
@@ -106,12 +107,16 @@ class setups_tab(QtGui.QWidget):
         checked_setup_ix = self._is_single_setup_selected()
 
         if checked_setup_ix:
+            checked_setup_ix = checked_setup_ix[0]
             setup_col = self.list_of_setups.header_names.index("Setup_ID")
             checked_setup_id = self.list_of_setups.item(checked_setup_ix, setup_col).text()
             for k, G in database.controllers.items():
                 if k == checked_setup_id:
-                    self.configure_box_dialog = direct_pyboard_dialog(k, self.GUI)
-                    self.configure_box_dialog.exec_()
+                    
+                    self.direct_pyboard_dialog = direct_pyboard_dialog(k)
+                    database.print_consumers[MessageRecipient.direct_pyboard_dialog] = self.direct_pyboard_dialog.print_msg
+                    self.direct_pyboard_dialog.exec_()
+                    del database.print_consumers[MessageRecipient.direct_pyboard_box_dialog]
         else:
             pass
             print('You must edit one setup at a time')
@@ -122,9 +127,11 @@ class setups_tab(QtGui.QWidget):
 
         isChecked = []
         for row in range(self.list_of_setups.rowCount()):
-            isChecked.append(self.list_of_setups.item(row, self.list_of_setups.select_nr).checkState() == 2)
+            row_checked = self.list_of_setups.item(row, self.list_of_setups.select_col_ix).checkState() == QtCore.Qt.Checked
+            if row_checked:
+                isChecked.append(row)
 
-        return isChecked if sum(isChecked) == 1 else []
+        return isChecked if len(isChecked) == 1 else []
 
     def _is_any_setup_connected(self) -> None:
         """ Are any setups connected. Raises a flag if not setups are connected """
@@ -139,7 +146,7 @@ class setups_tab(QtGui.QWidget):
         isChecked = []
 
         for row in range(self.list_of_setups.rowCount()):
-            isChecked.append(self.list_of_setups.item(row, self.list_of_setups.select_nr).checkState() == 2)
+            isChecked.append(self.list_of_setups.item(row, self.list_of_setups.select_col_ix).checkState() == QtCore.Qt.Checked)
 
         if len(database.controllers) == 0:
             boxM = QtGui.QMessageBox()
@@ -154,8 +161,10 @@ class setups_tab(QtGui.QWidget):
             for k, G in database.controllers.items():
                 if k == checked_setup_id:
 
-                    self.configure_box_dialog = configure_box_dialog(k, self.GUI)
+                    self.configure_box_dialog = configure_box_dialog(k)
+                    database.print_consumers[MessageRecipient.configure_box_dialog] = self.configure_box_dialog.print_msg
                     self.configure_box_dialog.exec_()
+                    del  database.print_consumers[MessageRecipient.configure_box_dialog]
 
         else:
             pass
@@ -210,7 +219,7 @@ class setups_tab(QtGui.QWidget):
         """ Remove cage from df and CSV file """
         isChecked = []
         for row in range(self.list_of_setups.rowCount()):
-            isChecked.append(self.list_of_setups.item(row, self.list_of_setups.select_nr).checkState() == 2)
+            isChecked.append(self.list_of_setups.item(row, self.list_of_setups.select_col_ix).checkState() == 2)
 
         if any(isChecked):
             sure = are_you_sure_dialog()

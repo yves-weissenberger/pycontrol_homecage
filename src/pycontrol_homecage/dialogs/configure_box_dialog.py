@@ -7,11 +7,10 @@ import pycontrol_homecage.db as database
 class configure_box_dialog(QtGui.QDialog):
     """ Dialog window that allows you to upload harware definitions etc """ 
 
-    def __init__(self, setup_id, GUI, parent=None):
+    def __init__(self, setup_id, parent=None):
         super(configure_box_dialog, self).__init__(parent)
         self.setGeometry(10, 30, 500, 200) # Left, top, width, height.
         self.setup_id = setup_id
-        self.GUI = GUI
         layoutH = QtGui.QHBoxLayout(self)
 
 
@@ -128,10 +127,9 @@ class configure_box_dialog(QtGui.QDialog):
         self.ac.serial.write(b'weigh')
 
     def _done(self):
-        self.ac.GUI.setup_tab.configure_box_dialog = None  #sorry
         self.accept()
 
-    def print_msg(self,msg):
+    def print_msg(self, msg: str):
         "print weighing messages"
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
 

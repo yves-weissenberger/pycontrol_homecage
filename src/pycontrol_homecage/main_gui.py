@@ -1,8 +1,8 @@
 import os
-from pycontrol_homecage.com.messages import MessageRecipient
 
 from pyqtgraph.Qt import QtGui, QtCore
 
+from pycontrol_homecage.com.messages import MessageRecipient
 from pycontrol_homecage.gui_tabs import mouse_tab
 from pycontrol_homecage.gui_tabs import setups_tab
 from pycontrol_homecage.gui_tabs import protocol_tab
@@ -24,6 +24,7 @@ class GUIApp(QtGui.QMainWindow):
         database.setup_df['connected'] = False
 
         self._init_tabs()
+        database.print_consumers[MessageRecipient.system_overview] = self.system_tab.write_to_log
         self._add_tabs_to_widget()
         self._disable_gui_pre_login()
        
@@ -90,15 +91,19 @@ class GUIApp(QtGui.QMainWindow):
             if self.system_tab.plot_isactive:
                 self.system_tab.experiment_plot.update()
 
+        self.refresh_tabs()
+        if database.update_table_queue:
+            self._reset_tables()
+
+        if database.message_queue:
+            self.print_dispatch()
+
+    def refresh_tabs(self) -> None:
         self.setup_tab._refresh()
         self.system_tab._refresh()
         self.experiment_tab._refresh()
         self.mouse_tab._refresh()
         self.protocol_tab._refresh()
-        if database.update_table_queue:
-            self._reset_tables()
-
-        self.print_msg()
 
     def change_user(self) -> None:
         self.login.exec_()
@@ -113,11 +118,24 @@ class GUIApp(QtGui.QMainWindow):
             self.system_tab.experiment_groupbox.setEnabled(True)
             self.experiment_tab.setEnabled(True)
 
-    def print_msg(self) -> None:
-        for mix, msg in enumerate(database.message_queue[:]):
-            if msg.recipient == MessageRecipient.system_overview:
-                self.system_tab.write_to_log(msg.text)
-                del database.message_queue[mix]
+
+    def print_dispatch(self) -> None:
+        """ This function iterates over the list of print statements and dispatches them to the approprirate receivers
+        """
+        print(len(database.message_queue))
+        dispatched = []  # These are the messages that are dispatched
+        for mix, msg in enumerate(list(database.message_queue)):
+            if msg.recipient in database.print_consumers:
+                database.print_consumers[msg.recipient](msg.text)
+                dispatched.append(mix)
+
+        # delete dispatched messages
+        for ix in reversed(dispatched):
+            del database.message_queue[ix]
+
+        # This just ensures that this never grows out of control in terms of memory usage
+        # if there is some bug the means messages for some consumer are not printed
+        database.message_queue = database.message_queue[-50:]
 
     def add_user_(self) -> None:
         self.add_user.exec_()
@@ -136,8 +154,6 @@ class GUIApp(QtGui.QMainWindow):
         self.experiment_tab.setEnabled(False)
 
     def _reset_tables(self):
-
-        while database.update_table_queue:
             update_table = database.update_table_queue.pop(0)
             if update_table=="all":
                 for table in self.table_map.values:

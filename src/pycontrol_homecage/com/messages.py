@@ -15,12 +15,13 @@ class MessageRecipient(Enum):
     system_overview = 1
     calibrate_dialog = 2
     configure_box_dialog = 3
+    direct_pyboard_dialog = 4
 
 
 class MessageSource(Enum):
     ACBoard = 1
     PYCBoard = 2
-    GUI =  3
+    GUI = 3
 
 
 @dataclass

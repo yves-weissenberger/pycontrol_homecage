@@ -10,9 +10,11 @@ import pandas as pd
 from pycontrol_homecage.com.access_control import Access_control
 from pycontrol_homecage.com.pycboard import PyboardError, Pycboard
 from pycontrol_homecage.com.system_handler import system_controller
+from pycontrol_homecage.com.messages import MessageRecipient
 from pycontrol_homecage.dialogs import calibrate_dialog
 from pycontrol_homecage.utils import find_setups
 import pycontrol_homecage.db as database
+
 
 
 class cageTable(QtGui.QTableWidget):
@@ -107,12 +109,14 @@ class cageTable(QtGui.QTableWidget):
             database.controllers[setup_id] = SC
             time.sleep(0.05)
             self.tab.callibrate_dialog = calibrate_dialog(ac=ac)
+            database.print_consumers[MessageRecipient.calibrate_dialog] = self.tab.callibrate_dialog.print_msg
             self.tab.callibrate_dialog.exec_()
-            print("CALIBRATE DIALOG DONE EXEC")
+            del database.print_consumers[MessageRecipient.calibrate_dialog]
+
             self.sender().setEnabled(False)
             self.fill_table()
             # self.GUI.system_tab.list_of_setups.fill_table()
-            database.update_table_queue("system_tab.list_of_setups")
+            database.update_table_queue.append("system_tab.list_of_setups")
 
         except (PyboardError, SerialException) as e:
 

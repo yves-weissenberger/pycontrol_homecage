@@ -10,12 +10,11 @@ class direct_pyboard_dialog(QtGui.QDialog):
         a task.
      """
 
-    def __init__(self, setup_id, GUI, parent=None):
+    def __init__(self, setup_id, parent=None):
         super(direct_pyboard_dialog, self).__init__(parent)
         self.setGeometry(10, 30, 500, 200)  # Left, top, width, height.
         self.setup_id = setup_id
         self.selected_task = 'None'
-        self.GUI = GUI
         layoutH = QtGui.QHBoxLayout(self)
 
         #
@@ -56,7 +55,7 @@ class direct_pyboard_dialog(QtGui.QDialog):
         if self.start_stop_button.text() == "Start":
             self.selected_task = self.task_combo.currentText()
             if self.task_combo.currentText() != 'None':
-                self.process_data("Uploading: " + str(self.selected_task))
+                self.print_msg("Uploading: " + str(self.selected_task))
                 self.PYC.setup_state_machine(sm_name=self.selected_task)
                 self.PYC.start_framework()
             self.start_stop_button.setText("Stop")
@@ -71,7 +70,7 @@ class direct_pyboard_dialog(QtGui.QDialog):
             self.PYC.stop_framework()  # stop the framework
         self.accept()   # close the dialog
 
-    def process_data(self, msg):
+    def print_msg(self, msg: str):
         "function to accept data from the system handler"
         self.log_textbox.moveCursor(QtGui.QTextCursor.End)
         self.log_textbox.insertPlainText(str(msg)+'\n')

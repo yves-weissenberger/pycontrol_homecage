@@ -6,3 +6,4 @@ from pycontrol_homecage.dialogs.add_user_dialog import add_user_dialog
 from pycontrol_homecage.dialogs.configure_box_dialog import configure_box_dialog
 from pycontrol_homecage.dialogs.mouse_summary_dialog import mouse_summary_dialog
 from pycontrol_homecage.dialogs.cage_summary_dialog import cage_summary_dialog
+from pycontrol_homecage.dialogs.direct_pyboard_dialog import direct_pyboard_dialog
