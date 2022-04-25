@@ -44,7 +44,7 @@ class MouseTable(QtGui.QTableWidget):
                         task_combo.installEventFilter(self)
                         task_combo.RFID = row['RFID']
                         cTask = database.mouse_df.loc[database.mouse_df['RFID']==row['RFID'],'Task'].values[0]
-                        task_combo.addItems([cTask] + get_tasks(database.paths['task_dir']))
+                        task_combo.addItems([cTask] + get_tasks() )
 
                         self.setCellWidget(row_index,table_col_ix,task_combo)
 

@@ -42,6 +42,10 @@ def create_user_file() -> None:
 
 def create_paths_and_empty_csvs(all_paths) -> None:
 
+    # This is thee data directory, doesn't have an empty csv in it
+    if not os.path.isdir(all_paths[0]):
+        os.mkdir(all_paths[0])
+
     for pth in all_paths[1:]:
         if not os.path.isdir(pth):
             os.mkdir(pth)

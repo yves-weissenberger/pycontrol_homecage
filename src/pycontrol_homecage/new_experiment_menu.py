@@ -8,7 +8,6 @@ from pyqtgraph.Qt import QtGui
 
 from pycontrol_homecage.utils import get_tasks
 from pycontrol_homecage.tables import mouse_list_table, new_experiment_cageTable, variables_table
-from pycontrol_homecage.utils.loc_def import data_dir, mice_dir, protocol_dir
 import pycontrol_homecage.db as database
 
 
@@ -60,7 +59,7 @@ class new_experiment_dialog(QtGui.QDialog):
         self.shared_protocol.stateChanged.connect(self._enable_prot_sel)
 
         self.protocol_combo = QtGui.QComboBox()
-        self.available_tasks = get_tasks(database.task_dir)
+        self.available_tasks = get_tasks()
         self.protocol_combo.addItems(['Select Task'] + self.available_tasks)
 
 
@@ -196,7 +195,7 @@ class new_experiment_dialog(QtGui.QDialog):
         #self.task_combo.currentIndexChanged.connect(self.picked_task)
 
 
-        self.mouse_var_table = variables_table(GUI=self.GUI)
+        self.mouse_var_table = variables_table()
 
         ###############################################################
         ###############################################################
@@ -346,11 +345,9 @@ class new_experiment_dialog(QtGui.QDialog):
 
             COM = str(self.setup_combo.currentText())
 
-            self.df_setup_tmp.loc[entry_nr]['Setup_ID'] = COM#str(time.time())#COM  #TESTCODE
+            self.df_setup_tmp.loc[entry_nr]['Setup_ID'] = COM
             self.df_setup_tmp.loc[entry_nr]['Experiment'] = self.set_experiment_name
             self.df_setup_tmp.loc[entry_nr]['Protocol'] = self.set_protocol
-            #print(111,database.setup_df['COM']==COM,database.setup_df['COM'])
-            #print(database.setup_df.loc[database.setup_df['COM']==COM])
 
             for col_name in database.setup_df.columns:
                 if col_name not in ['Setup_ID','Experiment','Protocol']:
@@ -366,9 +363,8 @@ class new_experiment_dialog(QtGui.QDialog):
 
     def _create_mouse_exp_log(self,mouse_ID):
 
-        #information is
         df_ = pd.DataFrame(columns=['entry_time','exit_time','weight','task','Variables','data_path'])
-        pth_ = os.path.join(mice_dir,mouse_ID+'.csv')
+        pth_ = os.path.join(database.paths["mice_dir"], mouse_ID + '.csv')
         df_.to_csv(pth_)
 
     def run_experiment(self):
@@ -377,7 +373,7 @@ class new_experiment_dialog(QtGui.QDialog):
         ADD WARNING IF YOU ARE DUPLICATING MOUSE NAMES OR RFIDS!!!!
         """
         ## Create all the paths for data
-        exp_path = os.path.join(data_dir,self.set_experiment_name)
+        exp_path = os.path.join(database.paths["data_dir"], self.set_experiment_name)
         if not os.path.isdir(exp_path):
             os.mkdir(exp_path)
 
