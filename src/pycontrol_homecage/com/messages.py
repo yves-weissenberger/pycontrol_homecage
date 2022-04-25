@@ -12,15 +12,15 @@ import pycontrol_homecage.db as database
 
 
 class MessageRecipient(Enum):
-    system_overview: 1
-    calibrate_dialog: 2
-    configure_box_dialog: 3
+    system_overview = 1
+    calibrate_dialog = 2
+    configure_box_dialog = 3
 
 
 class MessageSource(Enum):
-    ACBoard: 1
-    PYCBoard: 2
-    GUI: 3
+    ACBoard = 1
+    PYCBoard = 2
+    GUI =  3
 
 
 @dataclass

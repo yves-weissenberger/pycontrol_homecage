@@ -6,14 +6,14 @@ print(os.path.isfile(config_path))
 print(config_path)
 config = json.load(open(config_path, 'r'))
 
-ROOT = config["ROOT"]
+ROOT = os.path.abspath(config["ROOT"])
 if not os.path.isdir(ROOT):
     os.mkdir(ROOT)
 
 data_dir = os.path.join(ROOT, 'data')
 task_dir = os.path.join(ROOT, 'tasks')
 setup_dir = os.path.join(ROOT, 'setups')
-AC_logger_dir = os.path.join(setup_dir, 'loggers')
+AC_logger_dir = os.path.join(ROOT, 'loggers')
 experiment_dir = os.path.join(ROOT, 'experiments')
 mice_dir = os.path.join(ROOT, 'mice')
 protocol_dir = os.path.join(ROOT, 'prot')

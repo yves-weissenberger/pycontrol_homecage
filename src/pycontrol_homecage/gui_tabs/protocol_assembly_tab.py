@@ -3,12 +3,11 @@ import os
 import json
 
 
-from pycontrol_homecage.homecage_config.paths import tasks_dir
 
 
 from pycontrol_homecage.utils import get_variables_from_taskfile, get_tasks
-from pycontrol_homecage.utils.loc_def import protocol_dir
 from pycontrol_homecage.tables import protocol_table
+import pycontrol_homecage.db as database
 
 
 class protocol_tab(QtGui.QWidget):
@@ -140,7 +139,7 @@ class protocol_tab(QtGui.QWidget):
     def set_stage_task(self):
 
         "set task for a given stage"
-        pth = os.path.join(tasks_dir, self.task_combo.currentText()+'.py')
+        pth = os.path.join(database.paths["task_dir"], self.task_combo.currentText()+'.py')
 
         self.stage_dict = {'stage_nr': len(self.prot_dict),
                            'task': self.task_combo.currentText(),
@@ -239,7 +238,7 @@ class protocol_tab(QtGui.QWidget):
     def _refresh(self):
         pass
     def save(self):
-        pth = os.path.join(protocol_dir,self.protocol_name + '.prot')
+        pth = os.path.join(database.paths["protocol_dir"], self.protocol_name + '.prot')
         print(pth)
         with open(pth, 'w') as outfile:
             json.dump(self.prot_dict, outfile)

@@ -54,13 +54,13 @@ class system_controller(Data_logger):
 
         self.AC = ac
         self.has_AC = True
-        self._check_active()
+        self.check_active()
 
     def add_PYC(self, pyc: Pycboard) -> None:
 
         self.PYC = pyc
         self.has_PYC = True
-        self._check_active()
+        self.check_active()
 
     def check_active(self) -> None:
         if (self.has_AC and self.has_PYC):

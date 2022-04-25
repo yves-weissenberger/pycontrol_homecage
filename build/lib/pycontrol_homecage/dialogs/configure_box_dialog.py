@@ -1,7 +1,7 @@
 import os
 from pyqtgraph.Qt import QtGui
 
-from pycontrol_homecage.homecage_config.paths import config_dir
+
 import pycontrol_homecage.db as database
 
 
@@ -102,7 +102,7 @@ class configure_box_dialog(QtGui.QDialog):
 
     def load_hardware_definition(self):
         hwd_path = QtGui.QFileDialog.getOpenFileName(self, 'Select hardware definition:',
-                os.path.join(config_dir, 'hardware_definition.py'), filter='*.py')[0]
+                os.path.join(database.paths["config_dir"], 'hardware_definition.py'), filter='*.py')[0]
 
 
         self.log_textbox.insertPlainText('uploading hardware definition...')

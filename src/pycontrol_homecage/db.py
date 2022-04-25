@@ -1,5 +1,7 @@
 # from https://stackoverflow.com/questions/1977362/how-to-create-module-wide-variables-in-python
+from struct import pack
 import sys
+import os
 
 from pycontrol_homecage.utils import load_data_csv
 from pycontrol_homecage.utils.loc_def import all_paths
@@ -19,7 +21,7 @@ this.message_queue = []
 this.print_consumers = {}
 
 ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = all_paths
-
+package_path = os.path.split(__file__)[0]
 this.paths = {'ROOT': ROOT,
               'task_dir': task_dir,
               'experiment_dir': experiment_dir,
@@ -27,7 +29,12 @@ this.paths = {'ROOT': ROOT,
               'mice_dir': mice_dir,
               'data_dir': data_dir,
               'AC_logger_dir': AC_logger_dir,
-              'protocol_dir': protocol_dir
+              'protocol_dir': protocol_dir,
+
+              'framework_dir': os.path.join(package_path, "pyControl"),
+              "devices_dir": os.path.join(package_path, "devices"),
+              "config_dir": os.path.join(package_path, "pyControl_config"),
+              "access_control_dir": os.path.join(package_path, 'access_control_upy')
               }
 
 

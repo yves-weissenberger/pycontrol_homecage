@@ -5,10 +5,11 @@ import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 
-from pycontrol_homecage.homecage_config.gui_settings import (analog_history_dur, event_history_len,
-                                                             state_history_len
-                                                             )
 
+
+event_history_len  = 200  # Length of event history to plot (# events).
+state_history_len  = 100  # Length of state history to plot (# states). 
+analog_history_dur = 12   # Duration of analog signal history to plot (seconds).
 # ----------------------------------------------------------------------------------------
 # Task_plot
 # ----------------------------------------------------------------------------------------

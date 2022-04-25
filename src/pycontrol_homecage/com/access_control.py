@@ -7,7 +7,6 @@ from numpy import source
 from serial import SerialException
 from .pyboard import Pyboard, PyboardError
 
-from pycontrol_homecage.homecage_config.paths import accCtrl_dir, framework_dir
 import pycontrol_homecage.db as database
 from pycontrol_homecage.com.messages import MessageRecipient, MessageSource, emit_print_message
 
@@ -66,13 +65,13 @@ class Access_control(Pyboard):
             self.status['serial'] = False
             raise(e)
 
-    def load_framework(self, framework_dir: str = framework_dir, accCtrl_dir: str = accCtrl_dir) -> None:
+    def load_framework(self) -> None:
         '''Copy the pyControl framework folder to the board.'''
 
         self.print('\nTransfering access control framework to pyboard.', end='')
 
-        self.transfer_folder(accCtrl_dir, file_type='py', show_progress=True)    # upload access control framework
-        self.transfer_file(os.path.join(accCtrl_dir, 'main_script_for_pyboard.py'), 'main.py')
+        self.transfer_folder(database.paths["access_control_dir"], file_type='py', show_progress=True)    # upload access control framework
+        self.transfer_file(os.path.join(database.paths["access_control_dir"], 'main_script_for_pyboard.py'), 'main.py')
 
         try:
             self.exec('from access_control_upy.access_control_1_0 import Access_control_upy')

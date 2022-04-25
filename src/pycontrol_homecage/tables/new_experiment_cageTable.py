@@ -2,7 +2,7 @@ import os
 from pyqtgraph import Qt
 from pyqtgraph.Qt import QtCore, QtGui
 
-from pycontrol_homecage.com.pycboard import _djb2_file
+from pycontrol_homecage.com.pyboard import _djb2_file
 from pycontrol_homecage.utils import get_tasks
 import pycontrol_homecage.db as database
 
