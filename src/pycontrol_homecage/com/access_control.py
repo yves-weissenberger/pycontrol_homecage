@@ -116,16 +116,16 @@ class Access_control(Pyboard):
                     #     self.GUI.setup_tab.callibrate_dialog.print_msg(msg)
                     # if self.GUI.setup_tab.configure_box_dialog:
                     #     self.GUI.setup_tab.configure_box_dialog.print_msg(msg)
-                    if "calibrate_dialog" in database.print_consumers:
+                    if MessageRecipient.calibrate_dialog in database.print_consumers:
                         emit_print_message(print_text=msg,
-                                        recipeint=MessageRecipient.calibrate_dialog,
-                                        source=MessageSource.ACBoard
-                                        )
-                    if "configure_box_dialog" in database.print_consumers:
+                                           target=MessageRecipient.calibrate_dialog,
+                                           data_source=MessageSource.ACBoard
+                                           )
+                    if MessageRecipient.configure_box_dialog in database.print_consumers:
                         emit_print_message(print_text=msg,
-                                        recipeint=MessageRecipient.configure_box_dialog,
-                                        source=MessageSource.ACBoard
-                                        )
+                                           target=MessageRecipient.configure_box_dialog,
+                                           data_source=MessageSource.ACBoard
+                                           )
 
                 self.data_logger.process_data_AC(messages)
 

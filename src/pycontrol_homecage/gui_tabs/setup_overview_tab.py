@@ -114,9 +114,9 @@ class setups_tab(QtGui.QWidget):
                 if k == checked_setup_id:
                     
                     self.direct_pyboard_dialog = direct_pyboard_dialog(k)
-                    database.print_consumers[MessageRecipient.direct_pyboard_dialog] = self.direct_pyboard_dialog.print_msg
+                    # database.print_consumers[MessageRecipient.direct_pyboard_dialog] = self.direct_pyboard_dialog.print_msg
                     self.direct_pyboard_dialog.exec_()
-                    del database.print_consumers[MessageRecipient.direct_pyboard_box_dialog]
+                    # del database.print_consumers[MessageRecipient.direct_pyboard_box_dialog]
         else:
             pass
             print('You must edit one setup at a time')

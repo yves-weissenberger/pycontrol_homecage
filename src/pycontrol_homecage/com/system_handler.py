@@ -2,7 +2,6 @@ import json
 import os
 import time
 from datetime import datetime
-from queue import Queue
 from typing import Callable
 
 import pandas as pd
@@ -22,13 +21,12 @@ class system_controller(Data_logger):
         mice enter/exit the training apparatus. There is one system controller
         for each homecage system.
     """
-    def __init__(self, print_func: Callable = print, data_consumers: list = [], setup_id=None) -> None:
+    def __init__(self, print_func: Callable = print, setup_id=None) -> None:
 
         self.on = True
         self.setup_id = setup_id
         self.has_AC = False
         self.has_PYC = False
-        self.data_consumers = data_consumers
         self.analog_files = {}
         self.sm_info = {}
         self.print_func = print_func
@@ -37,7 +35,6 @@ class system_controller(Data_logger):
         self.data_dir = get_path("data")
         self.data_file = None
 
-        self.print_queue = Queue()
 
     def _handle_allow_entry(self) -> None:
         """ This resets the state of the dict that stores data about
@@ -82,15 +79,19 @@ class system_controller(Data_logger):
         '''If data _file is open new data is written to file.'''
         if self.data_file:
             self.write_to_file(new_data)
-        if self.data_consumers:
-            for data_consumer in self.data_consumers:
-                data_consumer.process_data(new_data)
 
         # self.GUI.print_msg(new_data, ac_pyc='pyc')
-        self.emit_print_message(new_data,
-                                MessageRecipient.system_overview,
+        emit_print_message(new_data,
+                            MessageRecipient.system_overview,
+                            MessageSource.PYCBoard
+                            )
+
+        if MessageRecipient.direct_pyboard_dialog in database.print_consumers:
+            emit_print_message(new_data,
+                                MessageRecipient.direct_pyboard_dialog,
                                 MessageSource.PYCBoard
                                 )
+
 
 
 
@@ -128,9 +129,15 @@ class system_controller(Data_logger):
 
             for msg in new_data:
                 emit_print_message(msg,
-                        MessageRecipient.system_overview,
-                        MessageSource.ACBoard
-                        )
+                                MessageRecipient.system_overview,
+                                MessageSource.ACBoard
+                                )
+                # if MessageRecipient.direct_pyboard_dialog in database.print_consumers:
+                #     emit_print_message(new_data,
+                #                         MessageRecipient.direct_pyboard_dialog,
+                #                         MessageSource.PYCBoard
+                #                         )
+
 
     def _handle_error_state(self) -> None:
         self.PYC.stop_framework()

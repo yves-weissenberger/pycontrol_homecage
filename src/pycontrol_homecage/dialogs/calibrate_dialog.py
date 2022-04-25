@@ -1,6 +1,10 @@
 from pyqtgraph.Qt import QtGui
 
 
+from pycontrol_homecage.com.messages import MessageRecipient
+import pycontrol_homecage.db as database
+
+
 class calibrate_dialog(QtGui.QDialog):
 
     """ Simple dialog that allows you to tare and callibrate the scales"""
@@ -17,6 +21,9 @@ class calibrate_dialog(QtGui.QDialog):
         self._setup_buttons()
         self._setup_calibration_weight_lineedit()
         self._set_dialog_layout()
+        database.print_consumers[MessageRecipient.calibrate_dialog] = self.print_msg
+
+
 
     def _setup_buttons(self) -> None:
         self.buttonDone = QtGui.QPushButton('Done')
@@ -70,6 +77,8 @@ class calibrate_dialog(QtGui.QDialog):
         self.ac.serial.write(b'weigh')
 
     def _done(self) -> None:
+
+        del database.print_consumers[MessageRecipient.calibrate_dialog]
         self.accept()
 
     def print_msg(self, msg: str) -> None:

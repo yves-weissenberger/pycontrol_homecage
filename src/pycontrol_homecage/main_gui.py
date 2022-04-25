@@ -123,9 +123,12 @@ class GUIApp(QtGui.QMainWindow):
         """ This function iterates over the list of print statements and dispatches them to the approprirate receivers
         """
         print(len(database.message_queue))
+        print(database.print_consumers)
         dispatched = []  # These are the messages that are dispatched
         for mix, msg in enumerate(list(database.message_queue)):
+            print(msg.recipient)
             if msg.recipient in database.print_consumers:
+                print("IN")
                 database.print_consumers[msg.recipient](msg.text)
                 dispatched.append(mix)
 

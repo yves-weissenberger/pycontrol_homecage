@@ -2,7 +2,7 @@ import os
 from pyqtgraph.Qt import QtGui
 
 import pycontrol_homecage.db as database
-
+from pycontrol_homecage.com.messages import MessageRecipient
 
 class configure_box_dialog(QtGui.QDialog):
     """ Dialog window that allows you to upload harware definitions etc """ 
@@ -67,6 +67,7 @@ class configure_box_dialog(QtGui.QDialog):
         layoutH.addLayout(layout2)
         layoutH.addLayout(layout)
         layoutH.addWidget(self.log_textbox)
+        database.print_consumers[MessageRecipient.configure_box_dialog] = self.print_msg
 
     def _set_layout(self) -> None:
         layout = QtGui.QVBoxLayout()
@@ -127,6 +128,7 @@ class configure_box_dialog(QtGui.QDialog):
         self.ac.serial.write(b'weigh')
 
     def _done(self):
+        del database.print_consumers[MessageRecipient.configure_box_dialog]
         self.accept()
 
     def print_msg(self, msg: str):

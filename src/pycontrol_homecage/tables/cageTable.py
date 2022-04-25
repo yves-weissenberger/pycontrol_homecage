@@ -109,9 +109,9 @@ class cageTable(QtGui.QTableWidget):
             database.controllers[setup_id] = SC
             time.sleep(0.05)
             self.tab.callibrate_dialog = calibrate_dialog(ac=ac)
-            database.print_consumers[MessageRecipient.calibrate_dialog] = self.tab.callibrate_dialog.print_msg
+            # database.print_consumers[MessageRecipient.calibrate_dialog] = self.tab.callibrate_dialog.print_msg
             self.tab.callibrate_dialog.exec_()
-            del database.print_consumers[MessageRecipient.calibrate_dialog]
+            # del database.print_consumers[MessageRecipient.calibrate_dialog]
 
             self.sender().setEnabled(False)
             self.fill_table()

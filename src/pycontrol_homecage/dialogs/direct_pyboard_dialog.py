@@ -2,7 +2,7 @@ from pyqtgraph.Qt import QtGui
 
 from pycontrol_homecage.utils import get_tasks
 import pycontrol_homecage.db as database
-
+from pycontrol_homecage.com.messages import MessageRecipient
 
 class direct_pyboard_dialog(QtGui.QDialog):
     """ In this dialog, the idea is that you can directly run scripts on
@@ -19,11 +19,6 @@ class direct_pyboard_dialog(QtGui.QDialog):
 
         #
         self.PYC = database.controllers[self.setup_id].PYC
-        if not database.controllers[self.setup_id].data_consumers:
-            database.controllers[self.setup_id].data_consumers = [self]
-        else:
-            database.controllers[self.setup_id].data_consumers.append(self)
-        database.controllers[self.setup_id]
         self.reject = self._done
 
         # self.setGeometry(10, 30, 400, 200) # Left, top, width, height.
@@ -48,6 +43,8 @@ class direct_pyboard_dialog(QtGui.QDialog):
 
         layoutH.addLayout(layout2)
         layoutH.addWidget(self.log_textbox)
+        database.print_consumers[MessageRecipient.direct_pyboard_dialog] = self.print_msg
+
 
     def start_stop(self):
         """ Button that allows you to start and stop task"""
@@ -65,9 +62,10 @@ class direct_pyboard_dialog(QtGui.QDialog):
 
     def _done(self) -> None:
 
-        del database.controllers[self.setup_id].data_consumers[-1]  # remove this dialog from the data consumers of the system handler
         if self.onClose_chechbox.isChecked():
             self.PYC.stop_framework()  # stop the framework
+
+        del database.print_consumers[MessageRecipient.direct_pyboard_dialog]
         self.accept()   # close the dialog
 
     def print_msg(self, msg: str):
