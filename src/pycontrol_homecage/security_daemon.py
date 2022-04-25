@@ -13,9 +13,8 @@ import numpy as np
 import pandas as pd
 import requests
 
-from loc_def import all_paths, user_path
 from utils import get_user_dicts, get_users
-from pyhomecage_conf import post_url, SECRET_TOKEN
+import pycontrol_homecage.db as database
 #This is a basic script that runs, independently of pycontrol and looks for errors
 
 
@@ -24,7 +23,7 @@ def check_loggers_running(user):
         baseline weight message has been received recently 
     """
 
-    setup_df = pd.read_csv(os.path.join(setup_dir, 'setups.csv'))
+    setup_df = pd.read_csv(os.path.join(database.paths["setup_dir"], 'setups.csv'))
     setup_rows = setup_df.loc[setup_df['User'] == user]
     active_dict = {}
     warn = False
@@ -50,7 +49,7 @@ def check_ac_status(user):
         has been received
     """
 
-    setup_df = pd.read_csv(os.path.join(setup_dir,'setups.csv'))
+    setup_df = pd.read_csv(os.path.join(database.paths["setup_dir"],'setups.csv'))
     setup_rows = setup_df.loc[setup_df['User']==user]
     #print(setup_rows)
     logger_state = {}
@@ -85,7 +84,7 @@ def check_mouse_weights(user,all_mouse_csv,logger_start):
                 mouseID = mouse_row['Mouse_ID']
                 baseline = mouse_row['Start_weight']
                 start_time = datetime.strptime(mouse_row['Start_date'],'%m/%d/%Y, %H:%M:%S')
-                mouse_csv = pd.read_csv(os.path.join(mice_dir,mouseID + '.csv'))
+                mouse_csv = pd.read_csv(os.path.join(database.paths["mice_dir"],mouseID + '.csv'))
                 now_weight = mouse_csv.iloc[-1]['weight']
 
                 if mouse_csv.iloc[-1]['entry_time'][0]!='2':
@@ -117,11 +116,11 @@ def check_mouse_weights(user,all_mouse_csv,logger_start):
 
 
     return weight_dict,warn
-def check_GUI_error_log(setup_dir,error_log_on_startup=None):
+def check_GUI_error_log(database.paths["setup_dir"],error_log_on_startup=None):
     """ Function to check the error log."""
     w4 = False
 
-    GUI_error_log_path = os.path.join(setup_dir,'exception_store.txt')
+    GUI_error_log_path = os.path.join(database.paths["setup_dir"],'exception_store.txt')
 
     with open(GUI_error_log_path,'r') as f:
         GELP = f.readlines()
@@ -141,7 +140,7 @@ def construct_warning_message(logger_active,ac_state,weight_dict):
 
 def send_email(send_message,subject,receiver_email,opening=None):
     """ This function actually send an email"""
-    with open(user_path,'r') as usrF:
+    with open(database.paths["user_path"],'r') as usrF:
         lines_ = usrF.readlines()
     #users = get_users()
     sender_email = [re.findall('"(.*)"',l)[0] for l in lines_ if "system_email" in l][0]
@@ -194,7 +193,7 @@ def send_regular_update(mouse_dict,receiver_email):
 if __name__=='__main__':
     daemon_start_time = datetime.now()
     users = get_users(); user_dicts = get_user_dicts()
-    ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
+    ROOT,task_dir,experiment_dir,database.paths["setup_dir"],database.paths["mice_dir"],data_dir,AC_logger_dir,protocol_dir = all_paths
 
     last_check = datetime.now() -timedelta(seconds=20)
     warning_checkDict = {}
@@ -204,7 +203,7 @@ if __name__=='__main__':
 
     last_regular_update = datetime.now() - timedelta(days=2)
     last_post = datetime.now() - timedelta(days=2)
-    _,error_log_on_startup = check_GUI_error_log(setup_dir)
+    _,error_log_on_startup = check_GUI_error_log(database.paths["setup_dir"])
     while True:
         now = datetime.now()
         #print(now,last_check)
@@ -215,7 +214,7 @@ if __name__=='__main__':
                 if u not in warning_checkDict.keys():
                     warning_checkDict[u] = datetime.now() - timedelta(days=1)
 
-            all_mice_csv = pd.read_csv(os.path.join(mice_dir,'mice.csv'))
+            all_mice_csv = pd.read_csv(os.path.join(database.paths["mice_dir"],'mice.csv'))
 
             for user in users:
 
@@ -225,7 +224,7 @@ if __name__=='__main__':
 
                 weight_dict, w3 = check_mouse_weights(user,all_mice_csv,daemon_start_time)
 
-                w4, message = check_GUI_error_log(setup_dir,error_log_on_startup)
+                w4, message = check_GUI_error_log(database.paths["setup_dir"],error_log_on_startup)
                 if (abs(now-last_regular_update).total_seconds()/3600.)>24:
                     send_regular_update(weight_dict,user_dicts[user])
                     last_regular_update = datetime.now()
@@ -237,15 +236,6 @@ if __name__=='__main__':
                     send_email(warning_message,'WARNING',user_dicts[user])
                     warning_checkDict[u] = datetime.now()
 
-                if abs((now-last_post)).total_seconds()>7200:
-                    try:
-                        payload = {'token':SECRET_TOKEN,
-                                'text': warning_message0}
-                        out = requests.post(post_url,data=payload, timeout=15)
-                        print(out)
-                    except:
-                        pass
-                    last_post = datetime.now()
             last_check = datetime.now()
         time.sleep(600)
 

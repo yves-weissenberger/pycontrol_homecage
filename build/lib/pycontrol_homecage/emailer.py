@@ -10,8 +10,9 @@ from email.mime.multipart import MIMEMultipart
 
 
 from pycontrol_homecage.utils import get_users, get_user_dicts
+import pycontrol_homecage.db as database
 
-lines_ = open(user_path,'r').readlines()
+lines_ = open(database.paths["user_path"],'r').readlines()
 users = get_users()
 sender_email = [re.findall('"(.*)"',l)[0] for l in lines_ if "system_email" in l][0]
 password = [re.findall('"(.*)"',l)[0] for l in lines_ if "password" in l][0]

@@ -1,15 +1,10 @@
 import json
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 import os
 import re
 import sys
 import traceback
 from datetime import datetime
-
-import pandas as pd
-
-from pycontrol_homecage.utils.loc_def import user_path, all_paths, task_dir
-
 
 def custom_excepthook(type_, exception, traceback_, filepath):
     """ A custom exception hook that prints
@@ -55,7 +50,7 @@ def get_path(path_type) -> str:
 
 def get_pyhomecage_email() -> Tuple[str, str]:
     """ Return email and password of the system email account """
-    lines_ = open(user_path, 'r').readlines()
+    lines_ = open(database.paths["user_path"], 'r').readlines()
     sender_email = re.findall('"(.*)"', [l_ for l_ in lines_ if 'system_email' in l_][0])[0]
     password = re.findall('"(.*)"', [l_ for l_ in lines_ if 'password' in l_][0])[0]
     return sender_email, password
@@ -64,7 +59,7 @@ def get_pyhomecage_email() -> Tuple[str, str]:
 
 
 def get_users() -> List[str]:
-    dat = open(user_path, 'r').readlines()
+    dat = open(database.paths["user_path"], 'r').readlines()
     user_dat = [re.findall(r'({.*})', l_)[0] for l_ in dat if 'user_data' in l_]
     user_dict_list = [eval(i) for i in user_dat]
     user_dict = {k: v for d in user_dict_list for k, v in d.items()}
@@ -80,28 +75,3 @@ def get_user_dicts() -> dict[str, str]:
     user_dict = {k: v for d in user_dict_list for k, v in d.items()}
     return user_dict
 
-
-def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-
-    ROOT, task_dir, experiment_dir, setup_dir, mice_dir, data_dir, AC_logger_dir, protocol_dir = all_paths
-    fp = os.path.join(task_dir, 'tasks.csv')
-    task_df = pd.read_csv(fp)
-    task_df.file_location = fp
-
-    fp = os.path.join(experiment_dir, 'experiments.csv')
-    exp_df = pd.read_csv(fp)
-    exp_df.file_location = fp
-
-    fp = os.path.join(setup_dir, 'setups.csv')
-    setup_df = pd.read_csv(fp)
-    setup_df.file_location = fp
-
-    fp = os.path.join(mice_dir, 'mice.csv')
-    mouse_df = pd.read_csv(fp)
-    mouse_df.file_location = fp
-
-    for col in mouse_df.columns:
-        if 'Unnamed' in col:
-            mouse_df.drop(col, inplace=True, axis=1)
-
-    return task_df, exp_df, setup_df, mouse_df

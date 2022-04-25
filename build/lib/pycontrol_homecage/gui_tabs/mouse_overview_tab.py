@@ -7,7 +7,6 @@ import json
 from pycontrol_homecage.dialogs import are_you_sure_dialog, mouse_summary_dialog
 from pycontrol_homecage.tables import MouseTable, variables_table
 from pycontrol_homecage.utils import get_variables_and_values_from_taskfile
-from pycontrol_homecage.utils.loc_def import main_path
 import pycontrol_homecage.db as database
 
 
@@ -160,7 +159,7 @@ class mouse_tab(QtGui.QWidget):
             if not pd.isnull(mouseRow['set_variables'].values):
                 set_variables = eval(mouseRow['set_variables'].values[0])  # set variables are persistent variables that are not updated. Is this necessary?? YES
             
-            task_dir = os.path.join(main_path, 'tasks')
+            task_dir = database.paths["task_path"]
             task_path = os.path.join(task_dir, mouseTask)
             self.default_variables =  get_variables_and_values_from_taskfile(task_path)
             self.variable_names =  list(set(self.default_variables.keys()))  # get_variables_from_taskfile(task_path)

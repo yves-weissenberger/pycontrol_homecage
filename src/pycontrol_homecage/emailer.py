@@ -1,6 +1,5 @@
 import smtplib, ssl
 import re
-from loc_def import user_path, all_paths
 from datetime import date, timedelta
 from datetime import datetime
 import pandas as pd
@@ -10,8 +9,10 @@ from email.mime.multipart import MIMEMultipart
 
 
 from pycontrol_homecage.utils import get_users, get_user_dicts
+import pycontrol_homecage.db as database
 
-lines_ = open(user_path,'r').readlines()
+
+lines_ = open(database.paths["user_path"],'r').readlines()
 users = get_users()
 sender_email = [re.findall('"(.*)"',l)[0] for l in lines_ if "system_email" in l][0]
 password = [re.findall('"(.*)"',l)[0] for l in lines_ if "password" in l][0]
@@ -78,7 +79,7 @@ def get_behaviour_dat(root_path):
 
 def send_email(send_message,subject,receiver_email,opening=None):
     """ This function actually send an email"""
-    lines_ = open(user_path,'r').readlines()
+    lines_ = open(database.paths["user_path"],'r').readlines()
     users = get_users()
     sender_email = [re.findall('"(.*)"',l)[0] for l in lines_ if "system_email" in l][0]
     password = [re.findall('"(.*)"',l)[0] for l in lines_ if "password" in l][0]
@@ -116,9 +117,9 @@ if __name__ == "__main__":
 
     users = get_users()  #get all users
     user_dicts = get_user_dicts()
-    ROOT,task_dir,experiment_dir,setup_dir,mice_dir,data_dir,AC_logger_dir,protocol_dir = all_paths
 
-    setup_df = pd.read_csv(os.path.join(setup_dir,'setups.csv'))
+
+    setup_df = pd.read_csv(os.path.join(database.paths["setup_dir"],'setups.csv'))
     for user in users:
         send_mouse_df = pd.DataFrame(columns=['Mouse','last_seen','last_weight','baseline_weight','number_of_visits','current_task','Experiment','n_rewards'])
         receiver_email = user_dicts[user]  #this gets users email
@@ -138,7 +139,7 @@ if __name__ == "__main__":
 
 
 
-                mouse_df =  pd.read_csv(os.path.join(mice_dir,'mice.csv'))
+                mouse_df =  pd.read_csv(os.path.join(database.paths["mice_dir"],'mice.csv'))
                 #print(mouse_df)
 
                 #print(mouse_dict.keys())
@@ -155,7 +156,7 @@ if __name__ == "__main__":
                     tmp['current_task'] = str(mouse_df.loc[mouse_df['RFID']==int(k),'Task'].values[0])
 
                     mouse_id = str(mouse_df.loc[mouse_df['RFID']==int(k),'Mouse_ID'].values[0])
-                    dat_path = os.path.join(data_dir,tmp['Experiment'],mouse_id)
+                    dat_path = os.path.join(database.paths["data_dir"],tmp['Experiment'],mouse_id)
                     beh_dat = get_behaviour_dat(dat_path)
                     tmp['n_rewards'] = beh_dat
                     #print(tmp)

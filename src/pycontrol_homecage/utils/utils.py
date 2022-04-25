@@ -78,29 +78,3 @@ def get_user_dicts() -> dict[str, str]:
     user_dict_list = [eval(i) for i in user_dat]
     user_dict = {k: v for d in user_dict_list for k, v in d.items()}
     return user_dict
-
-
-def load_data_csv() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-
-    task_dir, experiment_dir, setup_dir, mice_dir = tuple(map(get_path,["tasks", "experiments", "setups", "mice"]))
-    fp = os.path.join(task_dir, 'tasks.csv')
-    task_df = pd.read_csv(fp)
-    task_df.file_location = fp
-
-    fp = os.path.join(experiment_dir, 'experiments.csv')
-    exp_df = pd.read_csv(fp)
-    exp_df.file_location = fp
-
-    fp = os.path.join(setup_dir, 'setups.csv')
-    setup_df = pd.read_csv(fp)
-    setup_df.file_location = fp
-
-    fp = os.path.join(mice_dir, 'mice.csv')
-    mouse_df = pd.read_csv(fp)
-    mouse_df.file_location = fp
-
-    for col in mouse_df.columns:
-        if 'unnamed' in col:
-            mouse_df.drop(col, inplace=True, axis=1)
-
-    return task_df, exp_df, setup_df, mouse_df

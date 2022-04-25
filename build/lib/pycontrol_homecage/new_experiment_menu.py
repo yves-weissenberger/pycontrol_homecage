@@ -8,7 +8,6 @@ from pyqtgraph.Qt import QtGui
 
 from pycontrol_homecage.utils import get_tasks
 from pycontrol_homecage.tables import mouse_list_table, new_experiment_cageTable, variables_table
-from pycontrol_homecage.utils.loc_def import data_dir, mice_dir, protocol_dir
 import pycontrol_homecage.db as database
 
 
@@ -308,7 +307,7 @@ class new_experiment_dialog(QtGui.QDialog):
         if self.protVtask.isChecked():
             self.running_protocol = True
             self.protocol_combo.clear()
-            self.available_tasks = [i for i in os.listdir(protocol_dir) if '.prot' in i]
+            self.available_tasks = [i for i in os.listdir(database.paths["protocol_dir"]) if '.prot' in i]
             self.protocol_combo.addItems(['Select Protocol'] + self.available_tasks)
 
         else:
@@ -368,7 +367,7 @@ class new_experiment_dialog(QtGui.QDialog):
 
         #information is
         df_ = pd.DataFrame(columns=['entry_time','exit_time','weight','task','Variables','data_path'])
-        pth_ = os.path.join(mice_dir,mouse_ID+'.csv')
+        pth_ = os.path.join(database.paths["mouse_dir"], mouse_ID+'.csv')
         df_.to_csv(pth_)
 
     def run_experiment(self):
@@ -377,7 +376,7 @@ class new_experiment_dialog(QtGui.QDialog):
         ADD WARNING IF YOU ARE DUPLICATING MOUSE NAMES OR RFIDS!!!!
         """
         ## Create all the paths for data
-        exp_path = os.path.join(data_dir,self.set_experiment_name)
+        exp_path = os.path.join(database.paths["data_dir"],self.set_experiment_name)
         if not os.path.isdir(exp_path):
             os.mkdir(exp_path)
 
