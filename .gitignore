@@ -1,0 +1,12 @@
+*__pycache__
+*.pyc
+.DS_store
+*.swp
+*users.txt
+.vscode
+data_backup.py
+pyhomecage_conf.py
+.tox*
+*egg-info*
+.coverage
+*config.json
