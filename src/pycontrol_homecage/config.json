@@ -1,0 +1,5 @@
+{
+    "ROOT" : "path/for/data/to/be/saved",
+    "System_email": "example@gmail.com",
+    "System_password": "APP_PASSWORD_FOR_GMAIL"
+}

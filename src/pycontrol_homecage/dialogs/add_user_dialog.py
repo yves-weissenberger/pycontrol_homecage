@@ -48,6 +48,7 @@ class add_user_dialog(QtGui.QDialog):
 
         # stores in class variable to allow confirmation of code
         self.code = self._construct_code()
+        # print (self.code)
         self.receiver_email = str(self.textEmail.text())
         self.user = str(self.textName.text())
         sender_email, password = get_pyhomecage_email()
@@ -82,9 +83,7 @@ class add_user_dialog(QtGui.QDialog):
 
     def _construct_email(self, code: str) -> str:
         message = """\
-        Subject: Pyhomecage email confirmation code,
-
-        """ + str(self.code)
+        Subject: Pyhomecage email confirmation code""" + str(self.code)
         return message
 
     def handleLogin(self):
