@@ -9,3 +9,4 @@ pyhomecage_conf.py
 .tox*
 *egg-info*
 .coverage
+*config.json
